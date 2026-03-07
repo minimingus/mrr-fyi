@@ -14,6 +14,8 @@ model Founder {
   productName String
   productUrl  String
   description String?
+  email       String?
+  updateToken String?  @unique
   mrr         Int
   currency    String        @default("USD")
   verified    Boolean       @default(false)
