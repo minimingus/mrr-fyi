@@ -10,6 +10,7 @@ export const dynamic = "force-dynamic";
 
 interface Props {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ updated?: string; submitted?: string }>;
 }
 
 async function getFounder(slug: string) {
@@ -43,11 +44,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function FounderProfile({ params }: Props) {
+export default async function FounderProfile({ params, searchParams }: Props) {
   const { slug } = await params;
   const founder = await getFounder(slug);
 
   if (!founder) notFound();
+
+  const { updated, submitted } = await searchParams;
 
   const previousMRR = founder.snapshots[1]?.mrr ?? null;
   const growth = previousMRR !== null ? growthPercent(founder.mrr, previousMRR) : null;
@@ -55,6 +58,16 @@ export default async function FounderProfile({ params }: Props) {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-12">
+      {(updated || submitted) && (
+        <div
+          className="mb-6 px-4 py-3 rounded-lg border border-[var(--emerald)] text-sm"
+          style={{ background: "rgba(16,185,129,0.08)", color: "var(--emerald)" }}
+        >
+          {submitted
+            ? "You're on the leaderboard. Check your email for your private update link."
+            : "MRR updated. New snapshot recorded."}
+        </div>
+      )}
       {/* Back */}
       <a
         href="/"
