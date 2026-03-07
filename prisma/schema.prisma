@@ -1,0 +1,56 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Founder {
+  id          String        @id @default(cuid())
+  slug        String        @unique
+  name        String
+  twitter     String?
+  productName String
+  productUrl  String
+  description String?
+  mrr         Int
+  currency    String        @default("USD")
+  verified    Boolean       @default(false)
+  featured    Boolean       @default(false)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  snapshots   MRRSnapshot[]
+  payments    Payment[]
+
+  @@index([mrr(sort: Desc)])
+  @@index([featured])
+}
+
+model MRRSnapshot {
+  id         String   @id @default(cuid())
+  founderId  String
+  mrr        Int
+  recordedAt DateTime @default(now())
+
+  founder Founder @relation(fields: [founderId], references: [id], onDelete: Cascade)
+
+  @@index([founderId, recordedAt])
+}
+
+model Payment {
+  id        String      @id @default(cuid())
+  founderId String
+  type      PaymentType
+  stripeId  String      @unique
+  active    Boolean     @default(true)
+  createdAt DateTime    @default(now())
+
+  founder Founder @relation(fields: [founderId], references: [id], onDelete: Cascade)
+}
+
+enum PaymentType {
+  FEATURED
+  VERIFIED
+}
