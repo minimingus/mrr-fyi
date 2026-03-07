@@ -171,6 +171,22 @@ export default function SubmitPage() {
           </div>
 
           <div>
+            <label className={labelClass}>Email *</label>
+            <input
+              {...register("email")}
+              type="email"
+              placeholder="you@example.com"
+              className={inputClass}
+            />
+            <p className="text-xs text-[var(--text-dim)] mt-1">
+              We'll send you a private link to update your MRR. Never shared.
+            </p>
+            {errors.email && (
+              <p className={errorClass}>{errors.email.message}</p>
+            )}
+          </div>
+
+          <div>
             <label className={labelClass}>Twitter / X Handle</label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-dim)] text-sm">
