@@ -48,9 +48,11 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    sendUpdateLink(email, productName, updateToken).catch((err) =>
-      console.error("[email] failed to send update link:", err)
-    );
+    try {
+      await sendUpdateLink(email, productName, updateToken);
+    } catch (err) {
+      console.error("[email] failed to send update link:", err);
+    }
 
     return NextResponse.json({ slug: founder.slug }, { status: 201 });
   } catch (err) {
