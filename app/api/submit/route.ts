@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { submitSchema } from "@/lib/validations";
 import { slugify } from "@/lib/utils";
+import { sendUpdateLink } from "@/lib/email";
 
 export async function POST(req: NextRequest) {
   try {
@@ -15,10 +16,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { name, twitter, productName, productUrl, description, mrr, currency } =
+    const { name, email, twitter, productName, productUrl, description, mrr, currency } =
       parsed.data;
 
-    // Generate unique slug
     const baseSlug = slugify(productName);
     let slug = baseSlug;
     let attempt = 0;
@@ -28,22 +28,29 @@ export async function POST(req: NextRequest) {
     }
 
     const mrrCents = Math.round(mrr * 100);
+    const updateToken = crypto.randomUUID();
 
     const founder = await prisma.founder.create({
       data: {
         slug,
         name,
+        email,
         twitter: twitter || null,
         productName,
         productUrl,
         description: description || null,
         mrr: mrrCents,
         currency,
+        updateToken,
         snapshots: {
           create: { mrr: mrrCents },
         },
       },
     });
+
+    sendUpdateLink(email, productName, updateToken).catch((err) =>
+      console.error("[email] failed to send update link:", err)
+    );
 
     return NextResponse.json({ slug: founder.slug }, { status: 201 });
   } catch (err) {
