@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 
 const plans = [
   {
@@ -36,8 +37,9 @@ const plans = [
   },
 ];
 
-export default function PricingPage() {
-  const [slug, setSlug] = useState("");
+function PricingContent() {
+  const searchParams = useSearchParams();
+  const [slug, setSlug] = useState(searchParams.get("slug") ?? "");
   const [loading, setLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -165,5 +167,13 @@ export default function PricingPage() {
         Payments processed securely by Lemon Squeezy. Cancel anytime.
       </p>
     </div>
+  );
+}
+
+export default function PricingPage() {
+  return (
+    <Suspense>
+      <PricingContent />
+    </Suspense>
   );
 }

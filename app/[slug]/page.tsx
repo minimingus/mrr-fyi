@@ -224,7 +224,7 @@ export default async function FounderProfile({ params, searchParams }: Props) {
           Is this your product? Get a verified badge or featured placement.
         </p>
         <a
-          href="/pricing"
+          href={`/pricing?slug=${founder.slug}`}
           className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--amber)] text-black text-sm font-semibold rounded-md hover:bg-amber-400 transition-colors"
         >
           View Pricing →
