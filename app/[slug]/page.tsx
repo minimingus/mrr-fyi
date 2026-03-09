@@ -70,7 +70,7 @@ export default async function FounderProfile({ params, searchParams }: Props) {
           </span>
           <a
             href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
-              `I'm making ${formatMRR(founder.mrr, founder.currency)}/mo with ${founder.productName} 🚀\nmrr.fyi/${founder.slug}`
+              `I'm making ${formatMRR(founder.mrr, founder.currency)}/mo with ${founder.productName} 🚀\nhttps://mrr.fyi/${founder.slug}`
             )}`}
             target="_blank"
             rel="noopener noreferrer"
