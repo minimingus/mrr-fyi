@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { stripe, PLANS } from "@/lib/stripe";
+import { PLANS, createCheckoutUrl } from "@/lib/lemonsqueezy";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 
@@ -25,18 +25,16 @@ export async function POST(req: NextRequest) {
     }
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-    const planConfig = PLANS[plan];
+    const { variantId } = PLANS[plan];
 
-    const session = await stripe.checkout.sessions.create({
-      mode: "subscription",
-      payment_method_types: ["card"],
-      line_items: [{ price: planConfig.priceId, quantity: 1 }],
-      success_url: `${appUrl}/${slug}?payment=success`,
-      cancel_url: `${appUrl}/${slug}`,
-      metadata: { founderId: founder.id, plan },
-    });
+    const url = await createCheckoutUrl(
+      variantId,
+      founder.id,
+      plan,
+      `${appUrl}/${slug}?payment=success`
+    );
 
-    return NextResponse.json({ url: session.url });
+    return NextResponse.json({ url });
   } catch (err) {
     console.error("[checkout]", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

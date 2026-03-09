@@ -145,6 +145,12 @@ export default async function Home() {
         >
           Submit Revenue →
         </a>
+        <p className="text-xs text-[var(--text-dim)] mt-4">
+          Already listed?{" "}
+          <a href="/resend" className="text-[var(--amber)] hover:underline">
+            Get your update link.
+          </a>
+        </p>
       </div>
     </div>
   );

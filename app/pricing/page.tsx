@@ -49,7 +49,7 @@ export default function PricingPage() {
     setError(null);
     setLoading(plan);
     try {
-      const res = await fetch("/api/stripe/checkout", {
+      const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ slug: slug.trim(), plan }),
@@ -162,7 +162,7 @@ export default function PricingPage() {
       </div>
 
       <p className="text-xs text-center text-[var(--text-dim)] mt-8">
-        Payments processed securely by Stripe. Cancel anytime from your billing portal.
+        Payments processed securely by Lemon Squeezy. Cancel anytime.
       </p>
     </div>
   );

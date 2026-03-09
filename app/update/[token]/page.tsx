@@ -91,6 +91,12 @@ export default function UpdatePage() {
         <p className="text-xs text-center text-[var(--text-dim)]">
           This link is private and never expires. Bookmark it.
         </p>
+        <p className="text-xs text-center text-[var(--text-dim)]">
+          Lost your link?{" "}
+          <a href="/resend" className="text-[var(--amber)] hover:underline">
+            Re-send it to your email.
+          </a>
+        </p>
       </form>
     </div>
   );

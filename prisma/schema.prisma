@@ -45,7 +45,7 @@ model Payment {
   id        String      @id @default(cuid())
   founderId String
   type      PaymentType
-  stripeId  String      @unique
+  externalId String     @unique
   active    Boolean     @default(true)
   createdAt DateTime    @default(now())
 

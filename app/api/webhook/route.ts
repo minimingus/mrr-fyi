@@ -1,42 +1,47 @@
 import { NextRequest, NextResponse } from "next/server";
-import { stripe } from "@/lib/stripe";
 import { prisma } from "@/lib/prisma";
-import Stripe from "stripe";
+import crypto from "crypto";
 
 export async function POST(req: NextRequest) {
   const body = await req.text();
-  const sig = req.headers.get("stripe-signature");
+  const signature = req.headers.get("x-signature");
 
-  if (!sig) {
+  if (!signature) {
     return NextResponse.json({ error: "Missing signature" }, { status: 400 });
   }
 
-  let event: Stripe.Event;
-  try {
-    event = stripe.webhooks.constructEvent(
-      body,
-      sig,
-      process.env.STRIPE_WEBHOOK_SECRET!
-    );
-  } catch (err) {
-    console.error("[webhook] signature failed", err);
+  const hmac = crypto
+    .createHmac("sha256", process.env.LS_WEBHOOK_SECRET!)
+    .update(body)
+    .digest("hex");
+
+  if (!crypto.timingSafeEqual(Buffer.from(hmac), Buffer.from(signature))) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
+  let event: any;
   try {
-    switch (event.type) {
-      case "checkout.session.completed": {
-        const session = event.data.object as Stripe.Checkout.Session;
-        const { founderId, plan } = session.metadata ?? {};
+    event = JSON.parse(body);
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
 
-        if (!founderId || !plan) break;
+  const eventName: string = event?.meta?.event_name;
+  const customData = event?.meta?.custom_data ?? {};
+  const { founderId, plan } = customData;
+  const subscriptionId = String(event?.data?.id ?? "");
+
+  try {
+    switch (eventName) {
+      case "subscription_created": {
+        if (!founderId || !plan || !subscriptionId) break;
 
         await prisma.$transaction([
           prisma.payment.create({
             data: {
               founderId,
               type: plan as "FEATURED" | "VERIFIED",
-              stripeId: session.subscription as string,
+              externalId: subscriptionId,
               active: true,
             },
           }),
@@ -51,17 +56,16 @@ export async function POST(req: NextRequest) {
         break;
       }
 
-      case "customer.subscription.deleted": {
-        const sub = event.data.object as Stripe.Subscription;
-
+      case "subscription_cancelled":
+      case "subscription_expired": {
         const payment = await prisma.payment.findUnique({
-          where: { stripeId: sub.id },
+          where: { externalId: subscriptionId },
         });
         if (!payment) break;
 
         await prisma.$transaction([
           prisma.payment.update({
-            where: { stripeId: sub.id },
+            where: { externalId: subscriptionId },
             data: { active: false },
           }),
           prisma.founder.update({

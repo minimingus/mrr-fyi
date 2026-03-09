@@ -13,12 +13,14 @@ export async function sendUpdateLink(
   await resend.emails.send({
     from: "MRR.fyi <onboarding@resend.dev>",
     to: email,
-    subject: `Update your MRR — ${productName}`,
+    subject: `${productName} is on MRR.fyi — save your update link`,
+    text: `Hi,\n\nYour product "${productName}" was added to MRR.fyi.\n\nTo update your MRR in the future, visit:\n${updateUrl}\n\nSave this link — it lets you update your revenue number on the leaderboard.\n\n— MRR.fyi`,
     html: `
-      <p>Hey 👋</p>
-      <p>Here's your personal link to update the MRR for <strong>${productName}</strong> on MRR.fyi:</p>
-      <p><a href="${updateUrl}" style="font-size:18px;font-weight:bold;">${updateUrl}</a></p>
-      <p>Bookmark this link — it's the only way to update your revenue. It never expires.</p>
+      <p>Hi,</p>
+      <p>Your product <strong>${productName}</strong> was added to <a href="https://mrr-fyi.vercel.app">MRR.fyi</a>.</p>
+      <p>To update your MRR in the future, use this link:</p>
+      <p><a href="${updateUrl}">Update my MRR for ${productName}</a></p>
+      <p>Save this email so you can find it next time you want to update your revenue.</p>
       <p>— MRR.fyi</p>
     `,
   });
