@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { formatMRR } from "@/lib/utils";
 
@@ -18,9 +19,11 @@ export default async function Image({ params }: Props) {
     select: { productName: true, name: true, mrr: true, currency: true, verified: true },
   });
 
-  const productName = founder?.productName ?? "Unknown";
-  const name = founder?.name ?? "";
-  const mrr = founder ? formatMRR(founder.mrr, founder.currency) : "$0";
+  if (!founder) notFound();
+
+  const productName = founder.productName;
+  const name = founder.name;
+  const mrr = formatMRR(founder.mrr, founder.currency);
 
   return new ImageResponse(
     (
