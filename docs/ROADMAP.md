@@ -59,7 +59,7 @@ Internal planning doc. Dump ideas here, move them through stages.
 ## Maybe / Explore
 
 - [ ] Anonymous submissions (no email required)
-- [ ] Team/company profiles (multiple founders, one product)
+- [ ] Co-founder support — multiple names/twitters per product (schema: `founders` relation or comma-separated on Founder row)
 - [ ] Comments or reactions on profiles
 - [ ] Sponsor slot (non-subscription, one-off payment)
 - [ ] MRR verification via Stripe/Lemon read-only API key
