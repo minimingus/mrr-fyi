@@ -60,12 +60,25 @@ export default async function FounderProfile({ params, searchParams }: Props) {
     <div className="max-w-2xl mx-auto px-4 py-12">
       {(updated || submitted) && (
         <div
-          className="mb-6 px-4 py-3 rounded-lg border border-[var(--emerald)] text-sm"
+          className="mb-6 px-4 py-3 rounded-lg border border-[var(--emerald)] text-sm flex items-center justify-between gap-4 flex-wrap"
           style={{ background: "rgba(16,185,129,0.08)", color: "var(--emerald)" }}
         >
-          {submitted
-            ? "You're on the leaderboard. Check your email for your private update link."
-            : "MRR updated. New snapshot recorded."}
+          <span>
+            {submitted
+              ? "You're on the leaderboard. Check your email for your private update link."
+              : "MRR updated. New snapshot recorded."}
+          </span>
+          <a
+            href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
+              `I'm making ${formatMRR(founder.mrr, founder.currency)}/mo with ${founder.productName} 🚀\nmrr.fyi/${founder.slug}`
+            )}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="shrink-0 px-3 py-1.5 rounded-md text-xs font-semibold transition-colors"
+            style={{ background: "rgba(16,185,129,0.15)", color: "var(--emerald)" }}
+          >
+            Share on X →
+          </a>
         </div>
       )}
       {/* Back */}
