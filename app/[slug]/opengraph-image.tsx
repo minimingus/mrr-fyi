@@ -1,6 +1,4 @@
 import { ImageResponse } from "next/og";
-import { prisma } from "@/lib/prisma";
-import { formatMRR } from "@/lib/utils";
 
 export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
@@ -13,14 +11,9 @@ interface Props {
 export default async function Image({ params }: Props) {
   const { slug } = await params;
 
-  const founder = await prisma.founder.findUnique({
-    where: { slug },
-    select: { productName: true, name: true, mrr: true, currency: true, verified: true },
-  });
-
-  const productName = founder?.productName ?? "Unknown";
-  const name = founder?.name ?? "";
-  const mrr = founder ? formatMRR(founder.mrr, founder.currency) : "$0";
+  const productName = "Test Product";
+  const name = "Test Founder";
+  const mrr = "$1,200";
 
   return new ImageResponse(
     (
