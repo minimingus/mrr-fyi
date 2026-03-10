@@ -1,6 +1,5 @@
 import { ImageResponse } from "next/og";
 
-export const runtime = "nodejs";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -30,20 +29,20 @@ export default async function Image({ params }: Props) {
         }}
       >
         {/* Top: branding */}
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <span style={{ color: "#f59e0b", fontSize: "18px", fontWeight: 700, letterSpacing: "0.1em" }}>
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <span style={{ color: "#f59e0b", fontSize: "18px", fontWeight: 700, marginRight: "8px" }}>
             MRR.fyi
           </span>
           <span style={{ color: "#52525b", fontSize: "14px" }}>indie revenue leaderboard</span>
         </div>
 
         {/* Middle: main content */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-          <div style={{ color: "#f59e0b", fontSize: "72px", fontWeight: 700, letterSpacing: "-0.02em" }}>
-            {mrr}
-            <span style={{ color: "#71717a", fontSize: "32px", fontWeight: 400 }}>/mo</span>
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          <div style={{ display: "flex", alignItems: "baseline", marginBottom: "16px" }}>
+            <span style={{ color: "#f59e0b", fontSize: "72px", fontWeight: 700 }}>{mrr}</span>
+            <span style={{ color: "#71717a", fontSize: "32px", fontWeight: 400, marginLeft: "4px" }}>/mo</span>
           </div>
-          <div style={{ color: "#fafafa", fontSize: "48px", fontWeight: 600 }}>
+          <div style={{ color: "#fafafa", fontSize: "48px", fontWeight: 600, marginBottom: "12px" }}>
             {productName}
           </div>
           <div style={{ color: "#71717a", fontSize: "24px" }}>
