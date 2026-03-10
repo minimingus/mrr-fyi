@@ -28,7 +28,6 @@ export default async function Image({ params }: Props) {
           fontFamily: "system-ui, sans-serif",
         }}
       >
-        {/* Top: branding */}
         <div style={{ display: "flex", alignItems: "center" }}>
           <span style={{ color: "#f59e0b", fontSize: "18px", fontWeight: 700, marginRight: "8px" }}>
             MRR.fyi
@@ -36,22 +35,20 @@ export default async function Image({ params }: Props) {
           <span style={{ color: "#52525b", fontSize: "14px" }}>indie revenue leaderboard</span>
         </div>
 
-        {/* Middle: main content */}
         <div style={{ display: "flex", flexDirection: "column" }}>
           <div style={{ display: "flex", alignItems: "baseline", marginBottom: "16px" }}>
             <span style={{ color: "#f59e0b", fontSize: "72px", fontWeight: 700 }}>{mrr}</span>
             <span style={{ color: "#71717a", fontSize: "32px", fontWeight: 400, marginLeft: "4px" }}>/mo</span>
           </div>
-          <div style={{ color: "#fafafa", fontSize: "48px", fontWeight: 600, marginBottom: "12px" }}>
+          <div style={{ display: "flex", color: "#fafafa", fontSize: "48px", fontWeight: 600, marginBottom: "12px" }}>
             {productName}
           </div>
-          <div style={{ color: "#71717a", fontSize: "24px" }}>
+          <div style={{ display: "flex", color: "#71717a", fontSize: "24px" }}>
             by {name}
           </div>
         </div>
 
-        {/* Bottom: url */}
-        <div style={{ color: "#52525b", fontSize: "18px" }}>
+        <div style={{ display: "flex", color: "#52525b", fontSize: "18px" }}>
           mrr.fyi/{slug}
         </div>
       </div>
