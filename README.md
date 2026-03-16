@@ -1,6 +1,7 @@
 # MRR.fyi
 
 [![CI](https://github.com/minimingus/mrr-fyi/actions/workflows/ci.yml/badge.svg)](https://github.com/minimingus/mrr-fyi/actions/workflows/ci.yml)
+![Status](https://img.shields.io/badge/status-active-brightgreen)
 
 Public indie revenue leaderboard. Real MRR from real founders, building in public.
 
