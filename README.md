@@ -1,5 +1,7 @@
 # MRR.fyi
 
+[![CI](https://github.com/minimingus/mrr-fyi/actions/workflows/ci.yml/badge.svg)](https://github.com/minimingus/mrr-fyi/actions/workflows/ci.yml)
+
 Public indie revenue leaderboard. Real MRR from real founders, building in public.
 
 ## What it is
