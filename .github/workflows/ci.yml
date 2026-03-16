@@ -30,9 +30,10 @@ jobs:
         run: npm run build
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/mrr_fyi' }}
-          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY || 'sk_test_placeholder' }}
-          STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET || 'whsec_placeholder' }}
-          STRIPE_FEATURED_PRICE_ID: ${{ secrets.STRIPE_FEATURED_PRICE_ID || 'price_placeholder' }}
-          STRIPE_VERIFIED_PRICE_ID: ${{ secrets.STRIPE_VERIFIED_PRICE_ID || 'price_placeholder' }}
-          NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || 'pk_test_placeholder' }}
+          LEMONSQUEEZY_API_KEY: ${{ secrets.LEMONSQUEEZY_API_KEY || 'placeholder' }}
+          LS_STORE_ID: ${{ secrets.LS_STORE_ID || 'placeholder' }}
+          LS_FEATURED_VARIANT_ID: ${{ secrets.LS_FEATURED_VARIANT_ID || 'placeholder' }}
+          LS_VERIFIED_VARIANT_ID: ${{ secrets.LS_VERIFIED_VARIANT_ID || 'placeholder' }}
+          LS_WEBHOOK_SECRET: ${{ secrets.LS_WEBHOOK_SECRET || 'placeholder' }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY || 'placeholder' }}
           NEXT_PUBLIC_APP_URL: ${{ secrets.NEXT_PUBLIC_APP_URL || 'http://localhost:3000' }}
