@@ -75,7 +75,10 @@ export default async function Home() {
           { label: "Combined MRR", value: formatMRR(stats.totalMRR) },
           { label: "Combined ARR", value: formatMRR(totalARR) },
         ].map((stat) => (
-          <div key={stat.label} className="bg-[var(--bg-card)] px-5 py-4 text-center">
+          <div 
+            key={stat.label} 
+            className="bg-[var(--bg-card)] px-5 py-4 text-center transition-all hover:scale-[1.02] hover:brightness-110 cursor-default"
+          >
             <div className="mono text-lg font-semibold text-[var(--amber)]">
               {stat.value}
             </div>
