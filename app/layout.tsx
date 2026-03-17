@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { DM_Serif_Display, DM_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+import { Footer } from "@/components/Footer";
 
 const dmSerif = DM_Serif_Display({
   variable: "--font-dm-serif",
@@ -69,16 +70,7 @@ export default function RootLayout({
           </div>
         </nav>
         <main>{children}</main>
-        <footer className="border-t border-[var(--border)] mt-24 py-10">
-          <div className="max-w-4xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[var(--text-dim)]">
-            <span className="mono">MRR.fyi</span>
-            <div className="flex gap-6">
-              <a href="/submit" className="hover:text-[var(--text-muted)] transition-colors">Submit Revenue</a>
-              <a href="/pricing" className="hover:text-[var(--text-muted)] transition-colors">Pricing</a>
-            </div>
-            <span>self-reported · build in public</span>
-          </div>
-        </footer>
+        <Footer />
       </body>
     </html>
   );
