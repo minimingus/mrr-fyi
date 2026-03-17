@@ -24,7 +24,7 @@ const jetbrains = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "MRR.fyi — Public Indie Revenue Leaderboard",
   description:
-    "See who's making money building in public. Real MRR from real indie hackers, updated live.",
+    "Track and compare MRR from indie hackers building in public. See real revenue data from founders sharing their journey transparently.",
   openGraph: {
     title: "MRR.fyi — Public Indie Revenue Leaderboard",
     description: "Real MRR from real indie hackers. Build in public.",
