@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { LeaderboardList } from "@/components/LeaderboardList";
+import { ShareButton } from "@/components/ShareButton";
 import { formatMRR } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -82,6 +83,14 @@ export default async function Home() {
             <div className="text-xs text-[var(--text-dim)] mt-0.5">{stat.label}</div>
           </div>
         ))}
+      </div>
+
+      {/* Share leaderboard */}
+      <div className="flex justify-end mb-4 animate-fade-up stagger-2">
+        <ShareButton
+          text={`${stats.totalFounders} indie founders are making ${formatMRR(stats.totalMRR)}/mo combined on MRR.fyi 🔥`}
+          url="https://mrr.fyi"
+        />
       </div>
 
       {/* Leaderboard */}

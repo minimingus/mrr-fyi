@@ -5,6 +5,7 @@ import { MRRBadge } from "@/components/MRRBadge";
 import { GrowthBadge } from "@/components/GrowthBadge";
 import { MRRChart } from "@/components/MRRChart";
 import { MilestoneBadges } from "@/components/MilestoneBadges";
+import { ShareButton } from "@/components/ShareButton";
 import { formatMRR, growthPercent } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -43,7 +44,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     openGraph: {
       title,
       description,
+      url: `https://mrr.fyi/${founder.slug}`,
       type: "profile",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      ...(founder.twitter && { creator: `@${founder.twitter}` }),
     },
   };
 }
@@ -91,17 +99,11 @@ export default async function FounderProfile({ params, searchParams }: Props) {
               ? "You're on the leaderboard. Check your email for your private update link."
               : "MRR updated. New snapshot recorded."}
           </span>
-          <a
-            href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
-              `I'm making ${formatMRR(founder.mrr, founder.currency)}/mo with ${founder.productName} 🚀\nhttps://mrr.fyi/${founder.slug}`
-            )}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="shrink-0 px-3 py-1.5 rounded-md text-xs font-semibold transition-colors"
-            style={{ background: "rgba(16,185,129,0.15)", color: "var(--emerald)" }}
-          >
-            Share on X →
-          </a>
+          <ShareButton
+            text={`I'm making ${formatMRR(founder.mrr, founder.currency)}/mo with ${founder.productName} 🚀`}
+            url={`https://mrr.fyi/${founder.slug}`}
+            variant="success"
+          />
         </div>
       )}
       {/* Back */}
@@ -187,6 +189,11 @@ export default async function FounderProfile({ params, searchParams }: Props) {
           <span className="text-xs text-[var(--text-dim)]">
             Rank #{rank} on leaderboard
           </span>
+          <ShareButton
+            text={`${founder.productName} is making ${formatMRR(founder.mrr, founder.currency)}/mo — ranked #${rank} on MRR.fyi 🚀`}
+            url={`https://mrr.fyi/${founder.slug}`}
+            className="ml-auto"
+          />
         </div>
       </div>
 
@@ -205,9 +212,16 @@ export default async function FounderProfile({ params, searchParams }: Props) {
       {/* Milestones */}
       {founder.milestones.length > 0 && (
         <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] p-6 mb-6 animate-fade-up stagger-3">
-          <h2 className="text-sm font-medium text-[var(--text-muted)] mb-4 mono uppercase tracking-widest">
-            Milestones
-          </h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-medium text-[var(--text-muted)] mono uppercase tracking-widest">
+              Milestones
+            </h2>
+            <ShareButton
+              text={`I just hit ${formatMRR(founder.milestones[founder.milestones.length - 1].amount, founder.currency)} MRR with ${founder.productName}! 🏆`}
+              url={`https://mrr.fyi/${founder.slug}`}
+              variant="amber"
+            />
+          </div>
           <MilestoneBadges milestones={founder.milestones} currency={founder.currency} />
         </div>
       )}
