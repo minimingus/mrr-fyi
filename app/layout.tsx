@@ -75,6 +75,12 @@ export default function RootLayout({
             </a>
             <div className="flex items-center gap-1">
               <a
+                href="/api-docs"
+                className="px-3 py-1.5 text-xs text-[var(--text-muted)] hover:text-[var(--text)] transition-colors"
+              >
+                API
+              </a>
+              <a
                 href="/pricing"
                 className="px-3 py-1.5 text-xs text-[var(--text-muted)] hover:text-[var(--text)] transition-colors"
               >
