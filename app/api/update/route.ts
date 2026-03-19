@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { rateLimit } from "@/lib/rate-limit";
 
 const schema = z.object({
   token: z.string().min(1),
@@ -8,6 +9,9 @@ const schema = z.object({
 });
 
 export async function POST(req: NextRequest) {
+  const limited = rateLimit(req, { key: "update", limit: 10, windowSec: 60 });
+  if (limited) return limited;
+
   try {
     const body = await req.json();
     const parsed = schema.safeParse(body);

@@ -2,12 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendUpdateLink } from "@/lib/email";
 import { z } from "zod";
+import { rateLimit } from "@/lib/rate-limit";
 
 const schema = z.object({
   email: z.string().email("Must be a valid email"),
 });
 
 export async function POST(req: NextRequest) {
+  const limited = rateLimit(req, { key: "resend-link", limit: 3, windowSec: 60 });
+  if (limited) return limited;
+
   try {
     const body = await req.json();
     const parsed = schema.safeParse(body);
