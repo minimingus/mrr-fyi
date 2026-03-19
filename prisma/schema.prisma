@@ -25,6 +25,7 @@ model Founder {
 
   snapshots   MRRSnapshot[]
   payments    Payment[]
+  milestones  MRRMilestone[]
 
   @@index([mrr(sort: Desc)])
   @@index([featured])
@@ -50,6 +51,18 @@ model Payment {
   createdAt DateTime    @default(now())
 
   founder Founder @relation(fields: [founderId], references: [id], onDelete: Cascade)
+}
+
+model MRRMilestone {
+  id        String   @id @default(cuid())
+  founderId String
+  amount    Int
+  reachedAt DateTime @default(now())
+
+  founder Founder @relation(fields: [founderId], references: [id], onDelete: Cascade)
+
+  @@unique([founderId, amount])
+  @@index([founderId])
 }
 
 enum PaymentType {

@@ -2,7 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { rateLimit } from "@/lib/rate-limit";
-import { sendUpdateConfirmation } from "@/lib/email";
+import { sendUpdateConfirmation, sendMilestoneReached } from "@/lib/email";
+
+const MRR_MILESTONES = [1_000, 5_000, 10_000, 50_000, 100_000].map(
+  (d) => d * 100
+);
 
 const schema = z.object({
   token: z.string().min(1),
@@ -50,6 +54,45 @@ export async function POST(req: NextRequest) {
     const rank = await prisma.founder.count({
       where: { mrr: { gt: mrrCents } },
     }).then((above) => above + 1);
+
+    // Detect newly crossed milestones
+    const newMilestones = MRR_MILESTONES.filter(
+      (m) => mrrCents >= m && oldMrrCents < m
+    );
+
+    if (newMilestones.length > 0) {
+      const existing = await prisma.mRRMilestone.findMany({
+        where: { founderId: founder.id, amount: { in: newMilestones } },
+        select: { amount: true },
+      });
+      const existingSet = new Set(existing.map((e) => e.amount));
+      const toCreate = newMilestones.filter((m) => !existingSet.has(m));
+
+      if (toCreate.length > 0) {
+        await prisma.mRRMilestone.createMany({
+          data: toCreate.map((amount) => ({
+            founderId: founder.id,
+            amount,
+          })),
+        });
+
+        // Send celebration email for the highest new milestone
+        if (founder.email) {
+          const highest = Math.max(...toCreate);
+          try {
+            await sendMilestoneReached(
+              founder.email,
+              founder.productName,
+              highest,
+              founder.currency,
+              founder.slug
+            );
+          } catch (err) {
+            console.error("[email] failed to send milestone email:", err);
+          }
+        }
+      }
+    }
 
     if (founder.email) {
       try {
