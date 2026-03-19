@@ -41,3 +41,23 @@ yarn-error.log*
 next-env.d.ts
 
 /app/generated/prisma
+
+# Paperclip agents
+agents/
+
+# Symphony
+symphony/
+.symphony/
+log/
+*.log.*
+
+# Playwright MCP
+.playwright-mcp/
+
+# Dev docs
+SYMPHONY*.md
+WORKFLOW*.md
+docs/plans/
+
+# Misc
+~/
