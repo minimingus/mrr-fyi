@@ -3,8 +3,12 @@ import { prisma } from "@/lib/prisma";
 import { submitSchema } from "@/lib/validations";
 import { slugify } from "@/lib/utils";
 import { sendUpdateLink } from "@/lib/email";
+import { rateLimit } from "@/lib/rate-limit";
 
 export async function POST(req: NextRequest) {
+  const limited = rateLimit(req, { key: "submit", limit: 5, windowSec: 60 });
+  if (limited) return limited;
+
   try {
     const body = await req.json();
     const parsed = submitSchema.safeParse(body);
