@@ -2,6 +2,73 @@ import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+const BRAND = {
+  amber: "#f59e0b",
+  amberDark: "#d97706",
+  bg: "#09090b",
+  card: "#111113",
+  border: "#27272a",
+  text: "#fafafa",
+  textMuted: "#a1a1aa",
+  emerald: "#10b981",
+  red: "#ef4444",
+};
+
+function emailLayout(content: string): string {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>MRR.fyi</title>
+</head>
+<body style="margin:0;padding:0;background-color:${BRAND.bg};font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:${BRAND.bg};">
+    <tr>
+      <td align="center" style="padding:40px 16px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;width:100%;">
+          <!-- Header -->
+          <tr>
+            <td style="padding-bottom:32px;text-align:center;">
+              <span style="font-size:24px;font-weight:700;color:${BRAND.amber};letter-spacing:-0.5px;">MRR.fyi</span>
+            </td>
+          </tr>
+          <!-- Card -->
+          <tr>
+            <td style="background-color:${BRAND.card};border:1px solid ${BRAND.border};border-radius:8px;padding:32px 28px;">
+              ${content}
+            </td>
+          </tr>
+          <!-- Footer -->
+          <tr>
+            <td style="padding-top:24px;text-align:center;">
+              <p style="margin:0;font-size:12px;color:${BRAND.textMuted};line-height:1.5;">
+                The public indie revenue leaderboard.<br />
+                <a href="https://mrr.fyi" style="color:${BRAND.textMuted};text-decoration:underline;">mrr.fyi</a>
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+}
+
+function button(text: string, href: string): string {
+  return `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:24px 0;">
+  <tr>
+    <td style="background-color:${BRAND.amber};border-radius:6px;">
+      <a href="${href}" target="_blank" style="display:inline-block;padding:12px 24px;font-size:14px;font-weight:600;color:${BRAND.bg};text-decoration:none;border-radius:6px;">
+        ${text}
+      </a>
+    </td>
+  </tr>
+</table>`;
+}
+
 export async function sendUpdateLink(
   email: string,
   productName: string,
@@ -10,18 +77,91 @@ export async function sendUpdateLink(
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
   const updateUrl = `${appUrl}/update/${token}`;
 
+  const html = emailLayout(`
+    <h1 style="margin:0 0 8px;font-size:20px;font-weight:700;color:${BRAND.text};">
+      You're on the leaderboard
+    </h1>
+    <p style="margin:0 0 20px;font-size:14px;color:${BRAND.textMuted};line-height:1.6;">
+      <strong style="color:${BRAND.text};">${productName}</strong> was added to MRR.fyi. Save this email — the link below is how you update your revenue number.
+    </p>
+    ${button("Update my MRR", updateUrl)}
+    <p style="margin:0;font-size:12px;color:${BRAND.textMuted};line-height:1.5;">
+      Or copy this URL:<br />
+      <a href="${updateUrl}" style="color:${BRAND.amber};text-decoration:none;word-break:break-all;font-size:12px;">${updateUrl}</a>
+    </p>
+  `);
+
+  const text = `Your product "${productName}" was added to MRR.fyi.\n\nTo update your MRR, visit: ${updateUrl}\n\nSave this link — it lets you update your revenue on the leaderboard.\n\n— MRR.fyi`;
+
   await resend.emails.send({
     from: "MRR.fyi <onboarding@resend.dev>",
     to: email,
     subject: `${productName} is on MRR.fyi — save your update link`,
-    text: `Hi,\n\nYour product "${productName}" was added to MRR.fyi.\n\nTo update your MRR in the future, visit:\n${updateUrl}\n\nSave this link — it lets you update your revenue number on the leaderboard.\n\n— MRR.fyi`,
-    html: `
-      <p>Hi,</p>
-      <p>Your product <strong>${productName}</strong> was added to <a href="https://mrr-fyi.vercel.app">MRR.fyi</a>.</p>
-      <p>To update your MRR in the future, use this link:</p>
-      <p><a href="${updateUrl}">Update my MRR for ${productName}</a></p>
-      <p>Save this email so you can find it next time you want to update your revenue.</p>
-      <p>— MRR.fyi</p>
-    `,
+    text,
+    html,
+  });
+}
+
+export async function sendUpdateConfirmation(
+  email: string,
+  productName: string,
+  newMrrCents: number,
+  oldMrrCents: number,
+  rank: number | null,
+  currency: string
+) {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const symbol = currency === "EUR" ? "€" : currency === "GBP" ? "£" : "$";
+  const newMrr = (newMrrCents / 100).toLocaleString("en-US");
+  const oldMrr = (oldMrrCents / 100).toLocaleString("en-US");
+
+  const diff = newMrrCents - oldMrrCents;
+  const isUp = diff > 0;
+  const isDown = diff < 0;
+  const changeColor = isUp ? BRAND.emerald : isDown ? BRAND.red : BRAND.textMuted;
+  const changeArrow = isUp ? "&#9650;" : isDown ? "&#9660;" : "";
+  const changeText = diff !== 0
+    ? `${changeArrow} ${symbol}${Math.abs(diff / 100).toLocaleString("en-US")}`
+    : "No change";
+
+  const rankLine = rank
+    ? `<p style="margin:16px 0 0;font-size:13px;color:${BRAND.textMuted};">Leaderboard rank: <strong style="color:${BRAND.text};">#${rank}</strong></p>`
+    : "";
+
+  const html = emailLayout(`
+    <h1 style="margin:0 0 8px;font-size:20px;font-weight:700;color:${BRAND.text};">
+      MRR updated
+    </h1>
+    <p style="margin:0 0 20px;font-size:14px;color:${BRAND.textMuted};line-height:1.6;">
+      Your revenue for <strong style="color:${BRAND.text};">${productName}</strong> has been recorded.
+    </p>
+    <!-- MRR card -->
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:${BRAND.bg};border:1px solid ${BRAND.border};border-radius:6px;">
+      <tr>
+        <td style="padding:20px 24px;">
+          <p style="margin:0 0 4px;font-size:12px;color:${BRAND.textMuted};text-transform:uppercase;letter-spacing:0.5px;">New MRR</p>
+          <p style="margin:0;font-size:28px;font-weight:700;color:${BRAND.text};letter-spacing:-0.5px;">
+            ${symbol}${newMrr}
+            <span style="font-size:14px;font-weight:500;color:${changeColor};margin-left:8px;">${changeText}</span>
+          </p>
+          <p style="margin:8px 0 0;font-size:12px;color:${BRAND.textMuted};">Previously: ${symbol}${oldMrr}</p>
+          ${rankLine}
+        </td>
+      </tr>
+    </table>
+    <p style="margin:20px 0 0;font-size:13px;color:${BRAND.textMuted};line-height:1.5;">
+      View the leaderboard at <a href="${appUrl}" style="color:${BRAND.amber};text-decoration:none;">mrr.fyi</a>
+    </p>
+  `);
+
+  const rankText = rank ? `\nLeaderboard rank: #${rank}` : "";
+  const text = `MRR updated for ${productName}.\n\nNew MRR: ${symbol}${newMrr} (was ${symbol}${oldMrr})${rankText}\n\nView the leaderboard: ${appUrl}\n\n— MRR.fyi`;
+
+  await resend.emails.send({
+    from: "MRR.fyi <onboarding@resend.dev>",
+    to: email,
+    subject: `${productName} — MRR updated to ${symbol}${newMrr}`,
+    text,
+    html,
   });
 }
