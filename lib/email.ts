@@ -97,7 +97,8 @@ export async function sendUpdateLink(
 
   const text = `Your product "${productName}" was added to MRR.fyi.\n\nTo update your MRR, visit: ${updateUrl}\n\nSave this link — it lets you update your revenue on the leaderboard.\n\n— MRR.fyi`;
 
-  await getResend().emails.send({
+  const resend = await getResend();
+  await resend.emails.send({
     from: "MRR.fyi <onboarding@resend.dev>",
     to: email,
     subject: `${productName} is on MRR.fyi — save your update link`,
@@ -161,7 +162,8 @@ export async function sendUpdateConfirmation(
   const rankText = rank ? `\nLeaderboard rank: #${rank}` : "";
   const text = `MRR updated for ${productName}.\n\nNew MRR: ${symbol}${newMrr} (was ${symbol}${oldMrr})${rankText}\n\nView the leaderboard: ${appUrl}\n\n— MRR.fyi`;
 
-  await getResend().emails.send({
+  const resend = await getResend();
+  await resend.emails.send({
     from: "MRR.fyi <onboarding@resend.dev>",
     to: email,
     subject: `${productName} — MRR updated to ${symbol}${newMrr}`,
