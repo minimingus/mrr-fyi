@@ -1,6 +1,11 @@
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+function getResend() {
+  if (!process.env.RESEND_API_KEY) {
+    throw new Error("RESEND_API_KEY is not set");
+  }
+  return new Resend(process.env.RESEND_API_KEY);
+}
 
 const BRAND = {
   amber: "#f59e0b",
@@ -93,7 +98,7 @@ export async function sendUpdateLink(
 
   const text = `Your product "${productName}" was added to MRR.fyi.\n\nTo update your MRR, visit: ${updateUrl}\n\nSave this link — it lets you update your revenue on the leaderboard.\n\n— MRR.fyi`;
 
-  await resend.emails.send({
+  await getResend().emails.send({
     from: "MRR.fyi <onboarding@resend.dev>",
     to: email,
     subject: `${productName} is on MRR.fyi — save your update link`,
@@ -157,7 +162,7 @@ export async function sendUpdateConfirmation(
   const rankText = rank ? `\nLeaderboard rank: #${rank}` : "";
   const text = `MRR updated for ${productName}.\n\nNew MRR: ${symbol}${newMrr} (was ${symbol}${oldMrr})${rankText}\n\nView the leaderboard: ${appUrl}\n\n— MRR.fyi`;
 
-  await resend.emails.send({
+  await getResend().emails.send({
     from: "MRR.fyi <onboarding@resend.dev>",
     to: email,
     subject: `${productName} — MRR updated to ${symbol}${newMrr}`,
