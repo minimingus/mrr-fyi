@@ -83,7 +83,18 @@ export function FounderRow({ founder, rank, style }: FounderRowProps) {
           <MRRBadge mrr={founder.mrr} currency={founder.currency} />
         </div>
 
-        {/* Arrow */}
+        {/* Boost CTA or arrow */}
+        {!founder.featured ? (
+          <span
+            className="text-[10px] mono text-[var(--text-dim)] group-hover:text-[var(--amber)] transition-colors shrink-0 hidden sm:inline"
+            onClick={(e) => {
+              e.preventDefault();
+              window.location.href = `/pricing?slug=${founder.slug}`;
+            }}
+          >
+            Boost ↑
+          </span>
+        ) : null}
         <span className="text-[var(--text-dim)] group-hover:text-[var(--text-muted)] text-sm transition-colors shrink-0">
           →
         </span>

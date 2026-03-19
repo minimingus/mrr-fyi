@@ -106,6 +106,14 @@ export default async function FounderProfile({ params, searchParams }: Props) {
           />
         </div>
       )}
+      {(updated || submitted) && !founder.verified && !founder.featured && (
+        <a
+          href={`/pricing?slug=${founder.slug}`}
+          className="block mb-6 px-4 py-3 rounded-lg border border-dashed border-[var(--border-accent)] text-sm text-[var(--text-muted)] hover:border-[var(--amber)] hover:text-[var(--text)] transition-colors text-center"
+        >
+          Stand out — get a <span className="text-[var(--emerald)] font-semibold">verified badge</span> from $9/mo →
+        </a>
+      )}
       {/* Back */}
       <a
         href="/"
@@ -196,6 +204,30 @@ export default async function FounderProfile({ params, searchParams }: Props) {
           />
         </div>
       </div>
+
+      {/* Upgrade banner for free profiles */}
+      {!founder.featured && !founder.verified && (
+        <a
+          href={`/pricing?slug=${founder.slug}`}
+          className="block mb-6 px-4 py-3 rounded-lg border border-[var(--border)] bg-[var(--bg-card)] hover:border-[var(--border-accent)] transition-colors animate-fade-up stagger-2 group"
+        >
+          <div className="flex items-center justify-between gap-3 text-sm">
+            <span className="text-[var(--text-muted)]">
+              <span
+                className="inline-block text-[10px] font-semibold mono px-1.5 py-0.5 rounded-sm mr-2"
+                style={{ background: "rgba(16,185,129,0.15)", color: "var(--emerald)" }}
+              >
+                ✓
+              </span>
+              Get verified for $9/mo or{" "}
+              <span className="text-[var(--amber)]">featured for $29/mo</span>
+            </span>
+            <span className="text-xs text-[var(--text-dim)] group-hover:text-[var(--text-muted)] transition-colors">
+              Learn more →
+            </span>
+          </div>
+        </a>
+      )}
 
       {/* MRR Chart */}
       <div
