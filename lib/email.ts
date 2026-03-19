@@ -107,6 +107,107 @@ export async function sendUpdateLink(
   });
 }
 
+export async function sendMonthlyDigest(
+  email: string,
+  productName: string,
+  mrrCents: number,
+  currency: string,
+  currentRank: number,
+  previousRank: number | null,
+  top3: { productName: string; mrr: number; currency: string }[],
+  updateToken: string
+) {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const symbol = currency === "EUR" ? "€" : currency === "GBP" ? "£" : "$";
+  const mrr = (mrrCents / 100).toLocaleString("en-US");
+
+  const rankChange =
+    previousRank !== null
+      ? previousRank - currentRank // positive = moved up
+      : null;
+  const rankColor =
+    rankChange !== null && rankChange > 0
+      ? BRAND.emerald
+      : rankChange !== null && rankChange < 0
+        ? BRAND.red
+        : BRAND.textMuted;
+  const rankArrow =
+    rankChange !== null && rankChange > 0
+      ? "&#9650;"
+      : rankChange !== null && rankChange < 0
+        ? "&#9660;"
+        : "";
+  const rankChangeText =
+    rankChange !== null && rankChange !== 0
+      ? `<span style="font-size:13px;color:${rankColor};margin-left:6px;">${rankArrow} ${Math.abs(rankChange)}</span>`
+      : previousRank === null
+        ? `<span style="font-size:13px;color:${BRAND.textMuted};margin-left:6px;">New</span>`
+        : "";
+
+  const top3Rows = top3
+    .map(
+      (entry, i) => {
+        const s = entry.currency === "EUR" ? "€" : entry.currency === "GBP" ? "£" : "$";
+        const m = (entry.mrr / 100).toLocaleString("en-US");
+        return `<tr>
+        <td style="padding:8px 12px;font-size:14px;color:${BRAND.textMuted};border-bottom:1px solid ${BRAND.border};">#${i + 1}</td>
+        <td style="padding:8px 12px;font-size:14px;color:${BRAND.text};border-bottom:1px solid ${BRAND.border};">${entry.productName}</td>
+        <td style="padding:8px 12px;font-size:14px;color:${BRAND.text};text-align:right;border-bottom:1px solid ${BRAND.border};">${s}${m}</td>
+      </tr>`;
+      }
+    )
+    .join("");
+
+  const html = emailLayout(`
+    <h1 style="margin:0 0 8px;font-size:20px;font-weight:700;color:${BRAND.text};">
+      Your monthly digest
+    </h1>
+    <p style="margin:0 0 20px;font-size:14px;color:${BRAND.textMuted};line-height:1.6;">
+      Here's how <strong style="color:${BRAND.text};">${productName}</strong> is doing on the leaderboard this month.
+    </p>
+    <!-- Stats card -->
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:${BRAND.bg};border:1px solid ${BRAND.border};border-radius:6px;margin-bottom:20px;">
+      <tr>
+        <td style="padding:20px 24px;">
+          <p style="margin:0 0 4px;font-size:12px;color:${BRAND.textMuted};text-transform:uppercase;letter-spacing:0.5px;">Current MRR</p>
+          <p style="margin:0;font-size:28px;font-weight:700;color:${BRAND.text};letter-spacing:-0.5px;">${symbol}${mrr}</p>
+          <p style="margin:12px 0 0;font-size:12px;color:${BRAND.textMuted};text-transform:uppercase;letter-spacing:0.5px;">Leaderboard Rank</p>
+          <p style="margin:0;font-size:22px;font-weight:700;color:${BRAND.text};">#${currentRank}${rankChangeText}</p>
+        </td>
+      </tr>
+    </table>
+    <!-- Top 3 -->
+    <p style="margin:0 0 8px;font-size:13px;color:${BRAND.textMuted};text-transform:uppercase;letter-spacing:0.5px;">Top 3 on the leaderboard</p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:${BRAND.bg};border:1px solid ${BRAND.border};border-radius:6px;">
+      ${top3Rows}
+    </table>
+    ${button("Update my MRR", `${appUrl}/update/${updateToken}`)}
+    <p style="margin:0;font-size:12px;color:${BRAND.textMuted};line-height:1.5;">
+      View the full leaderboard at <a href="${appUrl}" style="color:${BRAND.amber};text-decoration:none;">mrr.fyi</a>
+    </p>
+  `);
+
+  const rankChangeTextPlain =
+    rankChange !== null && rankChange !== 0
+      ? ` (${rankChange > 0 ? "up" : "down"} ${Math.abs(rankChange)})`
+      : "";
+  const top3Plain = top3
+    .map((entry, i) => {
+      const s = entry.currency === "EUR" ? "€" : entry.currency === "GBP" ? "£" : "$";
+      return `  ${i + 1}. ${entry.productName} — ${s}${(entry.mrr / 100).toLocaleString("en-US")}`;
+    })
+    .join("\n");
+  const text = `Monthly digest for ${productName}\n\nCurrent MRR: ${symbol}${mrr}\nLeaderboard rank: #${currentRank}${rankChangeTextPlain}\n\nTop 3:\n${top3Plain}\n\nUpdate your MRR: ${appUrl}/update/${updateToken}\n\n— MRR.fyi`;
+
+  await getResend().emails.send({
+    from: "MRR.fyi <onboarding@resend.dev>",
+    to: email,
+    subject: `${productName} — your monthly MRR digest`,
+    text,
+    html,
+  });
+}
+
 export async function sendUpdateConfirmation(
   email: string,
   productName: string,
