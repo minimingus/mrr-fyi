@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { MRRBadge } from "@/components/MRRBadge";
 import { GrowthBadge } from "@/components/GrowthBadge";
 import { MRRChart } from "@/components/MRRChart";
+import { MilestoneBadges } from "@/components/MilestoneBadges";
 import { formatMRR, growthPercent } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -20,6 +21,9 @@ async function getFounder(slug: string) {
       snapshots: {
         orderBy: { recordedAt: "desc" },
         take: 24,
+      },
+      milestones: {
+        orderBy: { amount: "asc" },
       },
     },
   });
@@ -197,6 +201,16 @@ export default async function FounderProfile({ params, searchParams }: Props) {
         </h2>
         <MRRChart snapshots={founder.snapshots} currency={founder.currency} />
       </div>
+
+      {/* Milestones */}
+      {founder.milestones.length > 0 && (
+        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] p-6 mb-6 animate-fade-up stagger-3">
+          <h2 className="text-sm font-medium text-[var(--text-muted)] mb-4 mono uppercase tracking-widest">
+            Milestones
+          </h2>
+          <MilestoneBadges milestones={founder.milestones} currency={founder.currency} />
+        </div>
+      )}
 
       {/* Stats grid */}
       <div

@@ -170,3 +170,53 @@ export async function sendUpdateConfirmation(
     html,
   });
 }
+
+export async function sendMilestoneReached(
+  email: string,
+  productName: string,
+  milestoneAmountCents: number,
+  currency: string,
+  slug: string
+) {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const symbol = currency === "EUR" ? "€" : currency === "GBP" ? "£" : "$";
+  const milestone = (milestoneAmountCents / 100).toLocaleString("en-US");
+  const profileUrl = `${appUrl}/${slug}`;
+
+  const html = emailLayout(`
+    <h1 style="margin:0 0 8px;font-size:20px;font-weight:700;color:${BRAND.text};">
+      ${symbol}${milestone}/mo reached
+    </h1>
+    <p style="margin:0 0 20px;font-size:14px;color:${BRAND.textMuted};line-height:1.6;">
+      <strong style="color:${BRAND.text};">${productName}</strong> just crossed the <strong style="color:${BRAND.amber};">${symbol}${milestone}/mo</strong> milestone. Nice work.
+    </p>
+    <!-- Milestone badge -->
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:${BRAND.bg};border:1px solid ${BRAND.border};border-radius:6px;">
+      <tr>
+        <td style="padding:24px;text-align:center;">
+          <span style="font-size:36px;">&#127942;</span>
+          <p style="margin:12px 0 0;font-size:24px;font-weight:700;color:${BRAND.amber};letter-spacing:-0.5px;">
+            ${symbol}${milestone}/mo
+          </p>
+          <p style="margin:4px 0 0;font-size:12px;color:${BRAND.textMuted};text-transform:uppercase;letter-spacing:0.5px;">
+            Milestone unlocked
+          </p>
+        </td>
+      </tr>
+    </table>
+    ${button("View your profile", profileUrl)}
+    <p style="margin:0;font-size:13px;color:${BRAND.textMuted};line-height:1.5;">
+      A milestone badge has been added to your <a href="${profileUrl}" style="color:${BRAND.amber};text-decoration:none;">profile</a>.
+    </p>
+  `);
+
+  const text = `Congrats! ${productName} just crossed ${symbol}${milestone}/mo on MRR.fyi.\n\nA milestone badge has been added to your profile: ${profileUrl}\n\n— MRR.fyi`;
+
+  await getResend().emails.send({
+    from: "MRR.fyi <onboarding@resend.dev>",
+    to: email,
+    subject: `${productName} hit ${symbol}${milestone}/mo`,
+    text,
+    html,
+  });
+}
