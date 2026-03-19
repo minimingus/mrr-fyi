@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { rateLimit } from "@/lib/rate-limit";
+import { sendUpdateConfirmation } from "@/lib/email";
 
 const schema = z.object({
   token: z.string().min(1),
@@ -34,6 +35,7 @@ export async function POST(req: NextRequest) {
     }
 
     const mrrCents = Math.round(mrr * 100);
+    const oldMrrCents = founder.mrr;
 
     await prisma.$transaction([
       prisma.founder.update({
@@ -44,6 +46,25 @@ export async function POST(req: NextRequest) {
         data: { founderId: founder.id, mrr: mrrCents },
       }),
     ]);
+
+    const rank = await prisma.founder.count({
+      where: { mrr: { gt: mrrCents } },
+    }).then((above) => above + 1);
+
+    if (founder.email) {
+      try {
+        await sendUpdateConfirmation(
+          founder.email,
+          founder.productName,
+          mrrCents,
+          oldMrrCents,
+          rank,
+          founder.currency
+        );
+      } catch (err) {
+        console.error("[email] failed to send update confirmation:", err);
+      }
+    }
 
     return NextResponse.json({ slug: founder.slug });
   } catch (err) {
