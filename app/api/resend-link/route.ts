@@ -4,6 +4,8 @@ import { sendUpdateLink } from "@/lib/email";
 import { z } from "zod";
 import { rateLimit } from "@/lib/rate-limit";
 
+export const dynamic = "force-dynamic";
+
 const schema = z.object({
   email: z.string().email("Must be a valid email"),
 });
