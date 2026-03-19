@@ -25,10 +25,18 @@ export const metadata: Metadata = {
   title: "MRR.fyi — Public Indie Revenue Leaderboard",
   description:
     "Track and compare MRR from indie hackers building in public. See real revenue data from founders sharing their journey transparently.",
+  metadataBase: new URL("https://mrr.fyi"),
   openGraph: {
     title: "MRR.fyi — Public Indie Revenue Leaderboard",
     description: "Real MRR from real indie hackers. Build in public.",
+    url: "https://mrr.fyi",
+    siteName: "MRR.fyi",
     type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "MRR.fyi — Public Indie Revenue Leaderboard",
+    description: "Real MRR from real indie hackers. Build in public.",
   },
 };
 
