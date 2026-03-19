@@ -32,6 +32,20 @@ export const metadata: Metadata = {
   },
 };
 
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "MRR.fyi",
+  url: "https://mrr.fyi",
+  description:
+    "Track and compare MRR from indie hackers building in public. See real revenue data from founders sharing their journey transparently.",
+  publisher: {
+    "@type": "Organization",
+    name: "MRR.fyi",
+    url: "https://mrr.fyi",
+  },
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -39,6 +53,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${dmSerif.variable} ${dmSans.variable} ${jetbrains.variable}`}>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <body className="antialiased">
         <nav className="border-b border-[var(--border)] bg-[var(--bg)]/80 backdrop-blur-sm sticky top-0 z-50">
           <div className="max-w-4xl mx-auto px-4 h-14 flex items-center justify-between">
