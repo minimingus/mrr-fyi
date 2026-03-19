@@ -1,5 +1,7 @@
 "use client";
 
+import { trackEvent } from "@/lib/plausible";
+
 interface ShareButtonProps {
   text: string;
   url: string;
@@ -40,6 +42,7 @@ export function ShareButton({
       target="_blank"
       rel="noopener noreferrer"
       className={`inline-flex items-center gap-1.5 font-semibold rounded-md transition-colors ${variantStyles[variant]} ${sizeStyles[size]} ${className}`}
+      onClick={() => trackEvent("Share Click", { platform: "twitter" })}
     >
       <svg
         viewBox="0 0 24 24"

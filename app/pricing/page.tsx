@@ -2,6 +2,7 @@
 
 import { useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import { trackEvent } from "@/lib/plausible";
 
 const plans = [
   {
@@ -61,6 +62,7 @@ function PricingContent() {
         setError(json.error ?? "Something went wrong");
         return;
       }
+      trackEvent("Checkout Click", { plan });
       window.location.href = json.url;
     } catch {
       setError("Network error. Please try again.");

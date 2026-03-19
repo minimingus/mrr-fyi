@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { DM_Serif_Display, DM_Sans, JetBrains_Mono } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import { Footer } from "@/components/Footer";
 
@@ -67,6 +68,14 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
+      {process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN && (
+        <Script
+          defer
+          data-domain={process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN}
+          src="https://plausible.io/js/script.js"
+          strategy="afterInteractive"
+        />
+      )}
       <body className="antialiased">
         <nav className="border-b border-[var(--border)] bg-[var(--bg)]/80 backdrop-blur-sm sticky top-0 z-50">
           <div className="max-w-4xl mx-auto px-4 h-14 flex items-center justify-between">
