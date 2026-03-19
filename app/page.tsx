@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { FounderRow } from "@/components/FounderRow";
+import { LeaderboardList } from "@/components/LeaderboardList";
 import { formatMRR } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -104,25 +104,7 @@ export default async function Home() {
           </a>
         </div>
       ) : (
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center justify-between mb-1 px-1">
-            <span className="text-xs text-[var(--text-dim)] uppercase tracking-widest mono">
-              Rank · Product
-            </span>
-            <span className="text-xs text-[var(--text-dim)] uppercase tracking-widest mono">
-              MRR
-            </span>
-          </div>
-
-          {founders.map((founder, i) => (
-            <FounderRow
-              key={founder.id}
-              founder={founder}
-              rank={i + 1}
-              style={{ animationDelay: `${0.05 * i}s`, opacity: 0 }}
-            />
-          ))}
-        </div>
+        <LeaderboardList founders={founders} />
       )}
 
       {/* CTA */}
