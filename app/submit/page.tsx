@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { submitSchema, SubmitInput } from "@/lib/validations";
 import { useRouter } from "next/navigation";
+import { trackEvent } from "@/lib/plausible";
 
 export default function SubmitPage() {
   const router = useRouter();
@@ -34,6 +35,7 @@ export default function SubmitPage() {
         setError(json.error ?? "Something went wrong");
         return;
       }
+      trackEvent("MRR Submission", { currency: data.currency ?? "USD" });
       router.push(`/${json.slug}?submitted=1`);
     } catch {
       setError("Network error. Please try again.");
