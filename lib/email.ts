@@ -199,7 +199,8 @@ export async function sendMonthlyDigest(
     .join("\n");
   const text = `Monthly digest for ${productName}\n\nCurrent MRR: ${symbol}${mrr}\nLeaderboard rank: #${currentRank}${rankChangeTextPlain}\n\nTop 3:\n${top3Plain}\n\nUpdate your MRR: ${appUrl}/update/${updateToken}\n\n— MRR.fyi`;
 
-  await getResend().emails.send({
+  const resendClient = await getResend();
+  await resendClient.emails.send({
     from: "MRR.fyi <onboarding@resend.dev>",
     to: email,
     subject: `${productName} — your monthly MRR digest`,
@@ -314,7 +315,8 @@ export async function sendMilestoneReached(
 
   const text = `Congrats! ${productName} just crossed ${symbol}${milestone}/mo on MRR.fyi.\n\nA milestone badge has been added to your profile: ${profileUrl}\n\n— MRR.fyi`;
 
-  await getResend().emails.send({
+  const resendClient = await getResend();
+  await resendClient.emails.send({
     from: "MRR.fyi <onboarding@resend.dev>",
     to: email,
     subject: `${productName} hit ${symbol}${milestone}/mo`,
