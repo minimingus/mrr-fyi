@@ -308,6 +308,57 @@ export async function sendUpdateConfirmation(
   });
 }
 
+export async function sendChurnRecoveryEmail(
+  email: string,
+  productName: string,
+  planType: "FEATURED" | "VERIFIED",
+  slug: string
+) {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const profileUrl = `${appUrl}/${slug}`;
+  const planLabel = planType === "FEATURED" ? "Featured" : "Verified";
+
+  const loseFeature =
+    planType === "FEATURED"
+      ? "top placement on the leaderboard and your Featured badge"
+      : "your Verified badge";
+
+  const html = emailLayout(`
+    <h1 style="margin:0 0 8px;font-size:20px;font-weight:700;color:${BRAND.text};">
+      Your ${planLabel} subscription was cancelled
+    </h1>
+    <p style="margin:0 0 20px;font-size:14px;color:${BRAND.textMuted};line-height:1.6;">
+      We get it — things change. Your profile for <strong style="color:${BRAND.text};">${productName}</strong> will stay on MRR.fyi, but you'll lose ${loseFeature}.
+    </p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:${BRAND.bg};border:1px solid ${BRAND.border};border-radius:6px;margin-bottom:20px;">
+      <tr>
+        <td style="padding:20px 24px;">
+          <p style="margin:0 0 4px;font-size:12px;color:${BRAND.textMuted};text-transform:uppercase;letter-spacing:0.5px;">What you'll lose</p>
+          <p style="margin:0;font-size:14px;color:${BRAND.text};line-height:1.6;">${loseFeature}</p>
+        </td>
+      </tr>
+    </table>
+    <p style="margin:0 0 20px;font-size:14px;color:${BRAND.textMuted};line-height:1.6;">
+      If you change your mind, you can re-subscribe anytime from your profile.
+    </p>
+    ${button("View your profile", profileUrl)}
+    <p style="margin:0;font-size:12px;color:${BRAND.textMuted};line-height:1.5;">
+      No hard feelings. We're rooting for you either way.
+    </p>
+  `);
+
+  const text = `Your ${planLabel} subscription for ${productName} on MRR.fyi was cancelled.\n\nYour profile will stay on the leaderboard, but you'll lose ${loseFeature}.\n\nIf you change your mind, re-subscribe anytime: ${profileUrl}\n\n— MRR.fyi`;
+
+  const resend = await getResend();
+  await resend.emails.send({
+    from: "MRR.fyi <onboarding@resend.dev>",
+    to: email,
+    subject: `Your ${planLabel} plan for ${productName} was cancelled`,
+    text,
+    html,
+  });
+}
+
 export async function sendMilestoneReached(
   email: string,
   productName: string,
