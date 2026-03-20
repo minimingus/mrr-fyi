@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState, useTransition } from "react";
 import { FounderRow } from "./FounderRow";
 import type { Founder, MRRSnapshot } from "@prisma/client";
 
@@ -11,6 +11,8 @@ type FounderWithSnapshots = Founder & {
 
 interface LeaderboardListProps {
   founders: FounderWithSnapshots[];
+  totalCount: number;
+  pageSize: number;
 }
 
 const MRR_RANGES = [
@@ -29,13 +31,18 @@ function parseMRRRange(range: string): [number, number] | null {
   return [min, max];
 }
 
-export function LeaderboardList({ founders }: LeaderboardListProps) {
+export function LeaderboardList({ founders: initialFounders, totalCount, pageSize }: LeaderboardListProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
 
   const query = searchParams.get("q") ?? "";
   const range = searchParams.get("range") ?? "";
+
+  const [allFounders, setAllFounders] = useState(initialFounders);
+  const [isLoadingMore, startLoadMore] = useTransition();
+  const hasMore = allFounders.length < totalCount;
+  const isFiltering = Boolean(query || range);
 
   const updateParams = useCallback(
     (updates: Record<string, string>) => {
@@ -54,7 +61,7 @@ export function LeaderboardList({ founders }: LeaderboardListProps) {
   );
 
   const filtered = useMemo(() => {
-    let result = founders;
+    let result = allFounders;
 
     if (query) {
       const q = query.toLowerCase();
@@ -72,7 +79,40 @@ export function LeaderboardList({ founders }: LeaderboardListProps) {
     }
 
     return result;
-  }, [founders, query, range]);
+  }, [allFounders, query, range]);
+
+  const loadMore = useCallback(() => {
+    const nextPage = Math.floor(allFounders.length / pageSize) + 1;
+    startLoadMore(async () => {
+      const res = await fetch(`/api/v1/leaderboard?page=${nextPage}&limit=${pageSize}`);
+      if (!res.ok) return;
+      const json = await res.json();
+      const newFounders: FounderWithSnapshots[] = json.data.map((d: Record<string, unknown>) => ({
+        id: d.slug as string,
+        slug: d.slug as string,
+        name: d.name as string,
+        twitter: d.twitter as string | null,
+        productName: d.productName as string,
+        productUrl: d.productUrl as string | null,
+        description: d.description as string | null,
+        email: null,
+        updateToken: "",
+        mrr: d.mrr as number,
+        currency: d.currency as string,
+        verified: d.verified as boolean,
+        featured: d.featured as boolean,
+        createdAt: new Date(),
+        updatedAt: new Date(d.updatedAt as string),
+        snapshots: d.growthPercent != null
+          ? [
+              { mrr: d.mrr as number, recordedAt: new Date() },
+              { mrr: Math.round((d.mrr as number) / (1 + (d.growthPercent as number) / 100)), recordedAt: new Date() },
+            ]
+          : [{ mrr: d.mrr as number, recordedAt: new Date() }],
+      }));
+      setAllFounders((prev) => [...prev, ...newFounders]);
+    });
+  }, [allFounders.length, pageSize]);
 
   return (
     <>
@@ -130,10 +170,23 @@ export function LeaderboardList({ founders }: LeaderboardListProps) {
             <FounderRow
               key={founder.id}
               founder={founder}
-              rank={founders.indexOf(founder) + 1}
-              style={{ animationDelay: `${0.05 * i}s`, opacity: 0 }}
+              rank={allFounders.indexOf(founder) + 1}
+              style={{ animationDelay: `${0.05 * Math.min(i, 19)}s`, opacity: 0 }}
             />
           ))}
+        </div>
+      )}
+
+      {/* Load More */}
+      {hasMore && !isFiltering && (
+        <div className="text-center mt-6">
+          <button
+            onClick={loadMore}
+            disabled={isLoadingMore}
+            className="px-6 py-2.5 rounded-lg border border-[var(--border)] bg-[var(--bg-card)] text-[var(--text-muted)] text-sm mono hover:border-[var(--amber)] hover:text-[var(--amber)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isLoadingMore ? "Loading..." : `Load more founders`}
+          </button>
         </div>
       )}
     </>
