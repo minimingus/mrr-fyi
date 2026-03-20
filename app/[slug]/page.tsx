@@ -9,6 +9,7 @@ import { ShareButton } from "@/components/ShareButton";
 import { EmbedButton } from "@/components/EmbedButton";
 import { BadgeButton } from "@/components/BadgeButton";
 import { BadgeSection } from "@/components/BadgeSection";
+import { ReferralSection } from "@/components/ReferralSection";
 import { formatMRR, growthPercent } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -19,7 +20,7 @@ interface Props {
 }
 
 async function getFounder(slug: string) {
-  return prisma.founder.findUnique({
+  const founder = await prisma.founder.findUnique({
     where: { slug },
     include: {
       snapshots: {
@@ -34,11 +35,23 @@ async function getFounder(slug: string) {
       },
     },
   });
+
+  if (!founder) return null;
+
+  const referrer = founder.referredBy
+    ? await prisma.founder.findUnique({
+        where: { referralCode: founder.referredBy },
+        select: { name: true, slug: true, productName: true },
+      })
+    : null;
+
+  return { founder, referrer };
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const founder = await getFounder(slug);
+  const result = await getFounder(slug);
+  const founder = result?.founder;
   if (!founder || !founder.emailVerified) return {};
 
   const title = `${founder.productName} — ${formatMRR(founder.mrr, founder.currency)}/mo`;
@@ -64,7 +77,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function FounderProfile({ params, searchParams }: Props) {
   const { slug } = await params;
-  const founder = await getFounder(slug);
+  const result = await getFounder(slug);
+  const founder = result?.founder;
+  const referrer = result?.referrer ?? null;
 
   if (!founder || !founder.emailVerified) notFound();
 
@@ -318,13 +333,28 @@ export default async function FounderProfile({ params, searchParams }: Props) {
                 },
               ]
             : []),
+          ...(referrer
+            ? [
+                {
+                  label: "Referred by",
+                  value: referrer.productName,
+                  href: `/${referrer.slug}`,
+                },
+              ]
+            : []),
         ].map((stat) => (
           <div
             key={stat.label}
             className="rounded-lg border border-[var(--border)] bg-[var(--bg-card)] px-4 py-3"
           >
             <div className="mono text-base font-semibold text-[var(--text)]">
-              {stat.value}
+              {"href" in stat && stat.href ? (
+                <a href={stat.href} className="hover:text-[var(--amber)] transition-colors">
+                  {stat.value}
+                </a>
+              ) : (
+                stat.value
+              )}
             </div>
             <div className="text-xs text-[var(--text-dim)] mt-0.5">{stat.label}</div>
           </div>
@@ -341,6 +371,14 @@ export default async function FounderProfile({ params, searchParams }: Props) {
         </p>
         <BadgeSection slug={founder.slug} />
       </div>
+
+      {/* Referral invite */}
+      {founder.referralCode && (
+        <ReferralSection
+          referralCode={founder.referralCode}
+          productName={founder.productName}
+        />
+      )}
 
       {/* Promotion CTA */}
       <div
