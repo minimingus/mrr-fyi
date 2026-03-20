@@ -106,7 +106,7 @@ async function getRecentlyJoined() {
     where: { emailVerified: true },
     orderBy: { createdAt: "desc" },
     take: 5,
-    select: { name: true, slug: true, productName: true, createdAt: true },
+    select: { name: true, slug: true, productName: true },
   });
 }
 
@@ -178,22 +178,17 @@ export default async function Home() {
         >
           Join the Leaderboard →
         </a>
-      </div>
 
-      {/* Trusted by founders */}
-      <div className="mb-10 flex items-center justify-center gap-2 animate-fade-up stagger-2">
-        <Users size={16} style={{ color: "var(--amber)" }} />
-        <p className="text-sm text-[var(--text-muted)]">
-          Trusted by{" "}
-          <span className="text-[var(--amber)] font-semibold">
-            {stats.totalFounders} founder{stats.totalFounders !== 1 ? "s" : ""}
-          </span>{" "}
-          tracking{" "}
-          <span className="text-[var(--amber)] font-semibold">
-            {formatMRR(stats.totalMRR)}
-          </span>{" "}
-          in MRR
-        </p>
+        {stats.totalFounders > 0 && (
+          <p className="mt-4 text-xs text-[var(--text-dim)] flex items-center gap-1.5">
+            <Users size={14} style={{ color: "var(--amber)" }} />
+            Trusted by{" "}
+            <strong className="text-[var(--text-muted)]">{stats.totalFounders} founders</strong>{" "}
+            tracking{" "}
+            <strong className="text-[var(--text-muted)]">{formatMRR(stats.totalMRR)}/mo</strong>{" "}
+            in revenue
+          </p>
+        )}
       </div>
 
       {/* Stats bar */}
@@ -223,10 +218,32 @@ export default async function Home() {
         </div>
       )}
 
+      {/* Recently joined ticker */}
+      {recentlyJoined.length > 0 && (
+        <div className="mb-6 animate-fade-up stagger-2">
+          <div className="flex items-center gap-3 overflow-x-auto scrollbar-none py-1">
+            <span className="text-xs text-[var(--text-dim)] mono shrink-0 uppercase tracking-widest">
+              Recently joined
+            </span>
+            {recentlyJoined.map((f) => (
+              <a
+                key={f.slug}
+                href={`/${f.slug}`}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[var(--border)] bg-[var(--bg-card)] text-xs text-[var(--text-muted)] hover:border-[var(--amber)] hover:text-[var(--text)] transition-colors shrink-0"
+              >
+                <span className="text-[var(--text)]">{f.name}</span>
+                <span className="text-[var(--text-dim)]">·</span>
+                <span>{f.productName}</span>
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Share leaderboard */}
       <div className="flex justify-end mb-4 animate-fade-up stagger-2">
         <ShareButton
-          text={`${stats.totalFounders} indie founders are making ${formatMRR(stats.totalMRR)}/mo combined on MRR.fyi 🔥`}
+          text={`${stats.totalFounders} indie founders are making ${formatMRR(stats.totalMRR)}/mo combined on MRR.fyi`}
           url="https://mrr.fyi"
         />
       </div>
@@ -288,36 +305,6 @@ export default async function Home() {
                   <span className="text-[var(--text-muted)]">{item.detail}</span>
                 </span>
               </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Recently joined */}
-      {recentlyJoined.length > 0 && (
-        <div
-          className="mt-12 animate-fade-up"
-          style={{ animationDelay: "0.22s", opacity: 0 }}
-        >
-          <h2
-            className="text-lg mb-4 text-[var(--text-muted)]"
-            style={{ fontFamily: "var(--font-dm-serif)" }}
-          >
-            Recently joined
-          </h2>
-          <div className="flex flex-wrap gap-3">
-            {recentlyJoined.map((founder) => (
-              <a
-                key={founder.slug}
-                href={`/${founder.slug}`}
-                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-[var(--border)] bg-[var(--bg-card)] text-xs hover:border-[var(--amber)] transition-colors"
-              >
-                <span className="text-[var(--text)]">{founder.name}</span>
-                <span className="text-[var(--text-dim)]">·</span>
-                <span className="text-[var(--text-muted)]">
-                  {founder.productName}
-                </span>
-              </a>
             ))}
           </div>
         </div>
