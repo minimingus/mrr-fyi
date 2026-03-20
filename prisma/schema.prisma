@@ -56,9 +56,10 @@ model Payment {
   type          PaymentType
   externalId    String      @unique
   active        Boolean     @default(true)
-  trialEndsAt        DateTime?
-  trialReminder      Boolean     @default(false)
-  trialExpiredNotice Boolean     @default(false)
+  trialEndsAt          DateTime?
+  trialReminder        Boolean     @default(false)
+  trialUrgencyReminder Boolean     @default(false)
+  trialExpiredNotice   Boolean     @default(false)
   createdAt          DateTime    @default(now())
 
   founder Founder @relation(fields: [founderId], references: [id], onDelete: Cascade)

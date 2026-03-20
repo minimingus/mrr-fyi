@@ -650,6 +650,72 @@ export async function sendTrialStartedEmail(
   });
 }
 
+export async function sendTrialUrgencyEmail(
+  email: string,
+  productName: string,
+  planLabel: string,
+  slug: string,
+  founderCount: number
+) {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const pricingUrl = `${appUrl}/pricing?slug=${slug}`;
+
+  const perks =
+    planLabel === "Featured"
+      ? [
+          "Top placement on the leaderboard",
+          "Featured badge on your profile",
+          "Priority visibility to founders &amp; investors",
+        ]
+      : [
+          "Verified badge — proves your revenue is real",
+          "Increased trust with visitors",
+          "Priority listing over unverified founders",
+        ];
+
+  const perkRows = perks
+    .map(
+      (p) =>
+        `<li style="margin-bottom:8px;font-size:14px;color:${BRAND.textMuted};line-height:1.6;">${p}</li>`
+    )
+    .join("");
+
+  const html = emailLayout(`
+    <h1 style="margin:0 0 8px;font-size:20px;font-weight:700;color:${BRAND.text};">
+      Your trial ends tomorrow
+    </h1>
+    <p style="margin:0 0 20px;font-size:14px;color:${BRAND.textMuted};line-height:1.6;">
+      Lock in your <strong style="color:${BRAND.text};">${planLabel}</strong> profile for <strong style="color:${BRAND.text};">${productName}</strong> before your free trial expires. ${founderCount.toLocaleString()} founders are already sharing their MRR publicly on MRR.fyi.
+    </p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:${BRAND.bg};border:1px solid ${BRAND.border};border-radius:6px;margin-bottom:20px;">
+      <tr>
+        <td style="padding:20px 24px;">
+          <p style="margin:0 0 10px;font-size:12px;color:${BRAND.textMuted};text-transform:uppercase;letter-spacing:0.5px;">What you keep with ${planLabel}</p>
+          <ul style="margin:0;padding-left:20px;">
+            ${perkRows}
+          </ul>
+        </td>
+      </tr>
+    </table>
+    ${button("Lock in my profile →", pricingUrl)}
+    <p style="margin:0;font-size:12px;color:${BRAND.textMuted};line-height:1.5;">
+      Already subscribed? You're all set — no action needed.
+    </p>
+  `);
+
+  const perksPlain = perks.map((p) => `- ${p.replace(/&amp;/g, "&")}`).join("\n");
+  const text = `Your ${planLabel} trial for ${productName} ends tomorrow.\n\n${founderCount.toLocaleString()} founders are already sharing their MRR publicly on MRR.fyi.\n\nWhat you keep with ${planLabel}:\n${perksPlain}\n\nLock in your profile: ${pricingUrl}\n\nAlready subscribed? You're all set.\n\n— MRR.fyi`;
+
+  const resend = await getResend();
+  await resend.emails.send({
+    from: "MRR.fyi <onboarding@resend.dev>",
+    to: email,
+    subject: `Your ${planLabel} trial ends tomorrow — lock in ${productName}`,
+    text,
+    html,
+  });
+}
+
 export async function sendTrialEndingEmail(
   email: string,
   productName: string,
