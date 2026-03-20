@@ -2,6 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
+import { trackEvent } from "@/lib/plausible";
+
+function buildTwitterIntentUrl(text: string, url: string) {
+  const params = new URLSearchParams({ text: `${text}\n${url}` });
+  return `https://twitter.com/intent/tweet?${params.toString()}`;
+}
 
 interface ProfileData {
   name: string;
@@ -19,6 +25,7 @@ export default function UpdatePage() {
   const [mrr, setMrr] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [mrrSuccess, setMrrSuccess] = useState<{ slug: string; mrr: number } | null>(null);
 
   const [profile, setProfile] = useState<ProfileData>({
     name: "",
@@ -82,7 +89,10 @@ export default function UpdatePage() {
         setError(json.error ?? "Something went wrong");
         return;
       }
-      router.push(`/${json.slug}?updated=1`);
+      setMrrSuccess({ slug: json.slug, mrr: value });
+      setTimeout(() => {
+        router.push(`/${json.slug}?updated=1`);
+      }, 8000);
     } catch {
       setError("Network error. Please try again.");
     } finally {
@@ -151,45 +161,93 @@ export default function UpdatePage() {
         recorded and your position on the leaderboard will update immediately.
       </p>
 
-      <form onSubmit={handleMrrSubmit} className="flex flex-col gap-4">
-        <div>
-          <label className={labelClass}>New MRR (in full dollars)</label>
-          <input
-            type="number"
-            min="0"
-            step="1"
-            value={mrr}
-            onChange={(e) => setMrr(e.target.value)}
-            placeholder="e.g. 4200"
-            className={inputClass}
-            required
-          />
-        </div>
+      {mrrSuccess ? (
+        <div className="text-center">
+          <div className="rounded-xl border border-[var(--emerald)] p-6 mb-6" style={{ background: "rgba(16,185,129,0.08)" }}>
+            <div className="mb-4 text-4xl">&#10003;</div>
+            <h2
+              className="text-xl mb-2"
+              style={{ fontFamily: "var(--font-dm-serif)", color: "var(--emerald)" }}
+            >
+              MRR updated!
+            </h2>
+            <p className="text-sm text-[var(--text-muted)] mb-6">
+              New snapshot recorded. Let the world know you&apos;re building in public.
+            </p>
 
-        {error && (
-          <div className="rounded-md border border-[var(--red)] bg-red-950/20 px-4 py-3 text-sm text-[var(--red)]">
-            {error}
+            <a
+              href={buildTwitterIntentUrl(
+                `Just updated my MRR on the @mrrfyi leaderboard — building in public. Check it out: #buildinpublic`,
+                `https://mrr.fyi/${mrrSuccess.slug}`
+              )}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => trackEvent("Share Click", { platform: "twitter", source: "update" })}
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-[var(--amber)] text-black text-sm font-semibold rounded-md hover:bg-amber-400 transition-colors"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                className="w-4 h-4"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+              </svg>
+              Share on X
+            </a>
           </div>
-        )}
 
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="w-full py-3 bg-[var(--amber)] text-black font-semibold rounded-md hover:bg-amber-400 transition-all hover:scale-[1.01] disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100"
-        >
-          {isSubmitting ? "Saving..." : "Update MRR →"}
-        </button>
+          <p className="text-xs text-[var(--text-dim)]">
+            Redirecting to your profile...{" "}
+            <a
+              href={`/${mrrSuccess.slug}?updated=1`}
+              className="text-[var(--amber)] hover:underline"
+            >
+              Go now &rarr;
+            </a>
+          </p>
+        </div>
+      ) : (
+        <form onSubmit={handleMrrSubmit} className="flex flex-col gap-4">
+          <div>
+            <label className={labelClass}>New MRR (in full dollars)</label>
+            <input
+              type="number"
+              min="0"
+              step="1"
+              value={mrr}
+              onChange={(e) => setMrr(e.target.value)}
+              placeholder="e.g. 4200"
+              className={inputClass}
+              required
+            />
+          </div>
 
-        <p className="text-xs text-center text-[var(--text-dim)]">
-          This link is private and never expires. Bookmark it.
-        </p>
-        <p className="text-xs text-center text-[var(--text-dim)]">
-          Lost your link?{" "}
-          <a href="/resend" className="text-[var(--amber)] hover:underline">
-            Re-send it to your email.
-          </a>
-        </p>
-      </form>
+          {error && (
+            <div className="rounded-md border border-[var(--red)] bg-red-950/20 px-4 py-3 text-sm text-[var(--red)]">
+              {error}
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="w-full py-3 bg-[var(--amber)] text-black font-semibold rounded-md hover:bg-amber-400 transition-all hover:scale-[1.01] disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100"
+          >
+            {isSubmitting ? "Saving..." : "Update MRR →"}
+          </button>
+
+          <p className="text-xs text-center text-[var(--text-dim)]">
+            This link is private and never expires. Bookmark it.
+          </p>
+          <p className="text-xs text-center text-[var(--text-dim)]">
+            Lost your link?{" "}
+            <a href="/resend" className="text-[var(--amber)] hover:underline">
+              Re-send it to your email.
+            </a>
+          </p>
+        </form>
+      )}
 
       {/* Profile Edit Section */}
       <div className="mt-16 pt-10 border-t border-[var(--border)]">
