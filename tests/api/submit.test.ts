@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { POST } from "@/app/api/submit/route";
 import { prisma } from "@/lib/prisma";
-import { sendUpdateLink } from "@/lib/email";
+import { sendVerificationEmail } from "@/lib/email";
 import { createRequest, cleanDatabase } from "../helpers";
 
 describe("POST /api/submit", () => {
@@ -38,7 +38,7 @@ describe("POST /api/submit", () => {
     expect(founder!.snapshots).toHaveLength(1);
     expect(founder!.snapshots[0].mrr).toBe(50000);
 
-    expect(sendUpdateLink).toHaveBeenCalledWith(
+    expect(sendVerificationEmail).toHaveBeenCalledWith(
       "jane@example.com",
       "Acme SaaS",
       expect.any(String)

@@ -6,10 +6,13 @@ config({ path: ".env.test", override: true });
 
 // Mock email module — do NOT send real emails in tests
 vi.mock("@/lib/email", () => ({
+  sendVerificationEmail: vi.fn().mockResolvedValue(undefined),
   sendUpdateLink: vi.fn().mockResolvedValue(undefined),
   sendUpdateConfirmation: vi.fn().mockResolvedValue(undefined),
   sendMilestoneReached: vi.fn().mockResolvedValue(undefined),
   sendMonthlyDigest: vi.fn().mockResolvedValue(undefined),
+  sendChurnRecoveryEmail: vi.fn().mockResolvedValue(undefined),
+  sendReferralNotification: vi.fn().mockResolvedValue(undefined),
 }));
 
 // Disable rate limiting in tests
