@@ -20,6 +20,7 @@ model Founder {
   emailVerifyToken String?  @unique
   referralCode     String?  @unique
   referredBy       String?
+  onboardingEmailsSent Int  @default(0)
   mrr         Int
   currency    String        @default("USD")
   verified    Boolean       @default(false)

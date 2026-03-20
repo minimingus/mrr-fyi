@@ -456,6 +456,192 @@ export async function sendMilestoneReached(
   });
 }
 
+// --- Onboarding drip sequence ---
+
+export async function sendOnboardingEmail1Welcome(
+  email: string,
+  productName: string,
+  slug: string,
+  updateToken: string
+) {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const profileUrl = `${appUrl}/${slug}`;
+  const updateUrl = `${appUrl}/update/${updateToken}`;
+
+  const html = emailLayout(`
+    <h1 style="margin:0 0 8px;font-size:20px;font-weight:700;color:${BRAND.text};">
+      Welcome to MRR.fyi
+    </h1>
+    <p style="margin:0 0 20px;font-size:14px;color:${BRAND.textMuted};line-height:1.6;">
+      <strong style="color:${BRAND.text};">${productName}</strong> is live on the leaderboard. Here's how to get the most out of it:
+    </p>
+    <!-- Tips -->
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:${BRAND.bg};border:1px solid ${BRAND.border};border-radius:6px;margin-bottom:20px;">
+      <tr>
+        <td style="padding:20px 24px;">
+          <p style="margin:0 0 16px;font-size:14px;color:${BRAND.text};line-height:1.6;">
+            <strong style="color:${BRAND.amber};">1. Update regularly</strong><br />
+            <span style="color:${BRAND.textMuted};">Monthly updates keep your profile active and show real growth. Use your update link to log new revenue anytime.</span>
+          </p>
+          <p style="margin:0 0 16px;font-size:14px;color:${BRAND.text};line-height:1.6;">
+            <strong style="color:${BRAND.amber};">2. Embed your badge</strong><br />
+            <span style="color:${BRAND.textMuted};">Add an MRR.fyi badge to your website or GitHub to showcase your revenue publicly and drive traffic to your profile.</span>
+          </p>
+          <p style="margin:0;font-size:14px;color:${BRAND.text};line-height:1.6;">
+            <strong style="color:${BRAND.amber};">3. Share your profile</strong><br />
+            <span style="color:${BRAND.textMuted};">Post your MRR.fyi profile on Twitter/X and in founder communities. Building in public starts with transparency.</span>
+          </p>
+        </td>
+      </tr>
+    </table>
+    ${button("View your profile", profileUrl)}
+    <p style="margin:0;font-size:12px;color:${BRAND.textMuted};line-height:1.5;">
+      Update your MRR anytime at <a href="${updateUrl}" style="color:${BRAND.amber};text-decoration:none;">your update page</a>.
+    </p>
+  `);
+
+  const text = `Welcome to MRR.fyi!\n\n${productName} is live on the leaderboard. Here's how to get the most out of it:\n\n1. Update regularly — monthly updates keep your profile active and show real growth.\n2. Embed your badge — add an MRR.fyi badge to your website or GitHub.\n3. Share your profile — post it on Twitter/X and in founder communities.\n\nView your profile: ${profileUrl}\nUpdate your MRR: ${updateUrl}\n\n— MRR.fyi`;
+
+  const resend = await getResend();
+  await resend.emails.send({
+    from: "MRR.fyi <onboarding@resend.dev>",
+    to: email,
+    subject: `Welcome to MRR.fyi — make the most of ${productName}'s profile`,
+    text,
+    html,
+  });
+}
+
+export async function sendOnboardingEmail2Tips(
+  email: string,
+  productName: string,
+  slug: string,
+  topFounder: { productName: string; slug: string; mrr: number; currency: string } | null
+) {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const profileUrl = `${appUrl}/${slug}`;
+  const pricingUrl = `${appUrl}/pricing`;
+
+  const topFounderSection = topFounder
+    ? `<!-- Top founder spotlight -->
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:${BRAND.bg};border:1px solid ${BRAND.border};border-radius:6px;margin-bottom:20px;">
+      <tr>
+        <td style="padding:20px 24px;text-align:center;">
+          <p style="margin:0 0 4px;font-size:12px;color:${BRAND.textMuted};text-transform:uppercase;letter-spacing:0.5px;">Founder spotlight</p>
+          <p style="margin:0;font-size:18px;font-weight:700;color:${BRAND.text};">${topFounder.productName}</p>
+          <p style="margin:4px 0 0;font-size:14px;color:${BRAND.amber};">
+            ${topFounder.currency === "EUR" ? "€" : topFounder.currency === "GBP" ? "£" : "$"}${(topFounder.mrr / 100).toLocaleString("en-US")}/mo
+          </p>
+          <p style="margin:8px 0 0;">
+            <a href="${appUrl}/${topFounder.slug}" style="font-size:13px;color:${BRAND.amber};text-decoration:none;">View profile →</a>
+          </p>
+        </td>
+      </tr>
+    </table>`
+    : "";
+
+  const html = emailLayout(`
+    <h1 style="margin:0 0 8px;font-size:20px;font-weight:700;color:${BRAND.text};">
+      Tips for building in public
+    </h1>
+    <p style="margin:0 0 20px;font-size:14px;color:${BRAND.textMuted};line-height:1.6;">
+      You've had <strong style="color:${BRAND.text};">${productName}</strong> on MRR.fyi for a few days. Here are some ways founders use the platform to grow:
+    </p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:${BRAND.bg};border:1px solid ${BRAND.border};border-radius:6px;margin-bottom:20px;">
+      <tr>
+        <td style="padding:20px 24px;">
+          <p style="margin:0 0 12px;font-size:14px;color:${BRAND.textMuted};line-height:1.6;">
+            <strong style="color:${BRAND.text};">Share milestones publicly.</strong> When you hit a revenue milestone, tweet about it. The community loves celebrating wins.
+          </p>
+          <p style="margin:0 0 12px;font-size:14px;color:${BRAND.textMuted};line-height:1.6;">
+            <strong style="color:${BRAND.text};">Be consistent.</strong> Monthly updates build trust with your audience and keep you accountable.
+          </p>
+          <p style="margin:0;font-size:14px;color:${BRAND.textMuted};line-height:1.6;">
+            <strong style="color:${BRAND.text};">Engage with other founders.</strong> Check out who else is on the leaderboard and connect with them.
+          </p>
+        </td>
+      </tr>
+    </table>
+    ${topFounderSection}
+    <p style="margin:0 0 20px;font-size:14px;color:${BRAND.textMuted};line-height:1.6;">
+      Want to stand out? A <strong style="color:${BRAND.amber};">Verified badge</strong> signals credibility and helps you rank higher.
+    </p>
+    ${button("View pricing", pricingUrl)}
+    <p style="margin:0;font-size:12px;color:${BRAND.textMuted};line-height:1.5;">
+      Your profile: <a href="${profileUrl}" style="color:${BRAND.amber};text-decoration:none;">mrr.fyi/${slug}</a>
+    </p>
+  `);
+
+  const text = `Tips for building in public\n\nYou've had ${productName} on MRR.fyi for a few days. Here's how founders use the platform to grow:\n\n- Share milestones publicly on Twitter/X\n- Be consistent with monthly updates\n- Engage with other founders on the leaderboard\n\nWant to stand out? A Verified badge signals credibility.\n\nView pricing: ${pricingUrl}\nYour profile: ${profileUrl}\n\n— MRR.fyi`;
+
+  const resend = await getResend();
+  await resend.emails.send({
+    from: "MRR.fyi <onboarding@resend.dev>",
+    to: email,
+    subject: `Tips for building ${productName} in public`,
+    text,
+    html,
+  });
+}
+
+export async function sendOnboardingEmail3Recap(
+  email: string,
+  productName: string,
+  slug: string,
+  rank: number | null,
+  mrrCents: number,
+  currency: string
+) {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const profileUrl = `${appUrl}/${slug}`;
+  const pricingUrl = `${appUrl}/pricing`;
+  const symbol = currency === "EUR" ? "€" : currency === "GBP" ? "£" : "$";
+  const mrr = (mrrCents / 100).toLocaleString("en-US");
+
+  const rankLine = rank
+    ? `<p style="margin:12px 0 0;font-size:12px;color:${BRAND.textMuted};text-transform:uppercase;letter-spacing:0.5px;">Leaderboard rank</p>
+       <p style="margin:0;font-size:22px;font-weight:700;color:${BRAND.text};">#${rank}</p>`
+    : "";
+
+  const html = emailLayout(`
+    <h1 style="margin:0 0 8px;font-size:20px;font-weight:700;color:${BRAND.text};">
+      Your first week on MRR.fyi
+    </h1>
+    <p style="margin:0 0 20px;font-size:14px;color:${BRAND.textMuted};line-height:1.6;">
+      It's been a week since <strong style="color:${BRAND.text};">${productName}</strong> joined the leaderboard. Here's where you stand:
+    </p>
+    <!-- Stats card -->
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:${BRAND.bg};border:1px solid ${BRAND.border};border-radius:6px;margin-bottom:20px;">
+      <tr>
+        <td style="padding:20px 24px;">
+          <p style="margin:0 0 4px;font-size:12px;color:${BRAND.textMuted};text-transform:uppercase;letter-spacing:0.5px;">Current MRR</p>
+          <p style="margin:0;font-size:28px;font-weight:700;color:${BRAND.text};letter-spacing:-0.5px;">${symbol}${mrr}</p>
+          ${rankLine}
+        </td>
+      </tr>
+    </table>
+    <p style="margin:0 0 20px;font-size:14px;color:${BRAND.textMuted};line-height:1.6;">
+      Ready to take your profile to the next level? Upgrade to get a <strong style="color:${BRAND.amber};">Verified badge</strong> — it shows visitors your revenue is legit and boosts your credibility with customers, investors, and fellow founders.
+    </p>
+    ${button("Get verified", pricingUrl)}
+    <p style="margin:0;font-size:12px;color:${BRAND.textMuted};line-height:1.5;">
+      Your profile: <a href="${profileUrl}" style="color:${BRAND.amber};text-decoration:none;">mrr.fyi/${slug}</a>
+    </p>
+  `);
+
+  const rankText = rank ? `\nLeaderboard rank: #${rank}` : "";
+  const text = `Your first week on MRR.fyi\n\nIt's been a week since ${productName} joined the leaderboard.\n\nCurrent MRR: ${symbol}${mrr}${rankText}\n\nReady to take your profile to the next level? Upgrade to get a Verified badge — it shows visitors your revenue is legit.\n\nGet verified: ${pricingUrl}\nYour profile: ${profileUrl}\n\n— MRR.fyi`;
+
+  const resend = await getResend();
+  await resend.emails.send({
+    from: "MRR.fyi <onboarding@resend.dev>",
+    to: email,
+    subject: `${productName} — your first week on MRR.fyi`,
+    text,
+    html,
+  });
+}
+
 export async function sendTrialEndingEmail(
   email: string,
   productName: string,
