@@ -1,6 +1,7 @@
 // app/sitemap.ts
 import { MetadataRoute } from "next";
 import { prisma } from "@/lib/prisma";
+import { NICHE_SLUGS } from "@/app/niche/[niche]/page";
 
 export const revalidate = 3600; // rebuild sitemap every hour
 
@@ -17,6 +18,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: "https://mrr.fyi/changelog", lastModified: new Date(), changeFrequency: "weekly", priority: 0.6 },
   ];
 
+  const nicheRoutes: MetadataRoute.Sitemap = NICHE_SLUGS.map((niche) => ({
+    url: `https://mrr.fyi/niche/${niche}`,
+    lastModified: new Date(),
+    changeFrequency: "daily",
+    priority: 0.7,
+  }));
+
   const founderRoutes: MetadataRoute.Sitemap = founders.map((f) => ({
     url: `https://mrr.fyi/${f.slug}`,
     lastModified: f.updatedAt,
@@ -24,5 +32,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }));
 
-  return [...staticRoutes, ...founderRoutes];
+  return [...staticRoutes, ...nicheRoutes, ...founderRoutes];
 }
