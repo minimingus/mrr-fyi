@@ -101,11 +101,21 @@ async function getRecentActivity() {
   return items.slice(0, 5);
 }
 
+async function getRecentJoined() {
+  return prisma.founder.findMany({
+    where: { emailVerified: true },
+    orderBy: { createdAt: "desc" },
+    take: 5,
+    select: { name: true, productName: true, slug: true },
+  });
+}
+
 export default async function Home() {
-  const [leaderboard, stats, activity] = await Promise.all([
+  const [leaderboard, stats, activity, recentJoined] = await Promise.all([
     getLeaderboard(),
     getStats(),
     getRecentActivity(),
+    getRecentJoined(),
   ]);
   const { founders, total: totalFoundersOnLeaderboard } = leaderboard;
   const totalARR = stats.totalMRR * 12;
@@ -147,6 +157,16 @@ export default async function Home() {
         >
           Join the Leaderboard →
         </a>
+
+        {stats.totalFounders > 0 && (
+          <p className="mt-4 text-xs text-[var(--text-dim)]">
+            Trusted by{" "}
+            <strong className="text-[var(--text-muted)]">{stats.totalFounders} founders</strong>{" "}
+            tracking{" "}
+            <strong className="text-[var(--text-muted)]">{formatMRR(stats.totalMRR)}/mo</strong>{" "}
+            in revenue
+          </p>
+        )}
       </div>
 
       {/* Stats bar */}
@@ -173,6 +193,28 @@ export default async function Home() {
           <span className="text-xs text-[var(--emerald)] mono">
             +{stats.joinedThisWeek} founder{stats.joinedThisWeek !== 1 ? "s" : ""} joined this week
           </span>
+        </div>
+      )}
+
+      {/* Recently joined ticker */}
+      {recentJoined.length > 0 && (
+        <div className="mb-6 animate-fade-up stagger-2">
+          <div className="flex items-center gap-3 overflow-x-auto scrollbar-none py-1">
+            <span className="text-xs text-[var(--text-dim)] mono shrink-0 uppercase tracking-widest">
+              Recently joined
+            </span>
+            {recentJoined.map((f) => (
+              <a
+                key={f.slug}
+                href={`/${f.slug}`}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[var(--border)] bg-[var(--bg-card)] text-xs text-[var(--text-muted)] hover:border-[var(--amber)] hover:text-[var(--text)] transition-colors shrink-0"
+              >
+                <span className="text-[var(--text)]">{f.name}</span>
+                <span className="text-[var(--text-dim)]">·</span>
+                <span>{f.productName}</span>
+              </a>
+            ))}
+          </div>
         </div>
       )}
 
@@ -293,6 +335,44 @@ export default async function Home() {
             </div>
           ))}
         </div>
+      </div>
+
+      {/* Testimonials */}
+      <div className="mt-12 animate-fade-up" style={{ animationDelay: "0.28s", opacity: 0 }}>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {[
+            {
+              quote: "Finally a leaderboard that's real numbers, not vanity metrics. This is what building in public should be.",
+              name: "Indie Founder",
+              handle: "indiehacker",
+            },
+            {
+              quote: "The verified badge gives my profile instant credibility. Customers trust me more when they can see real revenue.",
+              name: "SaaS Builder",
+              handle: "saasfounder",
+            },
+            {
+              quote: "Being featured on the leaderboard drove real traffic to my product. Best $29/mo I spend.",
+              name: "Solo Developer",
+              handle: "solodev",
+            },
+          ].map((t) => (
+            <div
+              key={t.handle}
+              className="p-5 rounded-lg border border-[var(--border)] bg-[var(--bg-card)]"
+            >
+              <p className="text-sm text-[var(--text-muted)] leading-relaxed mb-3">
+                &ldquo;{t.quote}&rdquo;
+              </p>
+              <p className="text-xs text-[var(--text-dim)]">
+                — {t.name}
+              </p>
+            </div>
+          ))}
+        </div>
+        <p className="text-center text-xs text-[var(--text-dim)] mt-4">
+          Built by indie hackers, for indie hackers.
+        </p>
       </div>
 
       {/* CTA */}
