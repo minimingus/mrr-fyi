@@ -33,6 +33,8 @@ export async function GET(req: NextRequest) {
         productUrl: true,
         description: true,
         twitter: true,
+        referralCode: true,
+        _count: { select: { referralsMade: true } },
       },
     });
 
@@ -43,7 +45,15 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    return NextResponse.json(founder);
+    return NextResponse.json({
+      name: founder.name,
+      productName: founder.productName,
+      productUrl: founder.productUrl,
+      description: founder.description,
+      twitter: founder.twitter,
+      referralCode: founder.referralCode,
+      referralCount: founder._count.referralsMade,
+    });
   } catch (err) {
     console.error("[update-profile:get]", err);
     return NextResponse.json(

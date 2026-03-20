@@ -18,6 +18,8 @@ model Founder {
   updateToken      String?  @unique
   emailVerified    Boolean  @default(false)
   emailVerifyToken String?  @unique
+  referralCode     String?  @unique
+  referredBy       String?
   mrr         Int
   currency    String        @default("USD")
   verified    Boolean       @default(false)
@@ -28,6 +30,8 @@ model Founder {
   snapshots   MRRSnapshot[]
   payments    Payment[]
   milestones  MRRMilestone[]
+  referralsMade    Referral[] @relation("Referrer")
+  referralsReceived Referral[] @relation("Referred")
 
   @@index([mrr(sort: Desc)])
   @@index([featured])
@@ -65,6 +69,19 @@ model MRRMilestone {
 
   @@unique([founderId, amount])
   @@index([founderId])
+}
+
+model Referral {
+  id          String   @id @default(cuid())
+  referrerId  String
+  referredId  String
+  createdAt   DateTime @default(now())
+
+  referrer Founder @relation("Referrer", fields: [referrerId], references: [id], onDelete: Cascade)
+  referred Founder @relation("Referred", fields: [referredId], references: [id], onDelete: Cascade)
+
+  @@unique([referrerId, referredId])
+  @@index([referrerId])
 }
 
 enum PaymentType {

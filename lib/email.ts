@@ -359,6 +359,52 @@ export async function sendChurnRecoveryEmail(
   });
 }
 
+export async function sendReferralNotification(
+  email: string,
+  referrerProductName: string,
+  referredProductName: string,
+  referredSlug: string,
+  totalReferrals: number,
+  updateToken: string
+) {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const referredUrl = `${appUrl}/${referredSlug}`;
+  const updateUrl = `${appUrl}/update/${updateToken}`;
+
+  const html = emailLayout(`
+    <h1 style="margin:0 0 8px;font-size:20px;font-weight:700;color:${BRAND.text};">
+      New referral
+    </h1>
+    <p style="margin:0 0 20px;font-size:14px;color:${BRAND.textMuted};line-height:1.6;">
+      Someone you invited just joined MRR.fyi. <strong style="color:${BRAND.text};">${referredProductName}</strong> is now on the leaderboard thanks to you.
+    </p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:${BRAND.bg};border:1px solid ${BRAND.border};border-radius:6px;margin-bottom:20px;">
+      <tr>
+        <td style="padding:20px 24px;text-align:center;">
+          <p style="margin:0 0 4px;font-size:12px;color:${BRAND.textMuted};text-transform:uppercase;letter-spacing:0.5px;">Your referral count</p>
+          <p style="margin:0;font-size:28px;font-weight:700;color:${BRAND.amber};letter-spacing:-0.5px;">${totalReferrals}</p>
+          <p style="margin:4px 0 0;font-size:12px;color:${BRAND.textMuted};">founder${totalReferrals !== 1 ? "s" : ""} referred</p>
+        </td>
+      </tr>
+    </table>
+    ${button("View their profile", referredUrl)}
+    <p style="margin:0;font-size:13px;color:${BRAND.textMuted};line-height:1.5;">
+      Keep sharing your referral link to invite more founders. Find it on your <a href="${updateUrl}" style="color:${BRAND.amber};text-decoration:none;">update page</a>.
+    </p>
+  `);
+
+  const text = `New referral for ${referrerProductName}!\n\n${referredProductName} just joined MRR.fyi through your referral link. You've now referred ${totalReferrals} founder${totalReferrals !== 1 ? "s" : ""}.\n\nView their profile: ${referredUrl}\n\n— MRR.fyi`;
+
+  const resend = await getResend();
+  await resend.emails.send({
+    from: "MRR.fyi <onboarding@resend.dev>",
+    to: email,
+    subject: `${referredProductName} joined MRR.fyi through your referral`,
+    text,
+    html,
+  });
+}
+
 export async function sendMilestoneReached(
   email: string,
   productName: string,

@@ -5,6 +5,10 @@ import { slugify } from "@/lib/utils";
 import { sendVerificationEmail } from "@/lib/email";
 import { rateLimit } from "@/lib/rate-limit";
 
+function generateReferralCode(): string {
+  return crypto.randomUUID().replace(/-/g, "").slice(0, 8);
+}
+
 export async function POST(req: NextRequest) {
   const limited = rateLimit(req, { key: "submit", limit: 5, windowSec: 60 });
   if (limited) return limited;
@@ -34,6 +38,10 @@ export async function POST(req: NextRequest) {
     const mrrCents = Math.round(mrr * 100);
     const updateToken = crypto.randomUUID();
     const emailVerifyToken = crypto.randomUUID();
+    const referralCode = generateReferralCode();
+
+    // Check for referral cookie
+    const refCookie = req.cookies.get("ref")?.value ?? null;
 
     const founder = await prisma.founder.create({
       data: {
@@ -48,6 +56,8 @@ export async function POST(req: NextRequest) {
         currency,
         updateToken,
         emailVerifyToken,
+        referralCode,
+        referredBy: refCookie,
         snapshots: {
           create: { mrr: mrrCents },
         },
@@ -60,7 +70,12 @@ export async function POST(req: NextRequest) {
       console.error("[email] failed to send verification email:", err);
     }
 
-    return NextResponse.json({ slug: founder.slug }, { status: 201 });
+    const response = NextResponse.json({ slug: founder.slug }, { status: 201 });
+    // Clear the referral cookie after use
+    if (refCookie) {
+      response.cookies.set("ref", "", { maxAge: 0, path: "/" });
+    }
+    return response;
   } catch (err) {
     console.error("[submit]", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
