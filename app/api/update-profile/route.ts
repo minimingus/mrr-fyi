@@ -13,6 +13,7 @@ const schema = z.object({
   ),
   description: z.string().max(280, "Max 280 characters").optional(),
   category: z.enum(["SAAS", "ECOMMERCE", "AGENCY", "CREATOR", "MARKETPLACE", "DEV_TOOLS", "OTHER"]).optional().nullable(),
+  mrrGoal: z.number().min(0).nullable().optional(),
   twitter: z
     .string()
     .optional()
@@ -34,6 +35,8 @@ export async function GET(req: NextRequest) {
         productUrl: true,
         description: true,
         category: true,
+        mrrGoal: true,
+        mrr: true,
         twitter: true,
         verified: true,
         featured: true,
@@ -66,6 +69,8 @@ export async function GET(req: NextRequest) {
       productUrl: founder.productUrl,
       description: founder.description,
       category: founder.category,
+      mrrGoal: founder.mrrGoal,
+      mrr: founder.mrr,
       twitter: founder.twitter,
       verified: founder.verified,
       featured: founder.featured,
@@ -104,7 +109,7 @@ export async function PATCH(req: NextRequest) {
       );
     }
 
-    const { token, name, productName, productUrl, description, category, twitter } =
+    const { token, name, productName, productUrl, description, category, mrrGoal, twitter } =
       parsed.data;
 
     const founder = await prisma.founder.findUnique({
@@ -126,6 +131,7 @@ export async function PATCH(req: NextRequest) {
         productUrl,
         description: description ?? null,
         category: category ?? null,
+        mrrGoal: mrrGoal !== undefined ? (mrrGoal === null ? null : Math.round(mrrGoal * 100)) : undefined,
         twitter: twitter ?? null,
       },
     });

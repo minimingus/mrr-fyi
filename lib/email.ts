@@ -149,7 +149,8 @@ export async function sendMonthlyDigest(
   currentRank: number,
   previousRank: number | null,
   top3: { productName: string; mrr: number; currency: string }[],
-  updateToken: string
+  updateToken: string,
+  mrrGoalCents?: number | null
 ) {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
   const symbol = currency === "EUR" ? "€" : currency === "GBP" ? "£" : "$";
@@ -177,6 +178,33 @@ export async function sendMonthlyDigest(
       : previousRank === null
         ? `<span style="font-size:13px;color:${BRAND.textMuted};margin-left:6px;">New</span>`
         : "";
+
+  const goalSection = mrrGoalCents
+    ? (() => {
+        const goalFormatted = (mrrGoalCents / 100).toLocaleString("en-US");
+        const percent = Math.min(100, Math.round((mrrCents / mrrGoalCents) * 100));
+        const reached = mrrCents >= mrrGoalCents;
+        const barColor = reached ? BRAND.emerald : BRAND.amber;
+        return `<!-- Goal progress -->
+    <p style="margin:20px 0 8px;font-size:13px;color:${BRAND.textMuted};text-transform:uppercase;letter-spacing:0.5px;">MRR Goal</p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:${BRAND.bg};border:1px solid ${BRAND.border};border-radius:6px;margin-bottom:20px;">
+      <tr>
+        <td style="padding:16px 20px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+              <td style="font-size:13px;color:${BRAND.text};">${symbol}${(mrrCents / 100).toLocaleString("en-US")}/mo</td>
+              <td style="font-size:13px;color:${BRAND.textMuted};text-align:right;">${reached ? "Goal reached!" : `${symbol}${goalFormatted}/mo goal`}</td>
+            </tr>
+          </table>
+          <div style="margin-top:10px;height:8px;background-color:${BRAND.border};border-radius:4px;overflow:hidden;">
+            <div style="height:8px;width:${percent}%;background-color:${barColor};border-radius:4px;"></div>
+          </div>
+          <p style="margin:6px 0 0;font-size:12px;color:${BRAND.textMuted};">${reached ? `${symbol}${goalFormatted}/mo achieved` : `${percent}% of ${symbol}${goalFormatted}/mo goal`}</p>
+        </td>
+      </tr>
+    </table>`;
+      })()
+    : "";
 
   const top3Rows = top3
     .map(
@@ -210,6 +238,7 @@ export async function sendMonthlyDigest(
         </td>
       </tr>
     </table>
+    ${goalSection}
     <!-- Top 3 -->
     <p style="margin:0 0 8px;font-size:13px;color:${BRAND.textMuted};text-transform:uppercase;letter-spacing:0.5px;">Top 3 on the leaderboard</p>
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:${BRAND.bg};border:1px solid ${BRAND.border};border-radius:6px;">
@@ -231,7 +260,15 @@ export async function sendMonthlyDigest(
       return `  ${i + 1}. ${entry.productName} — ${s}${(entry.mrr / 100).toLocaleString("en-US")}`;
     })
     .join("\n");
-  const text = `Monthly digest for ${productName}\n\nCurrent MRR: ${symbol}${mrr}\nLeaderboard rank: #${currentRank}${rankChangeTextPlain}\n\nTop 3:\n${top3Plain}\n\nUpdate your MRR: ${appUrl}/update/${updateToken}\n\n— MRR.fyi`;
+  const goalPlain = mrrGoalCents
+    ? (() => {
+        const percent = Math.min(100, Math.round((mrrCents / mrrGoalCents) * 100));
+        const goalFormatted = (mrrGoalCents / 100).toLocaleString("en-US");
+        const reached = mrrCents >= mrrGoalCents;
+        return `\nMRR Goal: ${reached ? `${symbol}${goalFormatted}/mo — Goal reached!` : `${percent}% of ${symbol}${goalFormatted}/mo`}`;
+      })()
+    : "";
+  const text = `Monthly digest for ${productName}\n\nCurrent MRR: ${symbol}${mrr}\nLeaderboard rank: #${currentRank}${rankChangeTextPlain}${goalPlain}\n\nTop 3:\n${top3Plain}\n\nUpdate your MRR: ${appUrl}/update/${updateToken}\n\n— MRR.fyi`;
 
   const resendClient = await getResend();
   await resendClient.emails.send({
@@ -451,6 +488,56 @@ export async function sendMilestoneReached(
     from: "MRR.fyi <onboarding@resend.dev>",
     to: email,
     subject: `${productName} hit ${symbol}${milestone}/mo`,
+    text,
+    html,
+  });
+}
+
+export async function sendGoalReached(
+  email: string,
+  productName: string,
+  goalAmountCents: number,
+  currency: string,
+  slug: string
+) {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const symbol = currency === "EUR" ? "€" : currency === "GBP" ? "£" : "$";
+  const goal = (goalAmountCents / 100).toLocaleString("en-US");
+  const profileUrl = `${appUrl}/${slug}`;
+
+  const html = emailLayout(`
+    <h1 style="margin:0 0 8px;font-size:20px;font-weight:700;color:${BRAND.text};">
+      Goal reached!
+    </h1>
+    <p style="margin:0 0 20px;font-size:14px;color:${BRAND.textMuted};line-height:1.6;">
+      <strong style="color:${BRAND.text};">${productName}</strong> just hit your MRR goal of <strong style="color:${BRAND.emerald};">${symbol}${goal}/mo</strong>. You set a target and crushed it.
+    </p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:${BRAND.bg};border:1px solid ${BRAND.border};border-radius:6px;">
+      <tr>
+        <td style="padding:24px;text-align:center;">
+          <span style="font-size:36px;">&#127881;</span>
+          <p style="margin:12px 0 0;font-size:24px;font-weight:700;color:${BRAND.emerald};letter-spacing:-0.5px;">
+            ${symbol}${goal}/mo
+          </p>
+          <p style="margin:4px 0 0;font-size:12px;color:${BRAND.textMuted};text-transform:uppercase;letter-spacing:0.5px;">
+            Goal reached
+          </p>
+        </td>
+      </tr>
+    </table>
+    ${button("View your profile", profileUrl)}
+    <p style="margin:0;font-size:13px;color:${BRAND.textMuted};line-height:1.5;">
+      Set a new goal on your <a href="${profileUrl}" style="color:${BRAND.amber};text-decoration:none;">profile update page</a> to keep the momentum going.
+    </p>
+  `);
+
+  const text = `Goal reached! ${productName} just hit ${symbol}${goal}/mo on MRR.fyi.\n\nView your profile: ${profileUrl}\n\n— MRR.fyi`;
+
+  const resendClient = await getResend();
+  await resendClient.emails.send({
+    from: "MRR.fyi <onboarding@resend.dev>",
+    to: email,
+    subject: `${productName} hit your ${symbol}${goal}/mo goal!`,
     text,
     html,
   });

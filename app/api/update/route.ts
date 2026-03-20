@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { rateLimit } from "@/lib/rate-limit";
-import { sendUpdateConfirmation, sendMilestoneReached } from "@/lib/email";
+import { sendUpdateConfirmation, sendMilestoneReached, sendGoalReached } from "@/lib/email";
 
 const MRR_MILESTONES = [1_000, 5_000, 10_000, 50_000, 100_000].map(
   (d) => d * 100
@@ -91,6 +91,21 @@ export async function POST(req: NextRequest) {
             console.error("[email] failed to send milestone email:", err);
           }
         }
+      }
+    }
+
+    // Detect if MRR goal was just crossed
+    if (founder.email && founder.mrrGoal && mrrCents >= founder.mrrGoal && oldMrrCents < founder.mrrGoal) {
+      try {
+        await sendGoalReached(
+          founder.email,
+          founder.productName,
+          founder.mrrGoal,
+          founder.currency,
+          founder.slug
+        );
+      } catch (err) {
+        console.error("[email] failed to send goal reached email:", err);
       }
     }
 
