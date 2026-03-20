@@ -7,7 +7,10 @@ const schema = z.object({
   token: z.string().min(1),
   name: z.string().min(2, "Name must be at least 2 characters"),
   productName: z.string().min(2, "Product name must be at least 2 characters"),
-  productUrl: z.string().url("Must be a valid URL"),
+  productUrl: z.string().url("Must be a valid URL").refine(
+    (url) => !url.toLowerCase().startsWith('javascript:'),
+    { message: 'Invalid URL scheme' }
+  ),
   description: z.string().max(280, "Max 280 characters").optional(),
   twitter: z
     .string()
