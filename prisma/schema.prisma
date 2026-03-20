@@ -55,11 +55,12 @@ model MRRSnapshot {
 }
 
 model Payment {
-  id            String      @id @default(cuid())
+  id            String          @id @default(cuid())
   founderId     String
   type          PaymentType
-  externalId    String      @unique
-  active        Boolean     @default(true)
+  provider      PaymentProvider @default(LEMON_SQUEEZY)
+  externalId    String          @unique
+  active        Boolean         @default(true)
   trialEndsAt          DateTime?
   trialReminder        Boolean     @default(false)
   trialUrgencyReminder Boolean     @default(false)
@@ -97,6 +98,11 @@ model Referral {
 enum PaymentType {
   FEATURED
   VERIFIED
+}
+
+enum PaymentProvider {
+  LEMON_SQUEEZY
+  STRIPE
 }
 
 enum FounderCategory {
