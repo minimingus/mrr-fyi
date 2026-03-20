@@ -14,6 +14,7 @@ interface ProfileData {
   productName: string;
   productUrl: string;
   description: string;
+  category: string;
   twitter: string;
   referralCode: string | null;
   referralCount: number;
@@ -32,6 +33,7 @@ export default function UpdatePage() {
     productName: "",
     productUrl: "",
     description: "",
+    category: "",
     twitter: "",
     referralCode: null,
     referralCount: 0,
@@ -55,6 +57,7 @@ export default function UpdatePage() {
             productName: data.productName ?? "",
             productUrl: data.productUrl ?? "",
             description: data.description ?? "",
+            category: data.category ?? "",
             twitter: data.twitter ?? "",
             referralCode: data.referralCode ?? null,
             referralCount: data.referralCount ?? 0,
@@ -115,6 +118,7 @@ export default function UpdatePage() {
           productName: profile.productName,
           productUrl: profile.productUrl,
           description: profile.description || undefined,
+          category: profile.category || undefined,
           twitter: profile.twitter || undefined,
         }),
       });
@@ -319,6 +323,29 @@ export default function UpdatePage() {
                 rows={3}
                 className={inputClass + " resize-none"}
               />
+            </div>
+
+            <div>
+              <label className={labelClass}>
+                Category{" "}
+                <span className="text-[var(--text-dim)] font-normal">
+                  (optional)
+                </span>
+              </label>
+              <select
+                value={profile.category}
+                onChange={(e) => updateProfile("category", e.target.value)}
+                className={inputClass}
+              >
+                <option value="">Select a category</option>
+                <option value="SAAS">SaaS</option>
+                <option value="ECOMMERCE">E-commerce</option>
+                <option value="AGENCY">Agency</option>
+                <option value="CREATOR">Creator</option>
+                <option value="MARKETPLACE">Marketplace</option>
+                <option value="DEV_TOOLS">Developer Tools</option>
+                <option value="OTHER">Other</option>
+              </select>
             </div>
 
             <div>
