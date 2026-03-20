@@ -602,6 +602,54 @@ export async function sendOnboardingRecap(
   });
 }
 
+export async function sendTrialStartedEmail(
+  email: string,
+  productName: string,
+  planLabel: string,
+  trialEndsAt: Date,
+  slug: string
+) {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const profileUrl = `${appUrl}/${slug}`;
+  const endDate = trialEndsAt.toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+
+  const html = emailLayout(`
+    <h1 style="margin:0 0 8px;font-size:20px;font-weight:700;color:${BRAND.text};">
+      Your ${planLabel} trial has started
+    </h1>
+    <p style="margin:0 0 20px;font-size:14px;color:${BRAND.textMuted};line-height:1.6;">
+      <strong style="color:${BRAND.text};">${productName}</strong> now has ${planLabel.toLowerCase()} benefits on MRR.fyi. Your 7-day free trial runs until <strong style="color:${BRAND.text};">${endDate}</strong>.
+    </p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:${BRAND.bg};border:1px solid ${BRAND.border};border-radius:6px;margin-bottom:20px;">
+      <tr>
+        <td style="padding:20px 24px;">
+          <p style="margin:0 0 4px;font-size:12px;color:${BRAND.textMuted};text-transform:uppercase;letter-spacing:0.5px;">Trial ends</p>
+          <p style="margin:0;font-size:22px;font-weight:700;color:${BRAND.amber};letter-spacing:-0.5px;">${endDate}</p>
+          <p style="margin:12px 0 0;font-size:13px;color:${BRAND.textMuted};line-height:1.5;">
+            No charge until then. Your subscription continues automatically after the trial — cancel anytime from your billing email.
+          </p>
+        </td>
+      </tr>
+    </table>
+    ${button("View your profile", profileUrl)}
+  `);
+
+  const text = `Your ${planLabel} trial for ${productName} has started!\n\nYour 7-day free trial runs until ${endDate}. No charge until then.\n\nYour subscription continues automatically after the trial. Cancel anytime from your billing email.\n\nView your profile: ${profileUrl}\n\n— MRR.fyi`;
+
+  const resend = await getResend();
+  await resend.emails.send({
+    from: "MRR.fyi <onboarding@resend.dev>",
+    to: email,
+    subject: `Your ${planLabel} trial for ${productName} is active`,
+    text,
+    html,
+  });
+}
+
 export async function sendTrialEndingEmail(
   email: string,
   productName: string,
