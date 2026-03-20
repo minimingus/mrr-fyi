@@ -15,7 +15,9 @@ export async function POST(req: NextRequest) {
     .update(body)
     .digest("hex");
 
-  if (!crypto.timingSafeEqual(Buffer.from(hmac), Buffer.from(signature))) {
+  const hmacBuf = Buffer.from(hmac);
+  const sigBuf = Buffer.from(signature);
+  if (hmacBuf.length !== sigBuf.length || !crypto.timingSafeEqual(hmacBuf, sigBuf)) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
