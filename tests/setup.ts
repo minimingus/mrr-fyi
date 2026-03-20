@@ -13,6 +13,10 @@ vi.mock("@/lib/email", () => ({
   sendMonthlyDigest: vi.fn().mockResolvedValue(undefined),
   sendChurnRecoveryEmail: vi.fn().mockResolvedValue(undefined),
   sendReferralNotification: vi.fn().mockResolvedValue(undefined),
+  sendOnboardingWelcome: vi.fn().mockResolvedValue(undefined),
+  sendOnboardingTips: vi.fn().mockResolvedValue(undefined),
+  sendOnboardingRecap: vi.fn().mockResolvedValue(undefined),
+  sendTrialEndingEmail: vi.fn().mockResolvedValue(undefined),
 }));
 
 // Disable rate limiting in tests

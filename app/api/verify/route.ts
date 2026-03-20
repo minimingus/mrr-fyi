@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { sendUpdateLink, sendReferralNotification } from "@/lib/email";
+import { sendUpdateLink, sendReferralNotification, sendOnboardingWelcome } from "@/lib/email";
 import { rateLimit } from "@/lib/rate-limit";
 
 export async function POST(req: NextRequest) {
@@ -40,6 +40,23 @@ export async function POST(req: NextRequest) {
         await sendUpdateLink(founder.email, founder.productName, founder.updateToken);
       } catch (err) {
         console.error("[verify] failed to send update link:", err);
+      }
+
+      // Send onboarding welcome email (step 1) and mark step
+      try {
+        await sendOnboardingWelcome(
+          founder.email,
+          founder.productName,
+          founder.slug,
+          founder.updateToken,
+          founder.referralCode
+        );
+        await prisma.founder.update({
+          where: { id: founder.id },
+          data: { onboardingStep: 1 },
+        });
+      } catch (err) {
+        console.error("[verify] failed to send onboarding welcome:", err);
       }
     }
 

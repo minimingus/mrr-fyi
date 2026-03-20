@@ -1,10 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import {
-  sendOnboardingWelcome,
-  sendOnboardingTips,
-  sendOnboardingRecap,
-} from "@/lib/email";
+import { sendOnboardingTips, sendOnboardingRecap } from "@/lib/email";
 
 export const dynamic = "force-dynamic";
 
@@ -15,94 +11,86 @@ export async function GET(request: Request) {
   }
 
   const now = new Date();
-  const results = { welcome: 0, tips: 0, recap: 0, errors: 0 };
+  let tipsSent = 0;
+  let recapSent = 0;
 
-  // Step 0 → 1: Welcome email (immediately after verification, for verified founders with step 0)
-  const welcomeFounders = await prisma.founder.findMany({
+  // Day 3 emails: founders with onboardingStep=1 who signed up >= 3 days ago
+  const threeDaysAgo = new Date(now);
+  threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+
+  const day3Founders = await prisma.founder.findMany({
     where: {
       emailVerified: true,
-      onboardingStep: 0,
-      email: { not: null },
+      onboardingStep: 1,
+      createdAt: { lte: threeDaysAgo },
+    },
+    select: { id: true, email: true, productName: true, slug: true },
+  });
+
+  for (const founder of day3Founders) {
+    if (!founder.email) continue;
+    try {
+      await sendOnboardingTips(founder.email, founder.productName, founder.slug);
+      await prisma.founder.update({
+        where: { id: founder.id },
+        data: { onboardingStep: 2 },
+      });
+      tipsSent++;
+    } catch (err) {
+      console.error(`[onboarding-drip] tips failed for ${founder.id}:`, err);
+    }
+  }
+
+  // Day 7 emails: founders with onboardingStep=2 who signed up >= 7 days ago
+  const sevenDaysAgo = new Date(now);
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+  const day7Founders = await prisma.founder.findMany({
+    where: {
+      emailVerified: true,
+      onboardingStep: 2,
+      createdAt: { lte: sevenDaysAgo },
     },
     select: {
       id: true,
       email: true,
       productName: true,
       slug: true,
-      updateToken: true,
-      referralCode: true,
+      mrr: true,
+      currency: true,
     },
-    take: 50,
   });
 
-  for (const f of welcomeFounders) {
-    if (!f.email || !f.updateToken) continue;
+  for (const founder of day7Founders) {
+    if (!founder.email) continue;
     try {
-      await sendOnboardingWelcome(f.email, f.productName, f.slug, f.updateToken, f.referralCode);
-      await prisma.founder.update({ where: { id: f.id }, data: { onboardingStep: 1 } });
-      results.welcome++;
+      const rank =
+        (await prisma.founder.count({
+          where: { emailVerified: true, mrr: { gt: founder.mrr } },
+        })) + 1;
+
+      await sendOnboardingRecap(
+        founder.email,
+        founder.productName,
+        founder.slug,
+        founder.mrr,
+        founder.currency,
+        rank
+      );
+      await prisma.founder.update({
+        where: { id: founder.id },
+        data: { onboardingStep: 3 },
+      });
+      recapSent++;
     } catch (err) {
-      console.error(`[onboarding-drip] welcome failed for ${f.id}:`, err);
-      results.errors++;
+      console.error(`[onboarding-drip] recap failed for ${founder.id}:`, err);
     }
   }
 
-  // Step 1 → 2: Tips email (3+ days after creation)
-  const threeDaysAgo = new Date(now);
-  threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
-
-  const tipsFounders = await prisma.founder.findMany({
-    where: {
-      emailVerified: true,
-      onboardingStep: 1,
-      email: { not: null },
-      createdAt: { lte: threeDaysAgo },
-    },
-    select: { id: true, email: true, productName: true, slug: true },
-    take: 50,
+  return NextResponse.json({
+    tipsSent,
+    tipsEligible: day3Founders.length,
+    recapSent,
+    recapEligible: day7Founders.length,
   });
-
-  for (const f of tipsFounders) {
-    if (!f.email) continue;
-    try {
-      await sendOnboardingTips(f.email, f.productName, f.slug);
-      await prisma.founder.update({ where: { id: f.id }, data: { onboardingStep: 2 } });
-      results.tips++;
-    } catch (err) {
-      console.error(`[onboarding-drip] tips failed for ${f.id}:`, err);
-      results.errors++;
-    }
-  }
-
-  // Step 2 → 3: Recap email (7+ days after creation)
-  const sevenDaysAgo = new Date(now);
-  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-
-  const recapFounders = await prisma.founder.findMany({
-    where: {
-      emailVerified: true,
-      onboardingStep: 2,
-      email: { not: null },
-      createdAt: { lte: sevenDaysAgo },
-    },
-    select: { id: true, email: true, productName: true, slug: true, mrr: true, currency: true },
-    take: 50,
-  });
-
-  for (const f of recapFounders) {
-    if (!f.email) continue;
-    try {
-      const rank = await prisma.founder.count({
-        where: { emailVerified: true, mrr: { gt: f.mrr } },
-      }) + 1;
-      await sendOnboardingRecap(f.email, f.productName, f.slug, f.mrr, f.currency, rank);
-      await prisma.founder.update({ where: { id: f.id }, data: { onboardingStep: 3 } });
-      results.recap++;
-    } catch (err) {
-      console.error(`[onboarding-drip] recap failed for ${f.id}:`, err);
-      results.errors++;
-    }
-  }
-
-  return NextResponse.json(results);
 }
