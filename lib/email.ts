@@ -754,6 +754,85 @@ export async function sendTrialEndingEmail(
   });
 }
 
+export async function sendWeeklyDigest(
+  email: string,
+  updateToken: string,
+  top5: { productName: string; mrr: number; currency: string }[],
+  topGainers: { productName: string; mrrChangePct: number }[]
+) {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const unsubscribeUrl = `${appUrl}/api/unsubscribe/weekly-digest?token=${updateToken}`;
+  const updateUrl = `${appUrl}/update/${updateToken}`;
+
+  const top5Rows = top5
+    .map((entry, i) => {
+      const s = entry.currency === "EUR" ? "€" : entry.currency === "GBP" ? "£" : "$";
+      const m = (entry.mrr / 100).toLocaleString("en-US");
+      return `<tr>
+      <td style="padding:8px 12px;font-size:14px;color:${BRAND.textMuted};border-bottom:1px solid ${BRAND.border};">#${i + 1}</td>
+      <td style="padding:8px 12px;font-size:14px;color:${BRAND.text};border-bottom:1px solid ${BRAND.border};">${entry.productName}</td>
+      <td style="padding:8px 12px;font-size:14px;color:${BRAND.text};text-align:right;border-bottom:1px solid ${BRAND.border};">${s}${m}</td>
+    </tr>`;
+    })
+    .join("");
+
+  const gainersSection =
+    topGainers.length > 0
+      ? `<p style="margin:20px 0 8px;font-size:13px;color:${BRAND.textMuted};text-transform:uppercase;letter-spacing:0.5px;">Biggest movers this week</p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:${BRAND.bg};border:1px solid ${BRAND.border};border-radius:6px;margin-bottom:20px;">
+      ${topGainers
+        .map(
+          (g) => `<tr>
+        <td style="padding:8px 12px;font-size:14px;color:${BRAND.text};border-bottom:1px solid ${BRAND.border};">${g.productName}</td>
+        <td style="padding:8px 12px;font-size:14px;color:${BRAND.emerald};text-align:right;border-bottom:1px solid ${BRAND.border};">+${g.mrrChangePct.toFixed(0)}%</td>
+      </tr>`
+        )
+        .join("")}
+    </table>`
+      : "";
+
+  const html = emailLayout(`
+    <h1 style="margin:0 0 8px;font-size:20px;font-weight:700;color:${BRAND.text};">
+      Top indie revenue this week
+    </h1>
+    <p style="margin:0 0 20px;font-size:14px;color:${BRAND.textMuted};line-height:1.6;">
+      Here's a snapshot of the MRR.fyi leaderboard for the week.
+    </p>
+    <p style="margin:0 0 8px;font-size:13px;color:${BRAND.textMuted};text-transform:uppercase;letter-spacing:0.5px;">Top 5 by MRR</p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:${BRAND.bg};border:1px solid ${BRAND.border};border-radius:6px;margin-bottom:20px;">
+      ${top5Rows}
+    </table>
+    ${gainersSection}
+    ${button("Update your MRR →", updateUrl)}
+    <p style="margin:0;font-size:12px;color:${BRAND.textMuted};line-height:1.5;">
+      View the full leaderboard at <a href="${appUrl}" style="color:${BRAND.amber};text-decoration:none;">mrr.fyi</a><br />
+      <a href="${unsubscribeUrl}" style="color:${BRAND.textMuted};text-decoration:underline;">Unsubscribe from weekly digest</a>
+    </p>
+  `);
+
+  const top5Plain = top5
+    .map((entry, i) => {
+      const s = entry.currency === "EUR" ? "€" : entry.currency === "GBP" ? "£" : "$";
+      return `  ${i + 1}. ${entry.productName} — ${s}${(entry.mrr / 100).toLocaleString("en-US")}`;
+    })
+    .join("\n");
+  const gainersPlain =
+    topGainers.length > 0
+      ? `\n\nBiggest movers:\n${topGainers.map((g) => `  ${g.productName} +${g.mrrChangePct.toFixed(0)}%`).join("\n")}`
+      : "";
+
+  const text = `MRR.fyi weekly: top indie revenue this week\n\nTop 5 by MRR:\n${top5Plain}${gainersPlain}\n\nUpdate your MRR: ${updateUrl}\n\nUnsubscribe: ${unsubscribeUrl}\n\n— MRR.fyi`;
+
+  const resend = await getResend();
+  await resend.emails.send({
+    from: "MRR.fyi <onboarding@resend.dev>",
+    to: email,
+    subject: "MRR.fyi weekly: top indie revenue this week",
+    text,
+    html,
+  });
+}
+
 export async function sendTrialExpiredEmail(
   email: string,
   productName: string,

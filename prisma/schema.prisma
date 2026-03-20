@@ -25,6 +25,7 @@ model Founder {
   referralCode     String?  @unique
   referredBy       String?
   onboardingStep   Int      @default(0)
+  digestUnsubscribedAt DateTime?
   mrr         Int
   currency    String        @default("USD")
   verified    Boolean       @default(false)
