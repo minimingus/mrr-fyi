@@ -14,8 +14,10 @@ model Founder {
   productName String
   productUrl  String
   description String?
-  email       String?
-  updateToken String?  @unique
+  email            String?
+  updateToken      String?  @unique
+  emailVerified    Boolean  @default(false)
+  emailVerifyToken String?  @unique
   mrr         Int
   currency    String        @default("USD")
   verified    Boolean       @default(false)

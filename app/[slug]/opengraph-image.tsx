@@ -16,8 +16,12 @@ export default async function Image({ params }: Props) {
 
   const founder = await prisma.founder.findUnique({
     where: { slug },
-    select: { productName: true, name: true, mrr: true, currency: true },
+    select: { productName: true, name: true, mrr: true, currency: true, emailVerified: true },
   });
+
+  if (founder && !founder.emailVerified) {
+    return new ImageResponse(<div style={{ width: "100%", height: "100%", background: "#09090b" }} />, { ...size });
+  }
 
   const productName = founder?.productName ?? "Unknown";
   const name = founder?.name ?? "";

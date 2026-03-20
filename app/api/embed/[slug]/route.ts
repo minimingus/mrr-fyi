@@ -59,6 +59,7 @@ export async function GET(
       currency: true,
       verified: true,
       featured: true,
+      emailVerified: true,
       snapshots: {
         orderBy: { recordedAt: "desc" },
         take: 6,
@@ -67,12 +68,12 @@ export async function GET(
     },
   });
 
-  if (!founder) {
+  if (!founder || !founder.emailVerified) {
     return new NextResponse("Not found", { status: 404 });
   }
 
   const rank =
-    (await prisma.founder.count({ where: { mrr: { gt: founder.mrr } } })) + 1;
+    (await prisma.founder.count({ where: { emailVerified: true, mrr: { gt: founder.mrr } } })) + 1;
 
   const sparklineValues = [...founder.snapshots].reverse().map((s) => s.mrr);
 
