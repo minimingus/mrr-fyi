@@ -10,6 +10,12 @@ export function Footer() {
           <a href="/pricing" className="hover:text-[var(--text-muted)] transition-colors">
             Pricing
           </a>
+          <a href="/terms" className="hover:text-[var(--text-muted)] transition-colors">
+            Terms
+          </a>
+          <a href="/refund" className="hover:text-[var(--text-muted)] transition-colors">
+            Refund Policy
+          </a>
           <a
             href="https://github.com/minimingus/mrr-fyi"
             target="_blank"
