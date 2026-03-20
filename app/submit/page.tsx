@@ -1,16 +1,33 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { submitSchema, SubmitInput } from "@/lib/validations";
 import { useRouter } from "next/navigation";
 import { trackEvent } from "@/lib/plausible";
 
+interface Referrer {
+  name: string;
+  twitter: string | null;
+  productName: string;
+}
+
 export default function SubmitPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [referrer, setReferrer] = useState<Referrer | null>(null);
+
+  useEffect(() => {
+    const match = document.cookie.match(/(?:^|;\s*)ref=([^;]+)/);
+    if (!match) return;
+    const code = decodeURIComponent(match[1]);
+    fetch(`/api/referrer?code=${encodeURIComponent(code)}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => { if (data) setReferrer(data); })
+      .catch(() => {});
+  }, []);
 
   const {
     register,
@@ -57,6 +74,20 @@ export default function SubmitPage() {
       >
         ← Back to leaderboard
       </a>
+
+      {referrer && (
+        <div className="mb-6 px-4 py-3 rounded-lg border border-[var(--amber)] text-sm flex items-center gap-2"
+          style={{ background: "var(--amber-glow)" }}
+        >
+          <span className="text-[var(--amber)]">
+            Invited by{" "}
+            <strong className="text-[var(--text)]">
+              {referrer.twitter ? `@${referrer.twitter}` : referrer.name}
+            </strong>
+            {" "}({referrer.productName})
+          </span>
+        </div>
+      )}
 
       <div className="mb-8">
         <h1
