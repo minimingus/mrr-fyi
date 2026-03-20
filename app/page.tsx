@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { prisma } from "@/lib/prisma";
 import { LeaderboardList } from "@/components/LeaderboardList";
 import { ShareButton } from "@/components/ShareButton";
@@ -113,7 +114,9 @@ export default async function Home() {
           </a>
         </div>
       ) : (
-        <LeaderboardList founders={founders} />
+        <Suspense>
+          <LeaderboardList founders={founders} />
+        </Suspense>
       )}
 
       {/* CTA */}
