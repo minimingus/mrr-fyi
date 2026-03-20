@@ -13,12 +13,17 @@ export const PLANS = {
   },
 } as const;
 
+export const TRIAL_DAYS = 7;
+
 export async function createCheckoutUrl(
   variantId: string,
   founderId: string,
   plan: string,
   redirectUrl: string
 ): Promise<string> {
+  const trialEndsAt = new Date();
+  trialEndsAt.setDate(trialEndsAt.getDate() + TRIAL_DAYS);
+
   const res = await fetch("https://api.lemonsqueezy.com/v1/checkouts", {
     method: "POST",
     headers: {
@@ -36,6 +41,7 @@ export async function createCheckoutUrl(
           product_options: {
             redirect_url: redirectUrl,
           },
+          trial_ends_at: trialEndsAt.toISOString(),
         },
         relationships: {
           store: {
