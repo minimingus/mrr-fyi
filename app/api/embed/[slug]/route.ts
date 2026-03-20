@@ -163,7 +163,6 @@ export async function GET(
       "Content-Type": "text/html; charset=utf-8",
       "Cache-Control":
         "public, max-age=300, s-maxage=300, stale-while-revalidate=60",
-      "X-Frame-Options": "ALLOWALL",
     },
   });
 }
