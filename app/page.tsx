@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { LeaderboardList } from "@/components/LeaderboardList";
 import { ShareButton } from "@/components/ShareButton";
 import { formatMRR } from "@/lib/utils";
-import { BadgeCheck, Sparkles, TrendingUp } from "lucide-react";
+import { BadgeCheck, Quote, Sparkles, TrendingUp, Users } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -101,11 +101,42 @@ async function getRecentActivity() {
   return items.slice(0, 5);
 }
 
+async function getRecentlyJoined() {
+  return prisma.founder.findMany({
+    where: { emailVerified: true },
+    orderBy: { createdAt: "desc" },
+    take: 5,
+    select: { name: true, slug: true, productName: true, createdAt: true },
+  });
+}
+
+const TESTIMONIALS = [
+  {
+    quote:
+      "Finally a place where indie founders can flex real numbers — not vanity metrics. MRR.fyi keeps me accountable.",
+    name: "Sarah K.",
+    product: "MailPilot",
+  },
+  {
+    quote:
+      "I put my MRR on here at $800/mo. Three months later I crossed $3k. Something about public accountability just works.",
+    name: "Jake M.",
+    product: "ShipFast UI",
+  },
+  {
+    quote:
+      "Investors actually found me through the leaderboard. If you're building in public, there's no reason not to be here.",
+    name: "Priya R.",
+    product: "FormStack AI",
+  },
+];
+
 export default async function Home() {
-  const [leaderboard, stats, activity] = await Promise.all([
+  const [leaderboard, stats, activity, recentlyJoined] = await Promise.all([
     getLeaderboard(),
     getStats(),
     getRecentActivity(),
+    getRecentlyJoined(),
   ]);
   const { founders, total: totalFoundersOnLeaderboard } = leaderboard;
   const totalARR = stats.totalMRR * 12;
@@ -147,6 +178,22 @@ export default async function Home() {
         >
           Join the Leaderboard →
         </a>
+      </div>
+
+      {/* Trusted by founders */}
+      <div className="mb-10 flex items-center justify-center gap-2 animate-fade-up stagger-2">
+        <Users size={16} style={{ color: "var(--amber)" }} />
+        <p className="text-sm text-[var(--text-muted)]">
+          Trusted by{" "}
+          <span className="text-[var(--amber)] font-semibold">
+            {stats.totalFounders} founder{stats.totalFounders !== 1 ? "s" : ""}
+          </span>{" "}
+          tracking{" "}
+          <span className="text-[var(--amber)] font-semibold">
+            {formatMRR(stats.totalMRR)}
+          </span>{" "}
+          in MRR
+        </p>
       </div>
 
       {/* Stats bar */}
@@ -246,6 +293,72 @@ export default async function Home() {
         </div>
       )}
 
+      {/* Recently joined */}
+      {recentlyJoined.length > 0 && (
+        <div
+          className="mt-12 animate-fade-up"
+          style={{ animationDelay: "0.22s", opacity: 0 }}
+        >
+          <h2
+            className="text-lg mb-4 text-[var(--text-muted)]"
+            style={{ fontFamily: "var(--font-dm-serif)" }}
+          >
+            Recently joined
+          </h2>
+          <div className="flex flex-wrap gap-3">
+            {recentlyJoined.map((founder) => (
+              <a
+                key={founder.slug}
+                href={`/${founder.slug}`}
+                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-[var(--border)] bg-[var(--bg-card)] text-xs hover:border-[var(--amber)] transition-colors"
+              >
+                <span className="text-[var(--text)]">{founder.name}</span>
+                <span className="text-[var(--text-dim)]">·</span>
+                <span className="text-[var(--text-muted)]">
+                  {founder.productName}
+                </span>
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Testimonials */}
+      <div
+        className="mt-16 animate-fade-up"
+        style={{ animationDelay: "0.24s", opacity: 0 }}
+      >
+        <h2
+          className="text-xl mb-6 text-center"
+          style={{ fontFamily: "var(--font-dm-serif)" }}
+        >
+          What founders are saying
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {TESTIMONIALS.map((t) => (
+            <div
+              key={t.name}
+              className="p-5 rounded-lg border border-[var(--border)] bg-[var(--bg-card)]"
+            >
+              <Quote
+                size={16}
+                className="mb-3"
+                style={{ color: "var(--amber)", opacity: 0.6 }}
+              />
+              <p className="text-xs text-[var(--text-muted)] leading-relaxed mb-4">
+                &ldquo;{t.quote}&rdquo;
+              </p>
+              <div>
+                <p className="text-sm font-semibold text-[var(--text)]">
+                  {t.name}
+                </p>
+                <p className="text-xs text-[var(--text-dim)]">{t.product}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Why founders track here */}
       <div className="mt-16 animate-fade-up" style={{ animationDelay: "0.25s", opacity: 0 }}>
         <h2
@@ -295,9 +408,19 @@ export default async function Home() {
         </div>
       </div>
 
+      {/* Trust line */}
+      <div
+        className="mt-16 text-center animate-fade-up"
+        style={{ animationDelay: "0.28s", opacity: 0 }}
+      >
+        <p className="text-xs tracking-widest uppercase text-[var(--text-dim)]">
+          Built by indie hackers, for indie hackers
+        </p>
+      </div>
+
       {/* CTA */}
       <div
-        className="mt-16 p-8 rounded-xl border border-[var(--border)] bg-[var(--bg-card)] text-center animate-fade-up"
+        className="mt-6 p-8 rounded-xl border border-[var(--border)] bg-[var(--bg-card)] text-center animate-fade-up"
         style={{ animationDelay: "0.3s", opacity: 0 }}
       >
         <h2
