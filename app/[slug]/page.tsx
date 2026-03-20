@@ -190,6 +190,29 @@ export default async function FounderProfile({ params, searchParams }: Props) {
           </p>
         )}
 
+        {founder.mrrGoal && founder.mrrGoal > 0 && (
+          <div className="mt-4 border-t border-[var(--border)] pt-4">
+            <div className="flex justify-between text-xs text-[var(--text-dim)] mb-1.5">
+              <span className="mono">{formatMRR(founder.mrr, founder.currency)}/mo</span>
+              <span className="mono">{formatMRR(founder.mrrGoal, founder.currency)}/mo goal</span>
+            </div>
+            <div className="h-2.5 rounded-full bg-[var(--border)] overflow-hidden">
+              <div
+                className="h-full rounded-full transition-all"
+                style={{
+                  width: `${Math.min(100, (founder.mrr / founder.mrrGoal) * 100)}%`,
+                  background: founder.mrr >= founder.mrrGoal ? "var(--emerald)" : "var(--amber)",
+                }}
+              />
+            </div>
+            <p className="text-xs text-[var(--text-dim)] mt-1 mono">
+              {founder.mrr >= founder.mrrGoal
+                ? "Goal reached!"
+                : `${Math.round((founder.mrr / founder.mrrGoal) * 100)}% of goal`}
+            </p>
+          </div>
+        )}
+
         <div className="mt-4 flex items-center gap-4">
           <a
             href={founder.productUrl}
