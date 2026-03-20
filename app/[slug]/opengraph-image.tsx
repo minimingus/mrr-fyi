@@ -16,16 +16,48 @@ export default async function Image({ params }: Props) {
 
   const founder = await prisma.founder.findUnique({
     where: { slug },
-    select: { productName: true, name: true, mrr: true, currency: true, emailVerified: true },
+    select: {
+      productName: true,
+      name: true,
+      mrr: true,
+      currency: true,
+      emailVerified: true,
+      avatarUrl: true,
+      verified: true,
+    },
   });
 
   if (founder && !founder.emailVerified) {
-    return new ImageResponse(<div style={{ width: "100%", height: "100%", background: "#09090b" }} />, { ...size });
+    return new ImageResponse(<div style={{ width: "100%", height: "100%", background: "#0f0f0f" }} />, { ...size });
   }
 
   const productName = founder?.productName ?? "Unknown";
   const name = founder?.name ?? "";
   const mrr = founder ? formatMRR(founder.mrr, founder.currency) : "$0";
+  const isVerified = founder?.verified ?? false;
+  const avatarUrl = founder?.avatarUrl ?? null;
+
+  // Generate initials fallback
+  const initials = name
+    .split(" ")
+    .slice(0, 2)
+    .map((w) => w[0]?.toUpperCase() ?? "")
+    .join("");
+
+  // Attempt to fetch avatar as base64 for reliable rendering
+  let avatarSrc: string | null = null;
+  if (avatarUrl) {
+    try {
+      const res = await fetch(avatarUrl, { signal: AbortSignal.timeout(3000) });
+      if (res.ok) {
+        const buffer = await res.arrayBuffer();
+        const contentType = res.headers.get("content-type") ?? "image/jpeg";
+        avatarSrc = `data:${contentType};base64,${Buffer.from(buffer).toString("base64")}`;
+      }
+    } catch {
+      // fall through to initials
+    }
+  }
 
   return new ImageResponse(
     (
@@ -36,33 +68,87 @@ export default async function Image({ params }: Props) {
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
-          background: "#09090b",
+          background: "#0f0f0f",
           padding: "64px",
           fontFamily: "system-ui, sans-serif",
         }}
       >
+        {/* Top: Logo */}
         <div style={{ display: "flex", alignItems: "center" }}>
-          <span style={{ color: "#f59e0b", fontSize: "18px", fontWeight: 700, marginRight: "8px" }}>
+          <span style={{ color: "#f59e0b", fontSize: "20px", fontWeight: 700, marginRight: "10px" }}>
             MRR.fyi
           </span>
-          <span style={{ color: "#52525b", fontSize: "14px" }}>indie revenue leaderboard</span>
+          <span style={{ color: "#52525b", fontSize: "16px" }}>indie revenue leaderboard</span>
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column" }}>
-          <div style={{ display: "flex", alignItems: "baseline", marginBottom: "16px" }}>
-            <span style={{ color: "#f59e0b", fontSize: "72px", fontWeight: 700 }}>{mrr}</span>
-            <span style={{ color: "#71717a", fontSize: "32px", fontWeight: 400, marginLeft: "4px" }}>/mo</span>
+        {/* Middle: Founder info */}
+        <div style={{ display: "flex", alignItems: "center", gap: "40px" }}>
+          {/* Avatar */}
+          <div
+            style={{
+              width: "120px",
+              height: "120px",
+              borderRadius: "60px",
+              overflow: "hidden",
+              flexShrink: 0,
+              background: "#1c1c1c",
+              border: "3px solid #27272a",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            {avatarSrc ? (
+              <img
+                src={avatarSrc}
+                width={120}
+                height={120}
+                style={{ objectFit: "cover" }}
+              />
+            ) : (
+              <span style={{ color: "#f59e0b", fontSize: "44px", fontWeight: 700 }}>
+                {initials || "?"}
+              </span>
+            )}
           </div>
-          <div style={{ display: "flex", color: "#fafafa", fontSize: "48px", fontWeight: 600, marginBottom: "12px" }}>
-            {productName}
-          </div>
-          <div style={{ display: "flex", color: "#71717a", fontSize: "24px" }}>
-            by {name}
+
+          {/* Name + Product + Verified */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <span style={{ color: "#fafafa", fontSize: "42px", fontWeight: 700 }}>
+                {productName}
+              </span>
+              {isVerified && (
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    background: "#1a1a2e",
+                    border: "1px solid #3b3b8a",
+                    borderRadius: "6px",
+                    padding: "4px 12px",
+                    gap: "6px",
+                  }}
+                >
+                  <span style={{ color: "#818cf8", fontSize: "14px", fontWeight: 600 }}>
+                    ✓ Verified
+                  </span>
+                </div>
+              )}
+            </div>
+            <span style={{ color: "#71717a", fontSize: "24px" }}>by {name}</span>
           </div>
         </div>
 
-        <div style={{ display: "flex", color: "#52525b", fontSize: "18px" }}>
-          mrr.fyi/{slug}
+        {/* Bottom: MRR + URL */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
+          <div style={{ display: "flex", alignItems: "baseline", gap: "4px" }}>
+            <span style={{ color: "#f59e0b", fontSize: "80px", fontWeight: 700, lineHeight: 1 }}>
+              {mrr}
+            </span>
+            <span style={{ color: "#71717a", fontSize: "32px" }}>/mo</span>
+          </div>
+          <span style={{ color: "#3f3f46", fontSize: "18px" }}>mrr.fyi/{slug}</span>
         </div>
       </div>
     ),

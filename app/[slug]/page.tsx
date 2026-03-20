@@ -57,6 +57,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const title = `${founder.productName} — ${formatMRR(founder.mrr, founder.currency)}/mo`;
   const description = `${founder.name} is making ${formatMRR(founder.mrr, founder.currency)}/mo with ${founder.productName}. Follow their journey on MRR.fyi.`;
 
+  const ogImageUrl = `https://mrr.fyi/${founder.slug}/opengraph-image`;
+
   return {
     title,
     description,
@@ -65,11 +67,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description,
       url: `https://mrr.fyi/${founder.slug}`,
       type: "profile",
+      images: [{ url: ogImageUrl, width: 1200, height: 630, alt: title }],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
+      images: [ogImageUrl],
       ...(founder.twitter && { creator: `@${founder.twitter}` }),
     },
   };
