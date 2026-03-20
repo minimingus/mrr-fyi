@@ -6,6 +6,7 @@ import { GrowthBadge } from "@/components/GrowthBadge";
 import { MRRChart } from "@/components/MRRChart";
 import { MilestoneBadges } from "@/components/MilestoneBadges";
 import { ShareButton } from "@/components/ShareButton";
+import { EmbedButton } from "@/components/EmbedButton";
 import { formatMRR, growthPercent } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -197,11 +198,13 @@ export default async function FounderProfile({ params, searchParams }: Props) {
           <span className="text-xs text-[var(--text-dim)]">
             Rank #{rank} on leaderboard
           </span>
-          <ShareButton
-            text={`${founder.productName} is making ${formatMRR(founder.mrr, founder.currency)}/mo — ranked #${rank} on MRR.fyi 🚀`}
-            url={`https://mrr.fyi/${founder.slug}`}
-            className="ml-auto"
-          />
+          <div className="ml-auto flex items-center gap-2">
+            <EmbedButton slug={founder.slug} />
+            <ShareButton
+              text={`${founder.productName} is making ${formatMRR(founder.mrr, founder.currency)}/mo — ranked #${rank} on MRR.fyi 🚀`}
+              url={`https://mrr.fyi/${founder.slug}`}
+            />
+          </div>
         </div>
       </div>
 
