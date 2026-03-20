@@ -72,20 +72,38 @@ export default async function FounderProfile({ params, searchParams }: Props) {
   const growth = previousMRR !== null ? growthPercent(founder.mrr, previousMRR) : null;
   const rank = await prisma.founder.count({ where: { emailVerified: true, mrr: { gt: founder.mrr } } }) + 1;
 
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Person",
-    name: founder.name,
-    url: `https://mrr.fyi/${founder.slug}`,
-    ...(founder.twitter && {
-      sameAs: [`https://x.com/${founder.twitter}`],
-    }),
-    worksFor: {
-      "@type": "Organization",
+  const jsonLd = [
+    {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      name: founder.name,
+      url: `https://mrr.fyi/${founder.slug}`,
+      ...(founder.twitter && {
+        sameAs: [`https://x.com/${founder.twitter}`],
+      }),
+      worksFor: {
+        "@type": "Organization",
+        name: founder.productName,
+        url: founder.productUrl,
+      },
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "Product",
       name: founder.productName,
       url: founder.productUrl,
+      ...(founder.description && { description: founder.description }),
+      offers: {
+        "@type": "Offer",
+        priceCurrency: founder.currency,
+        availability: "https://schema.org/InStock",
+      },
+      creator: {
+        "@type": "Person",
+        name: founder.name,
+      },
     },
-  };
+  ];
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-12">
