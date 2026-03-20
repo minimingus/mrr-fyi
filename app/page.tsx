@@ -7,18 +7,24 @@ import { BadgeCheck, Sparkles, TrendingUp } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
+const LEADERBOARD_PAGE_SIZE = 50;
+
 async function getLeaderboard() {
-  const founders = await prisma.founder.findMany({
-    where: { emailVerified: true },
-    orderBy: [{ featured: "desc" }, { mrr: "desc" }],
-    include: {
-      snapshots: {
-        orderBy: { recordedAt: "desc" },
-        take: 2,
+  const [founders, total] = await Promise.all([
+    prisma.founder.findMany({
+      where: { emailVerified: true },
+      orderBy: [{ featured: "desc" }, { mrr: "desc" }],
+      take: LEADERBOARD_PAGE_SIZE,
+      include: {
+        snapshots: {
+          orderBy: { recordedAt: "desc" },
+          take: 2,
+        },
       },
-    },
-  });
-  return founders;
+    }),
+    prisma.founder.count({ where: { emailVerified: true } }),
+  ]);
+  return { founders, total };
 }
 
 async function getStats() {
@@ -96,11 +102,12 @@ async function getRecentActivity() {
 }
 
 export default async function Home() {
-  const [founders, stats, activity] = await Promise.all([
+  const [leaderboard, stats, activity] = await Promise.all([
     getLeaderboard(),
     getStats(),
     getRecentActivity(),
   ]);
+  const { founders, total: totalFoundersOnLeaderboard } = leaderboard;
   const totalARR = stats.totalMRR * 12;
 
   return (
@@ -198,7 +205,11 @@ export default async function Home() {
         </div>
       ) : (
         <Suspense>
-          <LeaderboardList founders={founders} />
+          <LeaderboardList
+            founders={founders}
+            totalCount={totalFoundersOnLeaderboard}
+            pageSize={LEADERBOARD_PAGE_SIZE}
+          />
         </Suspense>
       )}
 
