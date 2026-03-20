@@ -115,7 +115,7 @@ export default async function FounderProfile({ params, searchParams }: Props) {
           href={`/pricing?slug=${founder.slug}`}
           className="block mb-6 px-4 py-3 rounded-lg border border-dashed border-[var(--border-accent)] text-sm text-[var(--text-muted)] hover:border-[var(--amber)] hover:text-[var(--text)] transition-colors text-center"
         >
-          Stand out — get a <span className="text-[var(--emerald)] font-semibold">verified badge</span> from $9/mo →
+          Stand out — try a <span className="text-[var(--emerald)] font-semibold">verified badge</span> free for 7 days →
         </a>
       )}
       {/* Back */}
@@ -225,8 +225,8 @@ export default async function FounderProfile({ params, searchParams }: Props) {
               >
                 ✓
               </span>
-              Get verified for $9/mo or{" "}
-              <span className="text-[var(--amber)]">featured for $29/mo</span>
+              Try verified or{" "}
+              <span className="text-[var(--amber)]">featured free for 7 days</span>
             </span>
             <span className="text-xs text-[var(--text-dim)] group-hover:text-[var(--text-muted)] transition-colors">
               Learn more →

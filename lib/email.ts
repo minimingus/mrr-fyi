@@ -455,3 +455,41 @@ export async function sendMilestoneReached(
     html,
   });
 }
+
+export async function sendTrialEndingEmail(
+  email: string,
+  productName: string,
+  planLabel: string,
+  daysLeft: number,
+  slug: string
+) {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const profileUrl = `${appUrl}/${slug}`;
+
+  const html = emailLayout(`
+    <h1 style="margin:0 0 8px;font-size:20px;font-weight:700;color:${BRAND.text};">
+      Your free trial ends in ${daysLeft} day${daysLeft !== 1 ? "s" : ""}
+    </h1>
+    <p style="margin:0 0 20px;font-size:14px;color:${BRAND.textMuted};line-height:1.6;">
+      The ${planLabel} trial for <strong style="color:${BRAND.text};">${productName}</strong> is almost over. After it ends, you'll lose your ${planLabel.toLowerCase()} benefits.
+    </p>
+    <p style="margin:0 0 20px;font-size:14px;color:${BRAND.textMuted};line-height:1.6;">
+      No action needed if you want to keep it — your subscription will continue automatically.
+    </p>
+    ${button("View your profile", profileUrl)}
+    <p style="margin:0;font-size:12px;color:${BRAND.textMuted};line-height:1.5;">
+      To cancel before the trial ends, manage your subscription from the billing email you received at signup.
+    </p>
+  `);
+
+  const text = `Your ${planLabel} free trial for ${productName} ends in ${daysLeft} day${daysLeft !== 1 ? "s" : ""}.\n\nNo action needed to continue — your subscription starts automatically.\n\nTo cancel, use the billing link from your signup email.\n\nView your profile: ${profileUrl}\n\n— MRR.fyi`;
+
+  const resend = await getResend();
+  await resend.emails.send({
+    from: "MRR.fyi <onboarding@resend.dev>",
+    to: email,
+    subject: `Your ${planLabel} trial for ${productName} ends in ${daysLeft} days`,
+    text,
+    html,
+  });
+}

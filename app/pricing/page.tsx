@@ -17,7 +17,7 @@ const plans = [
       "✓ Builds trust with visitors",
       "✓ Cancel anytime",
     ],
-    cta: "Get Verified",
+    cta: "Start 7-day free trial",
     highlight: false,
   },
   {
@@ -33,7 +33,7 @@ const plans = [
       "★ Maximum visibility",
       "★ Cancel anytime",
     ],
-    cta: "Get Featured",
+    cta: "Start 7-day free trial",
     highlight: true,
   },
 ];
@@ -88,7 +88,7 @@ function PricingContent() {
           Stand out from the crowd.
         </h1>
         <p className="text-[var(--text-muted)]">
-          Simple, transparent pricing. Cancel anytime.
+          Try any plan free for 7 days. Cancel anytime.
         </p>
       </div>
 

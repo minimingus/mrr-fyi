@@ -8,7 +8,12 @@ interface WebhookEvent {
     event_name: string;
     custom_data?: { founderId?: string; plan?: string };
   };
-  data: { id?: string | number };
+  data: {
+    id?: string | number;
+    attributes?: {
+      trial_ends_at?: string | null;
+    };
+  };
 }
 
 export async function POST(req: NextRequest) {
@@ -47,6 +52,10 @@ export async function POST(req: NextRequest) {
       case "subscription_created": {
         if (!founderId || !plan || !subscriptionId) break;
 
+        const trialEndsAt = event.data.attributes?.trial_ends_at
+          ? new Date(event.data.attributes.trial_ends_at)
+          : null;
+
         await prisma.$transaction([
           prisma.payment.create({
             data: {
@@ -54,6 +63,7 @@ export async function POST(req: NextRequest) {
               type: plan as "FEATURED" | "VERIFIED",
               externalId: subscriptionId,
               active: true,
+              trialEndsAt,
             },
           }),
           prisma.founder.update({
