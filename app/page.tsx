@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { LeaderboardList } from "@/components/LeaderboardList";
 import { ShareButton } from "@/components/ShareButton";
 import { formatMRR } from "@/lib/utils";
+import { BadgeCheck, Sparkles, TrendingUp } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -23,14 +24,80 @@ async function getStats() {
     _sum: { mrr: true },
     _count: true,
   });
+
+  const oneWeekAgo = new Date();
+  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+  const joinedThisWeek = await prisma.founder.count({
+    where: { createdAt: { gte: oneWeekAgo } },
+  });
+
   return {
     totalMRR: result._sum.mrr ?? 0,
     totalFounders: result._count,
+    joinedThisWeek,
   };
 }
 
+async function getRecentActivity() {
+  const oneWeekAgo = new Date();
+  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+  const [recentMilestones, recentFounders] = await Promise.all([
+    prisma.mRRMilestone.findMany({
+      where: { reachedAt: { gte: oneWeekAgo } },
+      orderBy: { reachedAt: "desc" },
+      take: 5,
+      include: {
+        founder: { select: { name: true, slug: true, productName: true } },
+      },
+    }),
+    prisma.founder.findMany({
+      where: { createdAt: { gte: oneWeekAgo } },
+      orderBy: { createdAt: "desc" },
+      take: 5,
+      select: { name: true, slug: true, productName: true, createdAt: true },
+    }),
+  ]);
+
+  type ActivityItem = {
+    type: "milestone" | "joined";
+    name: string;
+    slug: string;
+    productName: string;
+    detail: string;
+    at: Date;
+  };
+
+  const items: ActivityItem[] = [
+    ...recentMilestones.map((m) => ({
+      type: "milestone" as const,
+      name: m.founder.name,
+      slug: m.founder.slug,
+      productName: m.founder.productName,
+      detail: `hit ${formatMRR(m.amount)} MRR`,
+      at: m.reachedAt,
+    })),
+    ...recentFounders.map((f) => ({
+      type: "joined" as const,
+      name: f.name,
+      slug: f.slug,
+      productName: f.productName,
+      detail: "joined the leaderboard",
+      at: f.createdAt,
+    })),
+  ];
+
+  items.sort((a, b) => b.at.getTime() - a.at.getTime());
+  return items.slice(0, 5);
+}
+
 export default async function Home() {
-  const [founders, stats] = await Promise.all([getLeaderboard(), getStats()]);
+  const [founders, stats, activity] = await Promise.all([
+    getLeaderboard(),
+    getStats(),
+    getRecentActivity(),
+  ]);
   const totalARR = stats.totalMRR * 12;
 
   return (
@@ -60,10 +127,16 @@ export default async function Home() {
           building in public?
         </h1>
 
-        <p className="text-[var(--text-muted)] text-base max-w-lg">
+        <p className="text-[var(--text-muted)] text-base max-w-lg mb-6">
           Real MRR from real indie founders. No VCs, no employees, no bullshit.
-          Submit your revenue and get on the board.
         </p>
+
+        <a
+          href="/submit"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--amber)] text-black font-semibold rounded-md hover:bg-amber-400 transition-all hover:scale-[1.02]"
+        >
+          Join the Leaderboard →
+        </a>
       </div>
 
       {/* Stats bar */}
@@ -84,6 +157,14 @@ export default async function Home() {
           </div>
         ))}
       </div>
+
+      {stats.joinedThisWeek > 0 && (
+        <div className="text-center mb-6 animate-fade-up stagger-2">
+          <span className="text-xs text-[var(--emerald)] mono">
+            +{stats.joinedThisWeek} founder{stats.joinedThisWeek !== 1 ? "s" : ""} joined this week
+          </span>
+        </div>
+      )}
 
       {/* Share leaderboard */}
       <div className="flex justify-end mb-4 animate-fade-up stagger-2">
@@ -109,12 +190,94 @@ export default async function Home() {
             href="/submit"
             className="inline-flex items-center gap-2 px-5 py-2.5 bg-[var(--amber)] text-black text-sm font-semibold rounded-md hover:bg-amber-400 transition-colors"
           >
-            Submit Your Revenue →
+            Join the Leaderboard →
           </a>
         </div>
       ) : (
         <LeaderboardList founders={founders} />
       )}
+
+      {/* Recent Activity */}
+      {activity.length > 0 && (
+        <div className="mt-12 animate-fade-up" style={{ animationDelay: "0.2s", opacity: 0 }}>
+          <h2
+            className="text-lg mb-4 text-[var(--text-muted)]"
+            style={{ fontFamily: "var(--font-dm-serif)" }}
+          >
+            Recent activity
+          </h2>
+          <div className="space-y-2">
+            {activity.map((item, i) => (
+              <div
+                key={`${item.slug}-${item.type}-${i}`}
+                className="flex items-center gap-3 text-sm py-2 px-3 rounded-md bg-[var(--bg-card)] border border-[var(--border)]"
+              >
+                <span className="text-[var(--text-dim)] text-xs mono shrink-0">
+                  {item.type === "milestone" ? "🏆" : "→"}
+                </span>
+                <span className="text-[var(--text)]">
+                  <a
+                    href={`/${item.slug}`}
+                    className="text-[var(--amber)] hover:underline"
+                  >
+                    {item.name}
+                  </a>{" "}
+                  <span className="text-[var(--text-muted)]">{item.detail}</span>
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Why founders track here */}
+      <div className="mt-16 animate-fade-up" style={{ animationDelay: "0.25s", opacity: 0 }}>
+        <h2
+          className="text-xl mb-6 text-center"
+          style={{ fontFamily: "var(--font-dm-serif)" }}
+        >
+          Why founders track here
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {[
+            {
+              icon: BadgeCheck,
+              title: "Build in public credibility",
+              desc: "Get a verified badge to prove your numbers are real. Investors and customers trust transparent founders.",
+              color: "var(--emerald)",
+            },
+            {
+              icon: Sparkles,
+              title: "Get discovered",
+              desc: "Featured founders appear at the top of the leaderboard. Put your product in front of customers and investors.",
+              color: "var(--amber)",
+            },
+            {
+              icon: TrendingUp,
+              title: "Track your journey",
+              desc: "MRR charts, milestone badges, and growth tracking. See how far you've come — and share the proof.",
+              color: "var(--amber)",
+            },
+          ].map((benefit) => (
+            <div
+              key={benefit.title}
+              className="p-5 rounded-lg border border-[var(--border)] bg-[var(--bg-card)]"
+            >
+              <benefit.icon
+                size={20}
+                className="mb-3"
+                style={{ color: benefit.color }}
+              />
+              <h3 className="text-sm font-semibold mb-1.5 text-[var(--text)]">
+                {benefit.title}
+              </h3>
+              <p className="text-xs text-[var(--text-muted)] leading-relaxed">
+                {benefit.desc}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
 
       {/* CTA */}
       <div
@@ -125,16 +288,16 @@ export default async function Home() {
           className="text-2xl mb-2"
           style={{ fontFamily: "var(--font-dm-serif)" }}
         >
-          Your revenue belongs here.
+          {stats.totalFounders} founders are already here.
         </h2>
         <p className="text-[var(--text-muted)] text-sm mb-5">
-          Building something people pay for? Show the world. Add your MRR in 60 seconds.
+          Building something people pay for? This is where you prove it. Takes 60 seconds.
         </p>
         <a
           href="/submit"
           className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--amber)] text-black font-semibold rounded-md hover:bg-amber-400 transition-all hover:scale-[1.02]"
         >
-          Submit Revenue →
+          Join the Leaderboard →
         </a>
         <p className="text-xs text-[var(--text-dim)] mt-4">
           Already listed?{" "}
