@@ -7,6 +7,7 @@ interface ShareButtonProps {
   url: string;
   variant?: "default" | "success" | "amber";
   size?: "sm" | "md";
+  source?: string;
   className?: string;
 }
 
@@ -20,6 +21,7 @@ export function ShareButton({
   url,
   variant = "default",
   size = "sm",
+  source,
   className = "",
 }: ShareButtonProps) {
   const href = buildTwitterIntentUrl(text, url);
@@ -42,7 +44,7 @@ export function ShareButton({
       target="_blank"
       rel="noopener noreferrer"
       className={`inline-flex items-center gap-1.5 font-semibold rounded-md transition-colors ${variantStyles[variant]} ${sizeStyles[size]} ${className}`}
-      onClick={() => trackEvent("Share Click", { platform: "twitter" })}
+      onClick={() => trackEvent("Share Click", { platform: "twitter", ...(source && { source }) })}
     >
       <svg
         viewBox="0 0 24 24"

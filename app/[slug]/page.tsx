@@ -107,6 +107,7 @@ export default async function FounderProfile({ params, searchParams }: Props) {
             text={`I'm making ${formatMRR(founder.mrr, founder.currency)}/mo with ${founder.productName} 🚀`}
             url={`https://mrr.fyi/${founder.slug}`}
             variant="success"
+            source={submitted ? "verify" : "update"}
           />
         </div>
       )}
