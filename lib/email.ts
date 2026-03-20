@@ -687,3 +687,49 @@ export async function sendTrialEndingEmail(
     html,
   });
 }
+
+export async function sendTrialExpiredEmail(
+  email: string,
+  productName: string,
+  planLabel: string,
+  slug: string
+) {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const pricingUrl = `${appUrl}/pricing?slug=${slug}`;
+
+  const html = emailLayout(`
+    <h1 style="margin:0 0 8px;font-size:20px;font-weight:700;color:${BRAND.text};">
+      Your free trial has ended
+    </h1>
+    <p style="margin:0 0 20px;font-size:14px;color:${BRAND.textMuted};line-height:1.6;">
+      Your ${planLabel} trial for <strong style="color:${BRAND.text};">${productName}</strong> has expired. Your ${planLabel.toLowerCase()} badge has been removed from the leaderboard.
+    </p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:${BRAND.bg};border:1px solid ${BRAND.border};border-radius:6px;margin-bottom:20px;">
+      <tr>
+        <td style="padding:20px 24px;">
+          <p style="margin:0 0 8px;font-size:14px;color:${BRAND.textMuted};">Upgrade to get back:</p>
+          <ul style="margin:0;padding-left:20px;font-size:14px;color:${BRAND.textMuted};line-height:1.8;">
+            <li>Your ${planLabel.toLowerCase()} badge on the leaderboard</li>
+            <li>Increased visibility among founders</li>
+            <li>Trust signal for your product</li>
+          </ul>
+        </td>
+      </tr>
+    </table>
+    ${button("Upgrade now →", pricingUrl)}
+    <p style="margin:0;font-size:12px;color:${BRAND.textMuted};line-height:1.5;">
+      Questions? Reply to this email and we'll help.
+    </p>
+  `);
+
+  const text = `Your ${planLabel} free trial for ${productName} has ended.\n\nUpgrade to restore your ${planLabel.toLowerCase()} badge: ${pricingUrl}\n\n— MRR.fyi`;
+
+  const resend = await getResend();
+  await resend.emails.send({
+    from: "MRR.fyi <onboarding@resend.dev>",
+    to: email,
+    subject: `Your ${planLabel} trial for ${productName} has ended`,
+    text,
+    html,
+  });
+}
