@@ -35,7 +35,15 @@ export async function GET(req: NextRequest) {
         description: true,
         category: true,
         twitter: true,
+        verified: true,
+        featured: true,
+        slug: true,
         referralCode: true,
+        payments: {
+          where: { active: true },
+          select: { trialEndsAt: true, type: true },
+          take: 1,
+        },
         _count: { select: { referralsMade: true } },
       },
     });
@@ -47,6 +55,11 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    const activePayment = founder.payments[0] ?? null;
+    const trialExpired = activePayment?.trialEndsAt
+      ? new Date(activePayment.trialEndsAt) < new Date()
+      : false;
+
     return NextResponse.json({
       name: founder.name,
       productName: founder.productName,
@@ -54,8 +67,14 @@ export async function GET(req: NextRequest) {
       description: founder.description,
       category: founder.category,
       twitter: founder.twitter,
+      verified: founder.verified,
+      featured: founder.featured,
+      slug: founder.slug,
       referralCode: founder.referralCode,
       referralCount: founder._count.referralsMade,
+      trialExpired,
+      trialEndsAt: activePayment?.trialEndsAt ?? null,
+      planType: activePayment?.type ?? null,
     });
   } catch (err) {
     console.error("[update-profile:get]", err);

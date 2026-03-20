@@ -43,6 +43,8 @@ export default function UpdatePage() {
   const [profileSubmitting, setProfileSubmitting] = useState(false);
   const [profileError, setProfileError] = useState<string | null>(null);
   const [profileSuccess, setProfileSuccess] = useState(false);
+  const [trialExpired, setTrialExpired] = useState(false);
+  const [founderSlug, setFounderSlug] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadProfile() {
@@ -62,6 +64,8 @@ export default function UpdatePage() {
             referralCode: data.referralCode ?? null,
             referralCount: data.referralCount ?? 0,
           });
+          if (data.trialExpired) setTrialExpired(true);
+          if (data.slug) setFounderSlug(data.slug);
         }
       } catch {
         // Non-critical — form will just start empty
@@ -153,6 +157,24 @@ export default function UpdatePage() {
       >
         ← Leaderboard
       </a>
+
+      {trialExpired && (
+        <div className="mb-8 px-5 py-4 rounded-xl border border-[var(--amber)] bg-[var(--amber-glow)]">
+          <p className="text-sm font-semibold text-[var(--text)] mb-1">
+            Your free trial has ended
+          </p>
+          <p className="text-xs text-[var(--text-muted)] mb-3">
+            Upgrade now to keep your verified badge and stay visible on the leaderboard.
+          </p>
+          <a
+            href={founderSlug ? `/pricing?slug=${founderSlug}` : "/pricing"}
+            onClick={() => trackEvent("Trial Expired Upgrade Click")}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--amber)] text-black text-sm font-semibold rounded-md hover:bg-amber-400 transition-colors"
+          >
+            Upgrade now →
+          </a>
+        </div>
+      )}
 
       <h1
         className="text-3xl mb-2"
