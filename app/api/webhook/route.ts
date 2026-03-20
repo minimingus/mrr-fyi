@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { sendChurnRecoveryEmail } from "@/lib/email";
+import { sendChurnRecoveryEmail, sendTrialStartedEmail } from "@/lib/email";
 import crypto from "crypto";
 
 interface WebhookEvent {
@@ -74,6 +74,28 @@ export async function POST(req: NextRequest) {
             },
           }),
         ]);
+
+        // Send trial-started email if this is a trial subscription
+        if (trialEndsAt) {
+          try {
+            const founder = await prisma.founder.findUnique({
+              where: { id: founderId },
+              select: { email: true, productName: true, slug: true },
+            });
+            if (founder?.email) {
+              const planLabel = plan === "FEATURED" ? "Featured" : "Verified";
+              await sendTrialStartedEmail(
+                founder.email,
+                founder.productName,
+                planLabel,
+                trialEndsAt,
+                founder.slug
+              );
+            }
+          } catch (err) {
+            console.error("[webhook] failed to send trial-started email:", err);
+          }
+        }
         break;
       }
 
