@@ -45,6 +45,25 @@ export async function createStripeCheckoutSession(
   return session.url!;
 }
 
+export async function createStripePortalSession(
+  subscriptionId: string,
+  returnUrl: string
+): Promise<string> {
+  const stripe = getStripe();
+  const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+  const customerId =
+    typeof subscription.customer === "string"
+      ? subscription.customer
+      : subscription.customer.id;
+
+  const session = await stripe.billingPortal.sessions.create({
+    customer: customerId,
+    return_url: returnUrl,
+  });
+
+  return session.url;
+}
+
 export function constructStripeEvent(payload: string, signature: string): Stripe.Event {
   const stripe = getStripe();
   if (!process.env.STRIPE_WEBHOOK_SECRET) {

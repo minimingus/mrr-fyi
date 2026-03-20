@@ -16,7 +16,7 @@ export const dynamic = "force-dynamic";
 
 interface Props {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ updated?: string; submitted?: string }>;
+  searchParams: Promise<{ updated?: string; submitted?: string; payment?: string }>;
 }
 
 async function getFounder(slug: string) {
@@ -87,7 +87,7 @@ export default async function FounderProfile({ params, searchParams }: Props) {
 
   if (!founder || !founder.emailVerified) notFound();
 
-  const { updated, submitted } = await searchParams;
+  const { updated, submitted, payment } = await searchParams;
 
   const previousMRR = founder.snapshots[1]?.mrr ?? null;
   const growth = previousMRR !== null ? growthPercent(founder.mrr, previousMRR) : null;
@@ -138,6 +138,14 @@ export default async function FounderProfile({ params, searchParams }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+      {payment === "success" && (
+        <div
+          className="mb-6 px-4 py-3 rounded-lg border border-[var(--emerald)] text-sm"
+          style={{ background: "rgba(16,185,129,0.08)", color: "var(--emerald)" }}
+        >
+          Payment successful! Your badge is now active and your listing has been upgraded.
+        </div>
+      )}
       {(updated || submitted) && (
         <div
           className="mb-6 px-4 py-3 rounded-lg border border-[var(--emerald)] text-sm flex items-center justify-between gap-4 flex-wrap"

@@ -53,6 +53,7 @@ export default function UpdatePage() {
   const [trialHoursLeft, setTrialHoursLeft] = useState<number | null>(null);
   const [founderSlug, setFounderSlug] = useState<string | null>(null);
   const [bannerDismissed, setBannerDismissed] = useState(false);
+  const [planType, setPlanType] = useState<"FEATURED" | "VERIFIED" | null>(null);
 
   useEffect(() => {
     const dismissed = sessionStorage.getItem("trial-warning-dismissed");
@@ -82,6 +83,7 @@ export default function UpdatePage() {
           });
           if (data.trialExpired) setTrialExpired(true);
           if (data.slug) setFounderSlug(data.slug);
+          if (data.planType) setPlanType(data.planType);
           if (data.trialEndsAt && !data.trialExpired) {
             const hoursLeft = Math.ceil(
               (new Date(data.trialEndsAt).getTime() - Date.now()) / (1000 * 60 * 60)
@@ -557,6 +559,26 @@ export default function UpdatePage() {
           )}
         </div>
       )}
+      {/* Billing Section */}
+      <div className="mt-16 pt-10 border-t border-[var(--border)]">
+        <h2
+          className="text-2xl mb-2"
+          style={{ fontFamily: "var(--font-dm-serif)" }}
+        >
+          Billing & plan.
+        </h2>
+        <p className="text-sm text-[var(--text-muted)] mb-6">
+          {planType
+            ? `You're on the ${planType === "FEATURED" ? "Featured" : "Verified"} plan.`
+            : "No active plan. Upgrade to get a badge and stand out on the leaderboard."}
+        </p>
+        <a
+          href={`/billing/${params.token}`}
+          className="inline-flex items-center gap-2 px-4 py-2.5 bg-[var(--bg-card)] border border-[var(--border)] text-[var(--text)] text-sm font-semibold rounded-md hover:border-[var(--amber)] hover:text-[var(--amber)] transition-all hover:scale-[1.01]"
+        >
+          {planType ? "Manage subscription →" : "Upgrade now →"}
+        </a>
+      </div>
     </div>
     </>
   );
