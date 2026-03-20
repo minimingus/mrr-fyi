@@ -21,6 +21,18 @@ export async function createCheckoutUrl(
   plan: string,
   redirectUrl: string
 ): Promise<string> {
+  const missingVars = [
+    ["LEMONSQUEEZY_API_KEY", process.env.LEMONSQUEEZY_API_KEY],
+    ["LS_STORE_ID", process.env.LS_STORE_ID],
+    ["variantId", variantId],
+  ]
+    .filter(([, v]) => !v || v.includes("your_"))
+    .map(([k]) => k);
+
+  if (missingVars.length > 0) {
+    throw new Error(`Lemon Squeezy not configured. Missing: ${missingVars.join(", ")}`);
+  }
+
   const trialEndsAt = new Date();
   trialEndsAt.setDate(trialEndsAt.getDate() + TRIAL_DAYS);
 
