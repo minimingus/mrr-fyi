@@ -2,6 +2,7 @@
 import { MetadataRoute } from "next";
 import { prisma } from "@/lib/prisma";
 import { NICHE_SLUGS } from "@/app/niche/[niche]/page";
+import { getAllPosts } from "@/lib/blog";
 
 export const revalidate = 3600; // rebuild sitemap every hour
 
@@ -32,5 +33,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }));
 
-  return [...staticRoutes, ...nicheRoutes, ...founderRoutes];
+  const blogPosts = getAllPosts();
+  const blogRoutes: MetadataRoute.Sitemap = [
+    {
+      url: "https://mrr.fyi/blog",
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.7,
+    },
+    ...blogPosts.map((post) => ({
+      url: `https://mrr.fyi/blog/${post.slug}`,
+      lastModified: new Date(post.date),
+      changeFrequency: "monthly" as const,
+      priority: 0.6,
+    })),
+  ];
+
+  return [...staticRoutes, ...nicheRoutes, ...blogRoutes, ...founderRoutes];
 }
