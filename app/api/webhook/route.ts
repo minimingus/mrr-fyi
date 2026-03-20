@@ -21,7 +21,8 @@ export async function POST(req: NextRequest) {
   const signature = req.headers.get("x-signature");
 
   if (!signature) {
-    return NextResponse.json({ error: "Missing signature" }, { status: 400 });
+    console.warn("[webhook] rejected: missing X-Signature header");
+    return NextResponse.json({ error: "Missing signature" }, { status: 401 });
   }
 
   const hmac = crypto
@@ -32,7 +33,8 @@ export async function POST(req: NextRequest) {
   const hmacBuf = Buffer.from(hmac);
   const sigBuf = Buffer.from(signature);
   if (hmacBuf.length !== sigBuf.length || !crypto.timingSafeEqual(hmacBuf, sigBuf)) {
-    return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
+    console.warn("[webhook] rejected: invalid signature");
+    return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
   }
 
   let event: WebhookEvent;
