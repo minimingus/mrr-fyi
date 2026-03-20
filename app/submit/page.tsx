@@ -133,6 +133,20 @@ export default function SubmitPage() {
           </div>
 
           <div>
+            <label className={labelClass}>Category</label>
+            <select {...register("category")} className={inputClass}>
+              <option value="">Select a category (optional)</option>
+              <option value="SAAS">SaaS</option>
+              <option value="ECOMMERCE">E-commerce</option>
+              <option value="AGENCY">Agency</option>
+              <option value="CREATOR">Creator</option>
+              <option value="MARKETPLACE">Marketplace</option>
+              <option value="DEV_TOOLS">Developer Tools</option>
+              <option value="OTHER">Other</option>
+            </select>
+          </div>
+
+          <div>
             <label className={labelClass}>Short Description</label>
             <textarea
               {...register("description")}

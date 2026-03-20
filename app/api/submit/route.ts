@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { name, email, twitter, productName, productUrl, description, mrr, currency } =
+    const { name, email, twitter, productName, productUrl, description, mrr, currency, category } =
       parsed.data;
 
     const baseSlug = slugify(productName);
@@ -52,6 +52,7 @@ export async function POST(req: NextRequest) {
         productName,
         productUrl,
         description: description || null,
+        category: category || null,
         mrr: mrrCents,
         currency,
         updateToken,

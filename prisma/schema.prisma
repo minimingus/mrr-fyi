@@ -14,6 +14,7 @@ model Founder {
   productName String
   productUrl  String
   description String?
+  category    FounderCategory?
   email            String?
   updateToken      String?  @unique
   emailVerified    Boolean  @default(false)
@@ -90,4 +91,14 @@ model Referral {
 enum PaymentType {
   FEATURED
   VERIFIED
+}
+
+enum FounderCategory {
+  SAAS
+  ECOMMERCE
+  AGENCY
+  CREATOR
+  MARKETPLACE
+  DEV_TOOLS
+  OTHER
 }

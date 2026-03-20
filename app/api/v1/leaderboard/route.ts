@@ -17,11 +17,17 @@ export async function GET(req: NextRequest) {
     MAX_LIMIT,
     Math.max(1, parseInt(searchParams.get("limit") ?? String(DEFAULT_LIMIT), 10) || DEFAULT_LIMIT),
   );
+  const category = searchParams.get("category")?.toUpperCase() || undefined;
+
+  const where = {
+    emailVerified: true as const,
+    ...(category ? { category: category as "SAAS" | "ECOMMERCE" | "AGENCY" | "CREATOR" | "MARKETPLACE" | "DEV_TOOLS" | "OTHER" } : {}),
+  };
 
   const [total, founders] = await Promise.all([
-    prisma.founder.count({ where: { emailVerified: true } }),
+    prisma.founder.count({ where }),
     prisma.founder.findMany({
-      where: { emailVerified: true },
+      where,
       orderBy: [{ featured: "desc" }, { mrr: "desc" }],
       skip: (page - 1) * limit,
       take: limit,
@@ -52,6 +58,7 @@ export async function GET(req: NextRequest) {
       productName: f.productName,
       productUrl: f.productUrl,
       description: f.description,
+      category: f.category,
       mrr: currentMrr,
       currency: f.currency,
       growthPercent,

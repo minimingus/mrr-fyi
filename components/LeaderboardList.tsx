@@ -15,6 +15,17 @@ interface LeaderboardListProps {
   pageSize: number;
 }
 
+const CATEGORIES = [
+  { label: "All", value: "" },
+  { label: "SaaS", value: "SAAS" },
+  { label: "E-commerce", value: "ECOMMERCE" },
+  { label: "Agency", value: "AGENCY" },
+  { label: "Creator", value: "CREATOR" },
+  { label: "Marketplace", value: "MARKETPLACE" },
+  { label: "Dev Tools", value: "DEV_TOOLS" },
+  { label: "Other", value: "OTHER" },
+] as const;
+
 const MRR_RANGES = [
   { label: "All", value: "" },
   { label: "$0–1K", value: "0-1000" },
@@ -38,11 +49,12 @@ export function LeaderboardList({ founders: initialFounders, totalCount, pageSiz
 
   const query = searchParams.get("q") ?? "";
   const range = searchParams.get("range") ?? "";
+  const category = searchParams.get("category") ?? "";
 
   const [allFounders, setAllFounders] = useState(initialFounders);
   const [isLoadingMore, startLoadMore] = useTransition();
   const hasMore = allFounders.length < totalCount;
-  const isFiltering = Boolean(query || range);
+  const isFiltering = Boolean(query || range || category);
 
   const updateParams = useCallback(
     (updates: Record<string, string>) => {
@@ -72,6 +84,10 @@ export function LeaderboardList({ founders: initialFounders, totalCount, pageSiz
       );
     }
 
+    if (category) {
+      result = result.filter((f) => f.category === category);
+    }
+
     const mrrRange = parseMRRRange(range);
     if (mrrRange) {
       const [min, max] = mrrRange;
@@ -79,7 +95,7 @@ export function LeaderboardList({ founders: initialFounders, totalCount, pageSiz
     }
 
     return result;
-  }, [allFounders, query, range]);
+  }, [allFounders, query, range, category]);
 
   const loadMore = useCallback(() => {
     const nextPage = Math.floor(allFounders.length / pageSize) + 1;
@@ -95,6 +111,7 @@ export function LeaderboardList({ founders: initialFounders, totalCount, pageSiz
         productName: d.productName as string,
         productUrl: d.productUrl as string | null,
         description: d.description as string | null,
+        category: (d.category as string) ?? null,
         email: null,
         updateToken: "",
         mrr: d.mrr as number,
@@ -143,6 +160,26 @@ export function LeaderboardList({ founders: initialFounders, totalCount, pageSiz
             );
           })}
         </div>
+      </div>
+
+      {/* Category filters */}
+      <div className="mb-4 flex gap-1.5 flex-wrap">
+        {CATEGORIES.map((c) => {
+          const active = category === c.value;
+          return (
+            <button
+              key={c.value}
+              onClick={() => updateParams({ category: c.value })}
+              className={`px-3 py-2 rounded-lg text-xs mono border transition-colors whitespace-nowrap ${
+                active
+                  ? "border-[var(--amber)] bg-[var(--amber-glow)] text-[var(--amber)]"
+                  : "border-[var(--border)] bg-[var(--bg-card)] text-[var(--text-dim)] hover:border-[var(--border-accent)] hover:text-[var(--text-muted)]"
+              }`}
+            >
+              {c.label}
+            </button>
+          );
+        })}
       </div>
 
       {/* Column headers */}

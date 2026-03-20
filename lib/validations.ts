@@ -10,6 +10,7 @@ export const submitSchema = z.object({
   productName: z.string().min(2, "Product name must be at least 2 characters"),
   productUrl: z.string().url("Must be a valid URL"),
   description: z.string().max(280, "Max 280 characters").optional(),
+  category: z.enum(["SAAS", "ECOMMERCE", "AGENCY", "CREATOR", "MARKETPLACE", "DEV_TOOLS", "OTHER"]).optional(),
   mrr: z
     .number({ error: "MRR must be a number" })
     .min(0, "MRR cannot be negative"),

@@ -12,6 +12,7 @@ const schema = z.object({
     { message: 'Invalid URL scheme' }
   ),
   description: z.string().max(280, "Max 280 characters").optional(),
+  category: z.enum(["SAAS", "ECOMMERCE", "AGENCY", "CREATOR", "MARKETPLACE", "DEV_TOOLS", "OTHER"]).optional().nullable(),
   twitter: z
     .string()
     .optional()
@@ -32,6 +33,7 @@ export async function GET(req: NextRequest) {
         productName: true,
         productUrl: true,
         description: true,
+        category: true,
         twitter: true,
         referralCode: true,
         _count: { select: { referralsMade: true } },
@@ -50,6 +52,7 @@ export async function GET(req: NextRequest) {
       productName: founder.productName,
       productUrl: founder.productUrl,
       description: founder.description,
+      category: founder.category,
       twitter: founder.twitter,
       referralCode: founder.referralCode,
       referralCount: founder._count.referralsMade,
@@ -82,7 +85,7 @@ export async function PATCH(req: NextRequest) {
       );
     }
 
-    const { token, name, productName, productUrl, description, twitter } =
+    const { token, name, productName, productUrl, description, category, twitter } =
       parsed.data;
 
     const founder = await prisma.founder.findUnique({
@@ -103,6 +106,7 @@ export async function PATCH(req: NextRequest) {
         productName,
         productUrl,
         description: description ?? null,
+        category: category ?? null,
         twitter: twitter ?? null,
       },
     });
