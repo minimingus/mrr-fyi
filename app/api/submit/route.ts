@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { submitSchema } from "@/lib/validations";
 import { slugify } from "@/lib/utils";
-import { sendUpdateLink } from "@/lib/email";
+import { sendVerificationEmail } from "@/lib/email";
 import { rateLimit } from "@/lib/rate-limit";
 
 export async function POST(req: NextRequest) {
@@ -33,6 +33,7 @@ export async function POST(req: NextRequest) {
 
     const mrrCents = Math.round(mrr * 100);
     const updateToken = crypto.randomUUID();
+    const emailVerifyToken = crypto.randomUUID();
 
     const founder = await prisma.founder.create({
       data: {
@@ -46,6 +47,7 @@ export async function POST(req: NextRequest) {
         mrr: mrrCents,
         currency,
         updateToken,
+        emailVerifyToken,
         snapshots: {
           create: { mrr: mrrCents },
         },
@@ -53,9 +55,9 @@ export async function POST(req: NextRequest) {
     });
 
     try {
-      await sendUpdateLink(email, productName, updateToken);
+      await sendVerificationEmail(email, productName, emailVerifyToken);
     } catch (err) {
-      console.error("[email] failed to send update link:", err);
+      console.error("[email] failed to send verification email:", err);
     }
 
     return NextResponse.json({ slug: founder.slug }, { status: 201 });

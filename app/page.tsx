@@ -9,6 +9,7 @@ export const dynamic = "force-dynamic";
 
 async function getLeaderboard() {
   const founders = await prisma.founder.findMany({
+    where: { emailVerified: true },
     orderBy: [{ featured: "desc" }, { mrr: "desc" }],
     include: {
       snapshots: {
@@ -22,6 +23,7 @@ async function getLeaderboard() {
 
 async function getStats() {
   const result = await prisma.founder.aggregate({
+    where: { emailVerified: true },
     _sum: { mrr: true },
     _count: true,
   });
@@ -30,7 +32,7 @@ async function getStats() {
   oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
   const joinedThisWeek = await prisma.founder.count({
-    where: { createdAt: { gte: oneWeekAgo } },
+    where: { emailVerified: true, createdAt: { gte: oneWeekAgo } },
   });
 
   return {
@@ -54,7 +56,7 @@ async function getRecentActivity() {
       },
     }),
     prisma.founder.findMany({
-      where: { createdAt: { gte: oneWeekAgo } },
+      where: { emailVerified: true, createdAt: { gte: oneWeekAgo } },
       orderBy: { createdAt: "desc" },
       take: 5,
       select: { name: true, slug: true, productName: true, createdAt: true },

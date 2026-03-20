@@ -36,7 +36,7 @@ export default function SubmitPage() {
         return;
       }
       trackEvent("MRR Submission", { currency: data.currency ?? "USD" });
-      router.push(`/${json.slug}?submitted=1`);
+      router.push(`/check-email?product=${encodeURIComponent(data.productName)}`);
     } catch {
       setError("Network error. Please try again.");
     } finally {
@@ -66,7 +66,7 @@ export default function SubmitPage() {
           Add your revenue.
         </h1>
         <p className="text-sm text-[var(--text-muted)]">
-          Self-reported and public. Takes 60 seconds. Updates the leaderboard instantly.
+          Self-reported and public. Takes 60 seconds. Verify your email to go live.
         </p>
       </div>
 
@@ -223,7 +223,7 @@ export default function SubmitPage() {
         </button>
 
         <p className="text-xs text-center text-[var(--text-dim)]">
-          Your profile will be public immediately. Revenue is self-reported.
+          We&apos;ll send a verification email before your profile goes live.
         </p>
       </form>
     </div>

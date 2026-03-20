@@ -73,6 +73,40 @@ function button(text: string, href: string): string {
 </table>`;
 }
 
+export async function sendVerificationEmail(
+  email: string,
+  productName: string,
+  verifyToken: string
+) {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const verifyUrl = `${appUrl}/verify/${verifyToken}`;
+
+  const html = emailLayout(`
+    <h1 style="margin:0 0 8px;font-size:20px;font-weight:700;color:${BRAND.text};">
+      Verify your email
+    </h1>
+    <p style="margin:0 0 20px;font-size:14px;color:${BRAND.textMuted};line-height:1.6;">
+      You submitted <strong style="color:${BRAND.text};">${productName}</strong> to MRR.fyi. Click below to verify your email and go live on the leaderboard.
+    </p>
+    ${button("Verify my email", verifyUrl)}
+    <p style="margin:0;font-size:12px;color:${BRAND.textMuted};line-height:1.5;">
+      Or copy this URL:<br />
+      <a href="${verifyUrl}" style="color:${BRAND.amber};text-decoration:none;word-break:break-all;font-size:12px;">${verifyUrl}</a>
+    </p>
+  `);
+
+  const text = `Verify your email for ${productName} on MRR.fyi.\n\nClick here to verify: ${verifyUrl}\n\nOnce verified, your profile will go live on the leaderboard.\n\n— MRR.fyi`;
+
+  const resend = await getResend();
+  await resend.emails.send({
+    from: "MRR.fyi <onboarding@resend.dev>",
+    to: email,
+    subject: `Verify your email for ${productName} on MRR.fyi`,
+    text,
+    html,
+  });
+}
+
 export async function sendUpdateLink(
   email: string,
   productName: string,

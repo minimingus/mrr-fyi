@@ -9,6 +9,7 @@ export async function GET(req: NextRequest) {
   if (limited) return limited;
 
   const founders = await prisma.founder.findMany({
+    where: { emailVerified: true },
     orderBy: [{ featured: "desc" }, { mrr: "desc" }],
     take: 50,
     include: {

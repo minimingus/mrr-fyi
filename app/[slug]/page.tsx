@@ -34,7 +34,7 @@ async function getFounder(slug: string) {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const founder = await getFounder(slug);
-  if (!founder) return {};
+  if (!founder || !founder.emailVerified) return {};
 
   const title = `${founder.productName} — ${formatMRR(founder.mrr, founder.currency)}/mo`;
   const description = `${founder.name} is making ${formatMRR(founder.mrr, founder.currency)}/mo with ${founder.productName}. Follow their journey on MRR.fyi.`;
@@ -61,13 +61,13 @@ export default async function FounderProfile({ params, searchParams }: Props) {
   const { slug } = await params;
   const founder = await getFounder(slug);
 
-  if (!founder) notFound();
+  if (!founder || !founder.emailVerified) notFound();
 
   const { updated, submitted } = await searchParams;
 
   const previousMRR = founder.snapshots[1]?.mrr ?? null;
   const growth = previousMRR !== null ? growthPercent(founder.mrr, previousMRR) : null;
-  const rank = await prisma.founder.count({ where: { mrr: { gt: founder.mrr } } }) + 1;
+  const rank = await prisma.founder.count({ where: { emailVerified: true, mrr: { gt: founder.mrr } } }) + 1;
 
   const jsonLd = {
     "@context": "https://schema.org",

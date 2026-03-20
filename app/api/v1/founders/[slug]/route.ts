@@ -22,12 +22,12 @@ export async function GET(
     },
   });
 
-  if (!founder) {
+  if (!founder || !founder.emailVerified) {
     return NextResponse.json({ error: "Founder not found" }, { status: 404 });
   }
 
   const rank = await prisma.founder.count({
-    where: { mrr: { gt: founder.mrr } },
+    where: { emailVerified: true, mrr: { gt: founder.mrr } },
   });
 
   const milestones = computeMilestones(founder.snapshots);
