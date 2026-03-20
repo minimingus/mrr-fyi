@@ -9,6 +9,8 @@ interface ProfileData {
   productUrl: string;
   description: string;
   twitter: string;
+  referralCode: string | null;
+  referralCount: number;
 }
 
 export default function UpdatePage() {
@@ -24,7 +26,10 @@ export default function UpdatePage() {
     productUrl: "",
     description: "",
     twitter: "",
+    referralCode: null,
+    referralCount: 0,
   });
+  const [copied, setCopied] = useState(false);
   const [profileLoading, setProfileLoading] = useState(true);
   const [profileSubmitting, setProfileSubmitting] = useState(false);
   const [profileError, setProfileError] = useState<string | null>(null);
@@ -44,6 +49,8 @@ export default function UpdatePage() {
             productUrl: data.productUrl ?? "",
             description: data.description ?? "",
             twitter: data.twitter ?? "",
+            referralCode: data.referralCode ?? null,
+            referralCount: data.referralCount ?? 0,
           });
         }
       } catch {
@@ -294,6 +301,52 @@ export default function UpdatePage() {
           </form>
         )}
       </div>
+      {/* Referral Section */}
+      {profile.referralCode && (
+        <div className="mt-16 pt-10 border-t border-[var(--border)]">
+          <h2
+            className="text-2xl mb-2"
+            style={{ fontFamily: "var(--font-dm-serif)" }}
+          >
+            Invite founders.
+          </h2>
+          <p className="text-sm text-[var(--text-muted)] mb-6">
+            Share your referral link. When someone joins through it, you get
+            credit on your profile.
+          </p>
+
+          <div className="flex gap-2">
+            <input
+              type="text"
+              readOnly
+              value={`${typeof window !== "undefined" ? window.location.origin : ""}/ref/${profile.referralCode}`}
+              className={inputClass + " flex-1 text-xs"}
+            />
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText(
+                  `${window.location.origin}/ref/${profile.referralCode}`
+                );
+                setCopied(true);
+                setTimeout(() => setCopied(false), 2000);
+              }}
+              className="px-4 py-2.5 bg-[var(--amber)] text-black text-sm font-semibold rounded-md hover:bg-amber-400 transition-colors whitespace-nowrap"
+            >
+              {copied ? "Copied" : "Copy link"}
+            </button>
+          </div>
+
+          {profile.referralCount > 0 && (
+            <p className="text-sm text-[var(--text-muted)] mt-4">
+              You&apos;ve referred{" "}
+              <strong className="text-[var(--text)]">
+                {profile.referralCount}
+              </strong>{" "}
+              founder{profile.referralCount !== 1 ? "s" : ""} so far.
+            </p>
+          )}
+        </div>
+      )}
     </div>
   );
 }

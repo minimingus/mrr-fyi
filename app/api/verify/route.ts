@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { sendUpdateLink } from "@/lib/email";
+import { sendUpdateLink, sendReferralNotification } from "@/lib/email";
 import { rateLimit } from "@/lib/rate-limit";
 
 export async function POST(req: NextRequest) {
@@ -40,6 +40,41 @@ export async function POST(req: NextRequest) {
         await sendUpdateLink(founder.email, founder.productName, founder.updateToken);
       } catch (err) {
         console.error("[verify] failed to send update link:", err);
+      }
+    }
+
+    // Handle referral: create Referral record and notify referrer
+    if (founder.referredBy) {
+      try {
+        const referrer = await prisma.founder.findUnique({
+          where: { referralCode: founder.referredBy },
+          select: { id: true, email: true, productName: true, updateToken: true },
+        });
+
+        if (referrer && referrer.id !== founder.id) {
+          await prisma.referral.create({
+            data: {
+              referrerId: referrer.id,
+              referredId: founder.id,
+            },
+          });
+
+          if (referrer.email && referrer.updateToken) {
+            const totalReferrals = await prisma.referral.count({
+              where: { referrerId: referrer.id },
+            });
+            await sendReferralNotification(
+              referrer.email,
+              referrer.productName,
+              founder.productName,
+              founder.slug,
+              totalReferrals,
+              referrer.updateToken
+            );
+          }
+        }
+      } catch (err) {
+        console.error("[verify] referral processing error:", err);
       }
     }
 

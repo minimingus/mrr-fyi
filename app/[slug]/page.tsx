@@ -27,6 +27,9 @@ async function getFounder(slug: string) {
       milestones: {
         orderBy: { amount: "asc" },
       },
+      _count: {
+        select: { referralsMade: true },
+      },
     },
   });
 }
@@ -285,6 +288,14 @@ export default async function FounderProfile({ params, searchParams }: Props) {
               year: "numeric",
             }),
           },
+          ...(founder._count.referralsMade > 0
+            ? [
+                {
+                  label: "Founders referred",
+                  value: String(founder._count.referralsMade),
+                },
+              ]
+            : []),
         ].map((stat) => (
           <div
             key={stat.label}
