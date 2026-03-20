@@ -25,13 +25,13 @@ async function getFounder(slug: string) {
     include: {
       snapshots: {
         orderBy: { recordedAt: "desc" },
-        take: 24,
+        take: 12,
       },
       milestones: {
         orderBy: { amount: "asc" },
       },
       _count: {
-        select: { referralsMade: true },
+        select: { referralsMade: true, snapshots: true },
       },
     },
   });
@@ -306,16 +306,18 @@ export default async function FounderProfile({ params, searchParams }: Props) {
       )}
 
       {/* MRR Chart */}
-      <div
-        className="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] p-6 mb-6 animate-fade-up stagger-2"
-      >
-        <h2
-          className="text-sm font-medium text-[var(--text-muted)] mb-4 mono uppercase tracking-widest"
+      {founder.snapshots.length >= 2 && (
+        <div
+          className="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] p-6 mb-6 animate-fade-up stagger-2"
         >
-          MRR over time
-        </h2>
-        <MRRChart snapshots={founder.snapshots} currency={founder.currency} />
-      </div>
+          <h2
+            className="text-sm font-medium text-[var(--text-muted)] mb-4 mono uppercase tracking-widest"
+          >
+            MRR over time
+          </h2>
+          <MRRChart snapshots={founder.snapshots} currency={founder.currency} />
+        </div>
+      )}
 
       {/* Milestones */}
       {founder.milestones.length > 0 && (
@@ -349,7 +351,7 @@ export default async function FounderProfile({ params, searchParams }: Props) {
           },
           {
             label: "Snapshots",
-            value: String(founder.snapshots.length),
+            value: String(founder._count.snapshots),
           },
           {
             label: "On board since",
