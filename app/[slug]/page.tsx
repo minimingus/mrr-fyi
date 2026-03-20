@@ -93,6 +93,12 @@ export default async function FounderProfile({ params, searchParams }: Props) {
   const growth = previousMRR !== null ? growthPercent(founder.mrr, previousMRR) : null;
   const rank = await prisma.founder.count({ where: { emailVerified: true, mrr: { gt: founder.mrr } } }) + 1;
 
+  const mrrDollars = founder.mrr / 100;
+  const mrrShortText = mrrDollars >= 1000
+    ? `$${Math.round(mrrDollars / 1000)}k`
+    : `$${Math.round(mrrDollars)}`;
+  const shareMRRText = `Crossed ${mrrShortText} MRR with ${founder.productName} 🚀 Tracking progress publicly at mrr.fyi/${founder.slug}`;
+
   const jsonLd = [
     {
       "@context": "https://schema.org",
@@ -260,6 +266,21 @@ export default async function FounderProfile({ params, searchParams }: Props) {
           <p className="mt-4 text-sm text-[var(--text-muted)] border-t border-[var(--border)] pt-4">
             {founder.description}
           </p>
+        )}
+
+        {founder._count.snapshots >= 1 && (
+          <div className="mt-4 pt-4 border-t border-[var(--border)] flex items-center justify-between gap-3">
+            <p className="text-xs text-[var(--text-dim)]">
+              Share your journey — let your followers discover mrr.fyi
+            </p>
+            <ShareButton
+              text={shareMRRText}
+              url={`https://mrr.fyi/${founder.slug}`}
+              variant="amber"
+              label="Share my MRR"
+              source="profile_share_mrr"
+            />
+          </div>
         )}
 
         <div className="mt-4 flex items-center gap-4">
