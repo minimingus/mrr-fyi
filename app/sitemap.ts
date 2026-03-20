@@ -2,7 +2,7 @@
 import { MetadataRoute } from "next";
 import { prisma } from "@/lib/prisma";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 3600; // rebuild sitemap every hour
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const founders = await prisma.founder.findMany({

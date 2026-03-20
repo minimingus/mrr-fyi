@@ -41,19 +41,29 @@ export const metadata: Metadata = {
   },
 };
 
-const jsonLd = {
-  "@context": "https://schema.org",
-  "@type": "WebSite",
-  name: "MRR.fyi",
-  url: "https://mrr.fyi",
-  description:
-    "Track and compare MRR from indie hackers building in public. See real revenue data from founders sharing their journey transparently.",
-  publisher: {
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "MRR.fyi",
+    url: "https://mrr.fyi",
+    description:
+      "Track and compare MRR from indie hackers building in public. See real revenue data from founders sharing their journey transparently.",
+    potentialAction: {
+      "@type": "SearchAction",
+      target: "https://mrr.fyi/?q={search_term_string}",
+      "query-input": "required name=search_term_string",
+    },
+  },
+  {
+    "@context": "https://schema.org",
     "@type": "Organization",
     name: "MRR.fyi",
     url: "https://mrr.fyi",
+    description: "Public indie revenue leaderboard for indie hackers building in public.",
+    sameAs: ["https://x.com/mrrfyi"],
   },
-};
+];
 
 export default function RootLayout({
   children,
