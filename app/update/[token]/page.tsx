@@ -15,6 +15,8 @@ interface ProfileData {
   productUrl: string;
   description: string;
   category: string;
+  mrrGoal: number | null;
+  currentMrr: number;
   twitter: string;
   referralCode: string | null;
   referralCount: number;
@@ -34,6 +36,8 @@ export default function UpdatePage() {
     productUrl: "",
     description: "",
     category: "",
+    mrrGoal: null,
+    currentMrr: 0,
     twitter: "",
     referralCode: null,
     referralCount: 0,
@@ -60,6 +64,8 @@ export default function UpdatePage() {
             productUrl: data.productUrl ?? "",
             description: data.description ?? "",
             category: data.category ?? "",
+            mrrGoal: data.mrrGoal ? data.mrrGoal / 100 : null,
+            currentMrr: data.mrr ? data.mrr / 100 : 0,
             twitter: data.twitter ?? "",
             referralCode: data.referralCode ?? null,
             referralCount: data.referralCount ?? 0,
@@ -123,6 +129,7 @@ export default function UpdatePage() {
           productUrl: profile.productUrl,
           description: profile.description || undefined,
           category: profile.category || undefined,
+          mrrGoal: profile.mrrGoal,
           twitter: profile.twitter || undefined,
         }),
       });
@@ -345,6 +352,50 @@ export default function UpdatePage() {
                 rows={3}
                 className={inputClass + " resize-none"}
               />
+            </div>
+
+            <div>
+              <label className={labelClass}>
+                MRR Goal{" "}
+                <span className="text-[var(--text-dim)] font-normal">
+                  (optional, in dollars — shown publicly on your profile)
+                </span>
+              </label>
+              <input
+                type="number"
+                min="0"
+                step="1"
+                value={profile.mrrGoal ?? ""}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setProfile((prev) => ({
+                    ...prev,
+                    mrrGoal: val === "" ? null : parseFloat(val),
+                  }));
+                }}
+                placeholder="e.g. 10000"
+                className={inputClass}
+              />
+              {profile.mrrGoal && profile.currentMrr > 0 && (
+                <div className="mt-2">
+                  <div className="flex justify-between text-xs text-[var(--text-dim)] mb-1">
+                    <span>${profile.currentMrr.toLocaleString()}/mo</span>
+                    <span>${profile.mrrGoal.toLocaleString()}/mo goal</span>
+                  </div>
+                  <div className="h-2 rounded-full bg-[var(--border)] overflow-hidden">
+                    <div
+                      className="h-full rounded-full transition-all"
+                      style={{
+                        width: `${Math.min(100, (profile.currentMrr / profile.mrrGoal) * 100)}%`,
+                        background: profile.currentMrr >= profile.mrrGoal ? "var(--emerald)" : "var(--amber)",
+                      }}
+                    />
+                  </div>
+                  <p className="text-xs text-[var(--text-dim)] mt-1">
+                    {Math.min(100, Math.round((profile.currentMrr / profile.mrrGoal) * 100))}% of goal
+                  </p>
+                </div>
+              )}
             </div>
 
             <div>

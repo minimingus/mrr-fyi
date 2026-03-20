@@ -21,6 +21,7 @@ export async function GET(request: Request) {
       email: true,
       productName: true,
       mrr: true,
+      mrrGoal: true,
       currency: true,
       updateToken: true,
     },
@@ -63,7 +64,8 @@ export async function GET(request: Request) {
         currentRank,
         previousRank,
         top3,
-        founder.updateToken
+        founder.updateToken,
+        founder.mrrGoal
       );
       sent++;
     } catch (err) {

@@ -34,6 +34,42 @@ async function getFounder(slug: string) {
   });
 }
 
+function GoalProgressBar({ mrr, mrrGoal, currency }: { mrr: number; mrrGoal: number; currency: string }) {
+  const symbol = currency === "EUR" ? "€" : currency === "GBP" ? "£" : "$";
+  const percent = Math.min(100, Math.round((mrr / mrrGoal) * 100));
+  const reached = mrr >= mrrGoal;
+  const goalFormatted = (mrrGoal / 100).toLocaleString("en-US");
+  const mrrFormatted = (mrr / 100).toLocaleString("en-US");
+
+  return (
+    <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] p-6 mb-6 animate-fade-up stagger-2">
+      <h2 className="text-sm font-medium text-[var(--text-muted)] mb-4 mono uppercase tracking-widest">
+        MRR Goal
+      </h2>
+      <div className="flex justify-between text-sm mb-2">
+        <span className="text-[var(--text)]">{symbol}{mrrFormatted}/mo</span>
+        <span className="text-[var(--text-muted)]">
+          {reached ? "Goal reached!" : `${symbol}${goalFormatted}/mo goal`}
+        </span>
+      </div>
+      <div className="h-2.5 rounded-full bg-[var(--border)] overflow-hidden mb-2">
+        <div
+          className="h-full rounded-full transition-all"
+          style={{
+            width: `${percent}%`,
+            background: reached ? "var(--emerald)" : "var(--amber)",
+          }}
+        />
+      </div>
+      <p className="text-xs text-[var(--text-dim)]">
+        {reached
+          ? `${symbol}${goalFormatted}/mo achieved`
+          : `${percent}% of ${symbol}${goalFormatted}/mo goal`}
+      </p>
+    </div>
+  );
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const founder = await getFounder(slug);
@@ -265,6 +301,11 @@ export default async function FounderProfile({ params, searchParams }: Props) {
         </h2>
         <MRRChart snapshots={founder.snapshots} currency={founder.currency} />
       </div>
+
+      {/* Goal Progress */}
+      {founder.mrrGoal && (
+        <GoalProgressBar mrr={founder.mrr} mrrGoal={founder.mrrGoal} currency={founder.currency} />
+      )}
 
       {/* Milestones */}
       {founder.milestones.length > 0 && (

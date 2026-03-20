@@ -23,6 +23,7 @@ model Founder {
   referredBy       String?
   onboardingStep   Int      @default(0)
   mrr         Int
+  mrrGoal     Int?
   currency    String        @default("USD")
   verified    Boolean       @default(false)
   featured    Boolean       @default(false)
