@@ -27,7 +27,7 @@ describe("POST /api/webhook", () => {
     const req = createRawRequest("/api/webhook", body);
     const res = await POST(req);
 
-    expect(res.status).toBe(400);
+    expect(res.status).toBe(401);
     const data = await res.json();
     expect(data.error).toMatch(/signature/i);
   });
@@ -39,7 +39,7 @@ describe("POST /api/webhook", () => {
     });
     const res = await POST(req);
 
-    expect(res.status).toBe(400);
+    expect(res.status).toBe(401);
     const data = await res.json();
     expect(data.error).toMatch(/signature/i);
   });
