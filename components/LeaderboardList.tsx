@@ -80,7 +80,7 @@ export function LeaderboardList({ founders }: LeaderboardListProps) {
       <div className="mb-4 flex flex-col sm:flex-row gap-2">
         <input
           type="text"
-          defaultValue={query}
+          value={query}
           onChange={(e) => updateParams({ q: e.target.value })}
           placeholder="Search by founder or product name..."
           className="flex-1 px-4 py-2.5 rounded-lg border border-[var(--border)] bg-[var(--bg-card)] text-[var(--text)] text-sm placeholder:text-[var(--text-dim)] focus:outline-none focus:border-[var(--amber)] transition-colors mono"
