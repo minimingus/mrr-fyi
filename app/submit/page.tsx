@@ -249,6 +249,46 @@ export default function SubmitPage() {
               <p className={errorClass}>{errors.twitter.message}</p>
             )}
           </div>
+
+          <div>
+            <label className={labelClass}>Bio <span className="text-[var(--text-dim)] font-normal">(optional, max 280 chars)</span></label>
+            <textarea
+              {...register("bio")}
+              placeholder="Short bio about you as a founder"
+              rows={2}
+              maxLength={280}
+              className={inputClass + " resize-none"}
+            />
+            {errors.bio && (
+              <p className={errorClass}>{errors.bio.message}</p>
+            )}
+          </div>
+
+          <div>
+            <label className={labelClass}>Personal Website <span className="text-[var(--text-dim)] font-normal">(optional)</span></label>
+            <input
+              {...register("websiteUrl")}
+              type="url"
+              placeholder="https://yoursite.com"
+              className={inputClass}
+            />
+            {errors.websiteUrl && (
+              <p className={errorClass}>{errors.websiteUrl.message}</p>
+            )}
+          </div>
+
+          <div>
+            <label className={labelClass}>Avatar URL <span className="text-[var(--text-dim)] font-normal">(optional, Gravatar or direct link)</span></label>
+            <input
+              {...register("avatarUrl")}
+              type="url"
+              placeholder="https://gravatar.com/avatar/..."
+              className={inputClass}
+            />
+            {errors.avatarUrl && (
+              <p className={errorClass}>{errors.avatarUrl.message}</p>
+            )}
+          </div>
         </div>
 
         {/* Error */}

@@ -171,42 +171,75 @@ export default async function FounderProfile({ params, searchParams }: Props) {
         }`}
       >
         <div className="flex items-start justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 flex-wrap mb-1">
-              <h1
-                className="text-2xl"
-                style={{ fontFamily: "var(--font-dm-serif)" }}
+          <div className="flex items-start gap-4">
+            {/* Avatar */}
+            {founder.avatarUrl ? (
+              <img
+                src={founder.avatarUrl}
+                alt={founder.name}
+                className="w-14 h-14 rounded-full object-cover shrink-0 border border-[var(--border)]"
+              />
+            ) : (
+              <div
+                className="w-14 h-14 rounded-full shrink-0 flex items-center justify-center text-lg font-semibold border border-[var(--border)] bg-[var(--bg)]"
+                style={{ color: "var(--amber)" }}
               >
-                {founder.productName}
-              </h1>
-              {founder.featured && (
-                <span className="text-[10px] font-semibold mono px-1.5 py-0.5 rounded-sm bg-[var(--amber)] text-black">
-                  FEATURED
-                </span>
-              )}
-              {founder.verified && (
-                <span
-                  className="text-[10px] font-semibold mono px-1.5 py-0.5 rounded-sm"
-                  style={{ background: "rgba(16,185,129,0.15)", color: "var(--emerald)" }}
+                {founder.name.split(" ").map((w: string) => w[0]).slice(0, 2).join("").toUpperCase()}
+              </div>
+            )}
+            <div>
+              <div className="flex items-center gap-2 flex-wrap mb-1">
+                <h1
+                  className="text-2xl"
+                  style={{ fontFamily: "var(--font-dm-serif)" }}
                 >
-                  ✓ VERIFIED
-                </span>
-              )}
-            </div>
-            <div className="flex items-center gap-2 text-sm text-[var(--text-muted)]">
-              <span>{founder.name}</span>
-              {founder.twitter && (
-                <>
-                  <span className="text-[var(--text-dim)]">·</span>
-                  <a
-                    href={`https://x.com/${founder.twitter}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:text-[var(--amber)] transition-colors"
+                  {founder.productName}
+                </h1>
+                {founder.featured && (
+                  <span className="text-[10px] font-semibold mono px-1.5 py-0.5 rounded-sm bg-[var(--amber)] text-black">
+                    FEATURED
+                  </span>
+                )}
+                {founder.verified && (
+                  <span
+                    className="text-[10px] font-semibold mono px-1.5 py-0.5 rounded-sm"
+                    style={{ background: "rgba(16,185,129,0.15)", color: "var(--emerald)" }}
                   >
-                    @{founder.twitter}
-                  </a>
-                </>
+                    ✓ VERIFIED
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-2 text-sm text-[var(--text-muted)] flex-wrap">
+                <span>{founder.name}</span>
+                {founder.twitter && (
+                  <>
+                    <span className="text-[var(--text-dim)]">·</span>
+                    <a
+                      href={`https://x.com/${founder.twitter}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-[var(--amber)] transition-colors"
+                    >
+                      @{founder.twitter}
+                    </a>
+                  </>
+                )}
+                {founder.websiteUrl && (
+                  <>
+                    <span className="text-[var(--text-dim)]">·</span>
+                    <a
+                      href={founder.websiteUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-[var(--amber)] transition-colors truncate max-w-[180px]"
+                    >
+                      {founder.websiteUrl.replace(/^https?:\/\//, "")}
+                    </a>
+                  </>
+                )}
+              </div>
+              {founder.bio && (
+                <p className="mt-2 text-sm text-[var(--text-muted)]">{founder.bio}</p>
               )}
             </div>
           </div>

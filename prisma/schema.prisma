@@ -11,6 +11,9 @@ model Founder {
   slug        String        @unique
   name        String
   twitter     String?
+  bio         String?
+  websiteUrl  String?
+  avatarUrl   String?
   productName String
   productUrl  String
   description String?

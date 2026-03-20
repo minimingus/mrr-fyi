@@ -16,6 +16,9 @@ interface ProfileData {
   description: string;
   category: string;
   twitter: string;
+  bio: string;
+  websiteUrl: string;
+  avatarUrl: string;
   referralCode: string | null;
   referralCount: number;
 }
@@ -35,6 +38,9 @@ export default function UpdatePage() {
     description: "",
     category: "",
     twitter: "",
+    bio: "",
+    websiteUrl: "",
+    avatarUrl: "",
     referralCode: null,
     referralCount: 0,
   });
@@ -61,6 +67,9 @@ export default function UpdatePage() {
             description: data.description ?? "",
             category: data.category ?? "",
             twitter: data.twitter ?? "",
+            bio: data.bio ?? "",
+            websiteUrl: data.websiteUrl ?? "",
+            avatarUrl: data.avatarUrl ?? "",
             referralCode: data.referralCode ?? null,
             referralCount: data.referralCount ?? 0,
           });
@@ -124,6 +133,9 @@ export default function UpdatePage() {
           description: profile.description || undefined,
           category: profile.category || undefined,
           twitter: profile.twitter || undefined,
+          bio: profile.bio || undefined,
+          websiteUrl: profile.websiteUrl || undefined,
+          avatarUrl: profile.avatarUrl || undefined,
         }),
       });
       const json = await res.json();
@@ -382,6 +394,55 @@ export default function UpdatePage() {
                 value={profile.twitter}
                 onChange={(e) => updateProfile("twitter", e.target.value)}
                 placeholder="janedoe"
+                className={inputClass}
+              />
+            </div>
+
+            <div>
+              <label className={labelClass}>
+                Bio{" "}
+                <span className="text-[var(--text-dim)] font-normal">
+                  (optional, max 280 chars)
+                </span>
+              </label>
+              <textarea
+                value={profile.bio}
+                onChange={(e) => updateProfile("bio", e.target.value)}
+                placeholder="Short bio about you as a founder"
+                maxLength={280}
+                rows={2}
+                className={inputClass + " resize-none"}
+              />
+            </div>
+
+            <div>
+              <label className={labelClass}>
+                Personal website{" "}
+                <span className="text-[var(--text-dim)] font-normal">
+                  (optional)
+                </span>
+              </label>
+              <input
+                type="url"
+                value={profile.websiteUrl}
+                onChange={(e) => updateProfile("websiteUrl", e.target.value)}
+                placeholder="https://yoursite.com"
+                className={inputClass}
+              />
+            </div>
+
+            <div>
+              <label className={labelClass}>
+                Avatar URL{" "}
+                <span className="text-[var(--text-dim)] font-normal">
+                  (optional, Gravatar or direct link)
+                </span>
+              </label>
+              <input
+                type="url"
+                value={profile.avatarUrl}
+                onChange={(e) => updateProfile("avatarUrl", e.target.value)}
+                placeholder="https://gravatar.com/avatar/..."
                 className={inputClass}
               />
             </div>

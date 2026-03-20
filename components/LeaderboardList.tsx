@@ -111,6 +111,7 @@ export function LeaderboardList({ founders: initialFounders, totalCount, pageSiz
         slug: d.slug as string,
         name: d.name as string,
         twitter: d.twitter as string | null,
+        avatarUrl: (d.avatarUrl as string | null) ?? null,
         productName: d.productName as string,
         productUrl: d.productUrl as string | null,
         description: d.description as string | null,

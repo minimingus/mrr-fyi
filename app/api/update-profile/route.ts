@@ -17,6 +17,19 @@ const schema = z.object({
     .string()
     .optional()
     .transform((v) => (v ? v.replace(/^@/, "") : v)),
+  bio: z.string().max(280, "Bio must be max 280 characters").optional(),
+  websiteUrl: z
+    .string()
+    .url("Must be a valid URL")
+    .refine((url) => !url.toLowerCase().startsWith("javascript:"), { message: "Invalid URL scheme" })
+    .optional()
+    .or(z.literal("")),
+  avatarUrl: z
+    .string()
+    .url("Must be a valid URL")
+    .refine((url) => !url.toLowerCase().startsWith("javascript:"), { message: "Invalid URL scheme" })
+    .optional()
+    .or(z.literal("")),
 });
 
 export async function GET(req: NextRequest) {
@@ -35,6 +48,9 @@ export async function GET(req: NextRequest) {
         description: true,
         category: true,
         twitter: true,
+        bio: true,
+        websiteUrl: true,
+        avatarUrl: true,
         verified: true,
         featured: true,
         slug: true,
@@ -67,6 +83,9 @@ export async function GET(req: NextRequest) {
       description: founder.description,
       category: founder.category,
       twitter: founder.twitter,
+      bio: founder.bio,
+      websiteUrl: founder.websiteUrl,
+      avatarUrl: founder.avatarUrl,
       verified: founder.verified,
       featured: founder.featured,
       slug: founder.slug,
@@ -104,7 +123,7 @@ export async function PATCH(req: NextRequest) {
       );
     }
 
-    const { token, name, productName, productUrl, description, category, twitter } =
+    const { token, name, productName, productUrl, description, category, twitter, bio, websiteUrl, avatarUrl } =
       parsed.data;
 
     const founder = await prisma.founder.findUnique({
@@ -127,6 +146,9 @@ export async function PATCH(req: NextRequest) {
         description: description ?? null,
         category: category ?? null,
         twitter: twitter ?? null,
+        bio: bio ?? null,
+        websiteUrl: websiteUrl || null,
+        avatarUrl: avatarUrl || null,
       },
     });
 
