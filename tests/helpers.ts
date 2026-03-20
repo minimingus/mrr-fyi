@@ -21,7 +21,8 @@ export function createRequest(
   if (body !== undefined) {
     init.body = JSON.stringify(body);
   }
-  return new NextRequest(new URL(url, "http://localhost:3000"), init);
+  const { signal, ...rest } = init;
+  return new NextRequest(new URL(url, "http://localhost:3000"), rest);
 }
 
 /**
