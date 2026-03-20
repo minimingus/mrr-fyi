@@ -50,7 +50,14 @@ export default function UpdatePage() {
   const [profileError, setProfileError] = useState<string | null>(null);
   const [profileSuccess, setProfileSuccess] = useState(false);
   const [trialExpired, setTrialExpired] = useState(false);
+  const [trialHoursLeft, setTrialHoursLeft] = useState<number | null>(null);
   const [founderSlug, setFounderSlug] = useState<string | null>(null);
+  const [bannerDismissed, setBannerDismissed] = useState(false);
+
+  useEffect(() => {
+    const dismissed = sessionStorage.getItem("trial-warning-dismissed");
+    if (dismissed) setBannerDismissed(true);
+  }, []);
 
   useEffect(() => {
     async function loadProfile() {
@@ -75,6 +82,14 @@ export default function UpdatePage() {
           });
           if (data.trialExpired) setTrialExpired(true);
           if (data.slug) setFounderSlug(data.slug);
+          if (data.trialEndsAt && !data.trialExpired) {
+            const hoursLeft = Math.ceil(
+              (new Date(data.trialEndsAt).getTime() - Date.now()) / (1000 * 60 * 60)
+            );
+            if (hoursLeft > 0 && hoursLeft <= 48) {
+              setTrialHoursLeft(hoursLeft);
+            }
+          }
         }
       } catch {
         // Non-critical — form will just start empty
@@ -84,6 +99,11 @@ export default function UpdatePage() {
     }
     loadProfile();
   }, [params.token]);
+
+  function dismissBanner() {
+    sessionStorage.setItem("trial-warning-dismissed", "1");
+    setBannerDismissed(true);
+  }
 
   async function handleMrrSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -162,6 +182,28 @@ export default function UpdatePage() {
     "block text-xs text-[var(--text-muted)] mb-1.5 font-medium tracking-wide";
 
   return (
+    <>
+      {trialHoursLeft !== null && !bannerDismissed && (
+        <div className="sticky top-0 z-50 w-full px-4 py-3 flex items-center justify-between gap-4 bg-[var(--amber)] text-black text-sm font-medium">
+          <span className="flex-1 text-center">
+            Your trial expires in {trialHoursLeft} hour{trialHoursLeft !== 1 ? "s" : ""} — upgrade to keep your Verified badge and stay on the leaderboard.{" "}
+            <a
+              href={founderSlug ? `/pricing?slug=${founderSlug}` : "/pricing"}
+              onClick={() => trackEvent("Trial Expiry Banner Click")}
+              className="underline font-semibold hover:opacity-80 transition-opacity"
+            >
+              Upgrade now →
+            </a>
+          </span>
+          <button
+            onClick={dismissBanner}
+            aria-label="Dismiss banner"
+            className="shrink-0 text-black/70 hover:text-black transition-colors text-lg leading-none"
+          >
+            ×
+          </button>
+        </div>
+      )}
     <div className="max-w-sm mx-auto px-4 py-16">
       <a
         href="/"
@@ -516,5 +558,6 @@ export default function UpdatePage() {
         </div>
       )}
     </div>
+    </>
   );
 }
