@@ -7,6 +7,8 @@ import { MRRChart } from "@/components/MRRChart";
 import { MilestoneBadges } from "@/components/MilestoneBadges";
 import { ShareButton } from "@/components/ShareButton";
 import { EmbedButton } from "@/components/EmbedButton";
+import { BadgeButton } from "@/components/BadgeButton";
+import { BadgeSection } from "@/components/BadgeSection";
 import { formatMRR, growthPercent } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -221,6 +223,7 @@ export default async function FounderProfile({ params, searchParams }: Props) {
             Rank #{rank} on leaderboard
           </span>
           <div className="ml-auto flex items-center gap-2">
+            <BadgeButton slug={founder.slug} />
             <EmbedButton slug={founder.slug} />
             <ShareButton
               text={`${founder.productName} is making ${formatMRR(founder.mrr, founder.currency)}/mo — ranked #${rank} on MRR.fyi 🚀`}
@@ -326,6 +329,17 @@ export default async function FounderProfile({ params, searchParams }: Props) {
             <div className="text-xs text-[var(--text-dim)] mt-0.5">{stat.label}</div>
           </div>
         ))}
+      </div>
+
+      {/* Share Badge */}
+      <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] p-6 mb-8 animate-fade-up stagger-4">
+        <h2 className="text-sm font-medium text-[var(--text-muted)] mono uppercase tracking-widest mb-4">
+          Share badge
+        </h2>
+        <p className="text-xs text-[var(--text-dim)] mb-4">
+          Add a live MRR badge to your README or website. It updates automatically.
+        </p>
+        <BadgeSection slug={founder.slug} />
       </div>
 
       {/* Promotion CTA */}
