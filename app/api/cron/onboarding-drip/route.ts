@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { sendOnboardingTips, sendOnboardingRecap } from "@/lib/email";
+import { sendOnboardingTips, sendOnboardingTrialEnding } from "@/lib/email";
 
 export const dynamic = "force-dynamic";
 
@@ -41,41 +41,26 @@ export async function GET(request: Request) {
     }
   }
 
-  // Day 7 emails: founders with onboardingStep=2 who signed up >= 7 days ago
-  const sevenDaysAgo = new Date(now);
-  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+  // Day 6 emails: founders with onboardingStep=2 who signed up >= 6 days ago
+  const sixDaysAgo = new Date(now);
+  sixDaysAgo.setDate(sixDaysAgo.getDate() - 6);
 
-  const day7Founders = await prisma.founder.findMany({
+  const day6Founders = await prisma.founder.findMany({
     where: {
       emailVerified: true,
       onboardingStep: 2,
-      createdAt: { lte: sevenDaysAgo },
+      createdAt: { lte: sixDaysAgo },
     },
-    select: {
-      id: true,
-      email: true,
-      productName: true,
-      slug: true,
-      mrr: true,
-      currency: true,
-    },
+    select: { id: true, email: true, productName: true, slug: true },
   });
 
-  for (const founder of day7Founders) {
+  for (const founder of day6Founders) {
     if (!founder.email) continue;
     try {
-      const rank =
-        (await prisma.founder.count({
-          where: { emailVerified: true, mrr: { gt: founder.mrr } },
-        })) + 1;
-
-      await sendOnboardingRecap(
+      await sendOnboardingTrialEnding(
         founder.email,
         founder.productName,
-        founder.slug,
-        founder.mrr,
-        founder.currency,
-        rank
+        founder.slug
       );
       await prisma.founder.update({
         where: { id: founder.id },
@@ -83,14 +68,14 @@ export async function GET(request: Request) {
       });
       recapSent++;
     } catch (err) {
-      console.error(`[onboarding-drip] recap failed for ${founder.id}:`, err);
+      console.error(`[onboarding-drip] trial-ending failed for ${founder.id}:`, err);
     }
   }
 
   return NextResponse.json({
     tipsSent,
     tipsEligible: day3Founders.length,
-    recapSent,
-    recapEligible: day7Founders.length,
+    trialEndingSent: recapSent,
+    trialEndingEligible: day6Founders.length,
   });
 }
