@@ -92,7 +92,7 @@ async function getRecentActivity() {
       name: f.name,
       slug: f.slug,
       productName: f.productName,
-      detail: "joined the leaderboard",
+      detail: "got a verified profile",
       at: f.createdAt,
     })),
   ];
@@ -125,7 +125,7 @@ const TESTIMONIALS = [
   },
   {
     quote:
-      "Investors actually found me through the leaderboard. If you're building in public, there's no reason not to be here.",
+      "Investors actually found me through my verified profile. If you're building in public, there's no reason not to be here.",
     name: "Priya R.",
     product: "FormStack AI",
   },
@@ -176,7 +176,7 @@ export default async function Home() {
           href="/submit"
           className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--amber)] text-black font-semibold rounded-md hover:bg-amber-400 transition-all hover:scale-[1.02]"
         >
-          Join the Leaderboard →
+          Get Your Verified Profile →
         </a>
 
         {stats.totalFounders > 0 && (
@@ -264,7 +264,7 @@ export default async function Home() {
             href="/submit"
             className="inline-flex items-center gap-2 px-5 py-2.5 bg-[var(--amber)] text-black text-sm font-semibold rounded-md hover:bg-amber-400 transition-colors"
           >
-            Join the Leaderboard →
+            Get Your Verified Profile →
           </a>
         </div>
       ) : (
@@ -423,7 +423,7 @@ export default async function Home() {
           href="/submit"
           className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--amber)] text-black font-semibold rounded-md hover:bg-amber-400 transition-all hover:scale-[1.02]"
         >
-          Join the Leaderboard →
+          Get Your Verified Profile →
         </a>
         <p className="text-xs text-[var(--text-dim)] mt-4">
           Already listed?{" "}

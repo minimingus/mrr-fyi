@@ -99,7 +99,7 @@ export default async function FounderProfile({ params, searchParams }: Props) {
     : `$${Math.round(mrrDollars)}`;
   const shareMRRText = `Crossed ${mrrShortText} MRR with ${founder.productName} 🚀 Tracking progress publicly at mrr.fyi/${founder.slug}`;
   const rankMedal = rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : null;
-  const shareRankText = `${rankMedal ? `${rankMedal} ` : ""}Ranked #${rank} on the MRR.fyi leaderboard — ${founder.productName} is making ${formatMRR(founder.mrr, founder.currency)}/mo 🚀`;
+  const shareRankText = `${rankMedal ? `${rankMedal} ` : ""}${founder.productName} is making ${formatMRR(founder.mrr, founder.currency)}/mo — verified MRR profile on mrr.fyi 🚀`;
 
   const jsonLd = [
     {
@@ -155,7 +155,7 @@ export default async function FounderProfile({ params, searchParams }: Props) {
         >
           <span>
             {submitted
-              ? "You're on the leaderboard. Check your email for your private update link."
+              ? "Your profile is live. Check your email for your private update link."
               : "MRR updated. New snapshot recorded."}
           </span>
           <ShareButton
@@ -179,7 +179,7 @@ export default async function FounderProfile({ params, searchParams }: Props) {
         href="/"
         className="inline-flex items-center gap-1 text-xs text-[var(--text-dim)] hover:text-[var(--text-muted)] mb-8 transition-colors"
       >
-        ← Back to leaderboard
+        ← Back to profiles
       </a>
 
       {/* Header card */}
@@ -303,7 +303,7 @@ export default async function FounderProfile({ params, searchParams }: Props) {
             Visit {founder.productName} →
           </a>
           <span className="text-xs text-[var(--text-dim)]">
-            Rank #{rank} on leaderboard
+            Rank #{rank} on MRR.fyi
           </span>
           <div className="ml-auto flex items-center gap-2">
             <BadgeButton slug={founder.slug} />

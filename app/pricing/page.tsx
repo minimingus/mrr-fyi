@@ -13,7 +13,7 @@ const plans = [
     tagline: "Prove your revenue is real",
     features: [
       "✓ Verified badge on your profile",
-      "✓ Stand out on the leaderboard",
+      "✓ Stand out with a verified profile",
       "✓ Builds trust with visitors and investors",
       "✓ 7-day free trial",
       "✓ Cancel anytime",
@@ -62,7 +62,7 @@ function PricingContent() {
         href="/"
         className="inline-flex items-center gap-1 text-xs text-[var(--text-dim)] hover:text-[var(--text-muted)] mb-8 transition-colors"
       >
-        ← Back to leaderboard
+        ← Back to profiles
       </a>
 
       <div className="text-center mb-12">

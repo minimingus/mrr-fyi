@@ -23,21 +23,21 @@ const jetbrains = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MRR.fyi — Public Indie Revenue Leaderboard",
+  title: "MRR.fyi — Verified MRR Profiles for Indie Founders",
   description:
-    "Track and compare MRR from indie hackers building in public. See real revenue data from founders sharing their journey transparently.",
+    "Your verified MRR profile — the social proof page every indie hacker needs. Real revenue from real founders building in public.",
   metadataBase: new URL("https://mrr.fyi"),
   openGraph: {
-    title: "MRR.fyi — Public Indie Revenue Leaderboard",
-    description: "Real MRR from real indie hackers. Build in public.",
+    title: "MRR.fyi — Verified MRR Profiles for Indie Founders",
+    description: "Your verified MRR profile — the social proof page every indie hacker needs.",
     url: "https://mrr.fyi",
     siteName: "MRR.fyi",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "MRR.fyi — Public Indie Revenue Leaderboard",
-    description: "Real MRR from real indie hackers. Build in public.",
+    title: "MRR.fyi — Verified MRR Profiles for Indie Founders",
+    description: "Your verified MRR profile — the social proof page every indie hacker needs.",
   },
 };
 
@@ -60,7 +60,7 @@ const jsonLd = [
     "@type": "Organization",
     name: "MRR.fyi",
     url: "https://mrr.fyi",
-    description: "Public indie revenue leaderboard for indie hackers building in public.",
+    description: "Verified MRR profiles for indie founders building in public.",
     sameAs: ["https://x.com/mrrfyi"],
   },
 ];
@@ -97,7 +97,7 @@ export default function RootLayout({
                 MRR.fyi
               </span>
               <span className="text-[var(--text-dim)] text-xs">
-                indie revenue leaderboard
+                verified MRR profiles
               </span>
             </a>
             <div className="flex items-center gap-1">

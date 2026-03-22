@@ -188,7 +188,7 @@ export default function UpdatePage() {
       {trialHoursLeft !== null && !bannerDismissed && (
         <div className="sticky top-0 z-50 w-full px-4 py-3 flex items-center justify-between gap-4 bg-[var(--amber)] text-black text-sm font-medium">
           <span className="flex-1 text-center">
-            Your trial expires in {trialHoursLeft} hour{trialHoursLeft !== 1 ? "s" : ""} — upgrade to keep your Verified badge and stay on the leaderboard.{" "}
+            Your trial expires in {trialHoursLeft} hour{trialHoursLeft !== 1 ? "s" : ""} — upgrade to keep your Verified badge and stay on your verified profile.{" "}
             <a
               href={founderSlug ? `/pricing?slug=${founderSlug}` : "/pricing"}
               onClick={() => trackEvent("Trial Expiry Banner Click")}
@@ -211,7 +211,7 @@ export default function UpdatePage() {
         href="/"
         className="inline-flex items-center gap-1 text-xs text-[var(--text-dim)] hover:text-[var(--text-muted)] mb-10 transition-colors"
       >
-        ← Leaderboard
+        ← Back
       </a>
 
       {trialExpired && (
@@ -220,7 +220,7 @@ export default function UpdatePage() {
             Your free trial has ended
           </p>
           <p className="text-xs text-[var(--text-muted)] mb-3">
-            Upgrade now to keep your verified badge and stay visible on the leaderboard.
+            Upgrade now to keep your verified badge and stay visible with your verified profile.
           </p>
           <a
             href={founderSlug ? `/pricing?slug=${founderSlug}` : "/pricing"}
@@ -240,7 +240,7 @@ export default function UpdatePage() {
       </h1>
       <p className="text-sm text-[var(--text-muted)] mb-8">
         Enter your current monthly recurring revenue. A new snapshot will be
-        recorded and your position on the leaderboard will update immediately.
+        recorded and your verified profile will update immediately.
       </p>
 
       {mrrSuccess ? (
@@ -259,7 +259,7 @@ export default function UpdatePage() {
 
             <a
               href={buildTwitterIntentUrl(
-                `Just updated my MRR on the @mrrfyi leaderboard — building in public. Check it out: #buildinpublic`,
+                `Just updated my verified MRR profile on @mrrfyi — building in public. Check it out: #buildinpublic`,
                 `https://mrr.fyi/${mrrSuccess.slug}`
               )}
               target="_blank"
@@ -570,7 +570,7 @@ export default function UpdatePage() {
         <p className="text-sm text-[var(--text-muted)] mb-6">
           {planType
             ? `You're on the ${planType === "FEATURED" ? "Featured" : "Verified"} plan.`
-            : "No active plan. Upgrade to get a badge and stand out on the leaderboard."}
+            : "No active plan. Upgrade to get a verified badge and stand out with your profile."}
         </p>
         <a
           href={`/billing/${params.token}`}

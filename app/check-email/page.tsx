@@ -21,12 +21,12 @@ function CheckEmailContent() {
           <>
             We sent a verification link for{" "}
             <strong className="text-[var(--text)]">{product}</strong>. Click it
-            to go live on the leaderboard.
+            to publish your verified profile.
           </>
         ) : (
           <>
-            We sent a verification link to your email. Click it to go live on
-            the leaderboard.
+            We sent a verification link to your email. Click it to publish
+            your verified profile.
           </>
         )}
       </p>
