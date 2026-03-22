@@ -71,11 +71,15 @@ export function FounderRow({ founder, rank, style }: FounderRowProps) {
             )}
             {founder.stripeAccountId && (
               <span
-                className="text-[10px] font-semibold mono px-1.5 py-0.5 rounded-sm shrink-0"
-                style={{ background: "rgba(99,102,241,0.15)", color: "#818cf8" }}
-                title="MRR verified via Stripe"
+                className="text-[10px] font-semibold mono px-2 py-0.5 rounded-sm shrink-0 border"
+                style={{
+                  background: "rgba(99,102,241,0.15)",
+                  color: "#818cf8",
+                  borderColor: "rgba(99,102,241,0.4)",
+                }}
+                title="MRR verified via Stripe Connect"
               >
-                ⚡ STRIPE
+                ⚡ STRIPE VERIFIED
               </span>
             )}
           </div>
