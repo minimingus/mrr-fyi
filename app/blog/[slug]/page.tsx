@@ -46,8 +46,31 @@ export default async function BlogPostPage({ params }: Props) {
 
   if (!post) notFound();
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: post.title,
+    description: post.description,
+    datePublished: post.date,
+    dateModified: post.date,
+    url: `https://mrr.fyi/blog/${post.slug}`,
+    publisher: {
+      "@type": "Organization",
+      name: "MRR.fyi",
+      url: "https://mrr.fyi",
+    },
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": `https://mrr.fyi/blog/${post.slug}`,
+    },
+  };
+
   return (
     <div className="max-w-3xl mx-auto px-4 py-12">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <a
         href="/blog"
         className="inline-flex items-center gap-1 text-xs text-[var(--text-dim)] hover:text-[var(--text-muted)] mb-8 transition-colors"
