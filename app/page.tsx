@@ -4,6 +4,7 @@ import { LeaderboardList } from "@/components/LeaderboardList";
 import { ShareButton } from "@/components/ShareButton";
 import { formatMRR } from "@/lib/utils";
 import { BadgeCheck, Quote, Sparkles, TrendingUp, Users } from "lucide-react";
+import { getAllPosts } from "@/lib/blog";
 
 export const dynamic = "force-dynamic";
 
@@ -394,6 +395,49 @@ export default async function Home() {
           ))}
         </div>
       </div>
+
+      {/* Blog section */}
+      {(() => {
+        const posts = getAllPosts().slice(0, 3);
+        if (posts.length === 0) return null;
+        return (
+          <div className="mt-16 animate-fade-up" style={{ animationDelay: "0.26s", opacity: 0 }}>
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-xl" style={{ fontFamily: "var(--font-dm-serif)" }}>
+                From the blog
+              </h2>
+              <a
+                href="/blog"
+                className="text-xs text-[var(--text-dim)] hover:text-[var(--text-muted)] transition-colors"
+              >
+                All posts →
+              </a>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {posts.map((post) => (
+                <a
+                  key={post.slug}
+                  href={`/blog/${post.slug}`}
+                  className="group p-4 rounded-lg border border-[var(--border)] bg-[var(--bg-card)] hover:border-[var(--amber)] transition-colors flex flex-col gap-2"
+                >
+                  <p className="text-xs text-[var(--text-dim)] mono">
+                    {new Date(post.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                  </p>
+                  <h3 className="text-sm font-medium text-[var(--text)] group-hover:text-[var(--amber)] transition-colors leading-snug">
+                    {post.title}
+                  </h3>
+                  <p className="text-xs text-[var(--text-dim)] leading-relaxed line-clamp-2 flex-1">
+                    {post.description}
+                  </p>
+                  <span className="text-xs text-[var(--text-dim)] group-hover:text-[var(--amber)] transition-colors">
+                    Read →
+                  </span>
+                </a>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Trust line */}
       <div
