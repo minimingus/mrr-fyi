@@ -7,6 +7,19 @@ export const submitSchema = z.object({
     .string()
     .optional()
     .transform((v) => (v ? v.replace(/^@/, "") : v)),
+  bio: z.string().max(280, "Bio must be max 280 characters").optional(),
+  websiteUrl: z
+    .string()
+    .url("Must be a valid URL")
+    .refine((url) => !url.toLowerCase().startsWith("javascript:"), { message: "Invalid URL scheme" })
+    .optional()
+    .or(z.literal("")),
+  avatarUrl: z
+    .string()
+    .url("Must be a valid URL")
+    .refine((url) => !url.toLowerCase().startsWith("javascript:"), { message: "Invalid URL scheme" })
+    .optional()
+    .or(z.literal("")),
   productName: z.string().min(2, "Product name must be at least 2 characters"),
   productUrl: z.string().url("Must be a valid URL"),
   description: z.string().max(280, "Max 280 characters").optional(),

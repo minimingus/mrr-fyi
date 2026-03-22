@@ -55,6 +55,7 @@ export async function GET(req: NextRequest) {
       slug: f.slug,
       name: f.name,
       twitter: f.twitter,
+      avatarUrl: f.avatarUrl,
       productName: f.productName,
       productUrl: f.productUrl,
       description: f.description,

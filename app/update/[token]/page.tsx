@@ -16,6 +16,9 @@ interface ProfileData {
   description: string;
   category: string;
   twitter: string;
+  bio: string;
+  websiteUrl: string;
+  avatarUrl: string;
   referralCode: string | null;
   referralCount: number;
 }
@@ -35,6 +38,9 @@ export default function UpdatePage() {
     description: "",
     category: "",
     twitter: "",
+    bio: "",
+    websiteUrl: "",
+    avatarUrl: "",
     referralCode: null,
     referralCount: 0,
   });
@@ -44,7 +50,15 @@ export default function UpdatePage() {
   const [profileError, setProfileError] = useState<string | null>(null);
   const [profileSuccess, setProfileSuccess] = useState(false);
   const [trialExpired, setTrialExpired] = useState(false);
+  const [trialHoursLeft, setTrialHoursLeft] = useState<number | null>(null);
   const [founderSlug, setFounderSlug] = useState<string | null>(null);
+  const [bannerDismissed, setBannerDismissed] = useState(false);
+  const [planType, setPlanType] = useState<"FEATURED" | "VERIFIED" | null>(null);
+
+  useEffect(() => {
+    const dismissed = sessionStorage.getItem("trial-warning-dismissed");
+    if (dismissed) setBannerDismissed(true);
+  }, []);
 
   useEffect(() => {
     async function loadProfile() {
@@ -61,11 +75,23 @@ export default function UpdatePage() {
             description: data.description ?? "",
             category: data.category ?? "",
             twitter: data.twitter ?? "",
+            bio: data.bio ?? "",
+            websiteUrl: data.websiteUrl ?? "",
+            avatarUrl: data.avatarUrl ?? "",
             referralCode: data.referralCode ?? null,
             referralCount: data.referralCount ?? 0,
           });
           if (data.trialExpired) setTrialExpired(true);
           if (data.slug) setFounderSlug(data.slug);
+          if (data.planType) setPlanType(data.planType);
+          if (data.trialEndsAt && !data.trialExpired) {
+            const hoursLeft = Math.ceil(
+              (new Date(data.trialEndsAt).getTime() - Date.now()) / (1000 * 60 * 60)
+            );
+            if (hoursLeft > 0 && hoursLeft <= 48) {
+              setTrialHoursLeft(hoursLeft);
+            }
+          }
         }
       } catch {
         // Non-critical — form will just start empty
@@ -75,6 +101,11 @@ export default function UpdatePage() {
     }
     loadProfile();
   }, [params.token]);
+
+  function dismissBanner() {
+    sessionStorage.setItem("trial-warning-dismissed", "1");
+    setBannerDismissed(true);
+  }
 
   async function handleMrrSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -124,6 +155,9 @@ export default function UpdatePage() {
           description: profile.description || undefined,
           category: profile.category || undefined,
           twitter: profile.twitter || undefined,
+          bio: profile.bio || undefined,
+          websiteUrl: profile.websiteUrl || undefined,
+          avatarUrl: profile.avatarUrl || undefined,
         }),
       });
       const json = await res.json();
@@ -150,6 +184,28 @@ export default function UpdatePage() {
     "block text-xs text-[var(--text-muted)] mb-1.5 font-medium tracking-wide";
 
   return (
+    <>
+      {trialHoursLeft !== null && !bannerDismissed && (
+        <div className="sticky top-0 z-50 w-full px-4 py-3 flex items-center justify-between gap-4 bg-[var(--amber)] text-black text-sm font-medium">
+          <span className="flex-1 text-center">
+            Your trial expires in {trialHoursLeft} hour{trialHoursLeft !== 1 ? "s" : ""} — upgrade to keep your Verified badge and stay on the leaderboard.{" "}
+            <a
+              href={founderSlug ? `/pricing?slug=${founderSlug}` : "/pricing"}
+              onClick={() => trackEvent("Trial Expiry Banner Click")}
+              className="underline font-semibold hover:opacity-80 transition-opacity"
+            >
+              Upgrade now →
+            </a>
+          </span>
+          <button
+            onClick={dismissBanner}
+            aria-label="Dismiss banner"
+            className="shrink-0 text-black/70 hover:text-black transition-colors text-lg leading-none"
+          >
+            ×
+          </button>
+        </div>
+      )}
     <div className="max-w-sm mx-auto px-4 py-16">
       <a
         href="/"
@@ -386,6 +442,55 @@ export default function UpdatePage() {
               />
             </div>
 
+            <div>
+              <label className={labelClass}>
+                Bio{" "}
+                <span className="text-[var(--text-dim)] font-normal">
+                  (optional, max 280 chars)
+                </span>
+              </label>
+              <textarea
+                value={profile.bio}
+                onChange={(e) => updateProfile("bio", e.target.value)}
+                placeholder="Short bio about you as a founder"
+                maxLength={280}
+                rows={2}
+                className={inputClass + " resize-none"}
+              />
+            </div>
+
+            <div>
+              <label className={labelClass}>
+                Personal website{" "}
+                <span className="text-[var(--text-dim)] font-normal">
+                  (optional)
+                </span>
+              </label>
+              <input
+                type="url"
+                value={profile.websiteUrl}
+                onChange={(e) => updateProfile("websiteUrl", e.target.value)}
+                placeholder="https://yoursite.com"
+                className={inputClass}
+              />
+            </div>
+
+            <div>
+              <label className={labelClass}>
+                Avatar URL{" "}
+                <span className="text-[var(--text-dim)] font-normal">
+                  (optional, Gravatar or direct link)
+                </span>
+              </label>
+              <input
+                type="url"
+                value={profile.avatarUrl}
+                onChange={(e) => updateProfile("avatarUrl", e.target.value)}
+                placeholder="https://gravatar.com/avatar/..."
+                className={inputClass}
+              />
+            </div>
+
             {profileError && (
               <div className="rounded-md border border-[var(--red)] bg-red-950/20 px-4 py-3 text-sm text-[var(--red)]">
                 {profileError}
@@ -454,6 +559,27 @@ export default function UpdatePage() {
           )}
         </div>
       )}
+      {/* Billing Section */}
+      <div className="mt-16 pt-10 border-t border-[var(--border)]">
+        <h2
+          className="text-2xl mb-2"
+          style={{ fontFamily: "var(--font-dm-serif)" }}
+        >
+          Billing & plan.
+        </h2>
+        <p className="text-sm text-[var(--text-muted)] mb-6">
+          {planType
+            ? `You're on the ${planType === "FEATURED" ? "Featured" : "Verified"} plan.`
+            : "No active plan. Upgrade to get a badge and stand out on the leaderboard."}
+        </p>
+        <a
+          href={`/billing/${params.token}`}
+          className="inline-flex items-center gap-2 px-4 py-2.5 bg-[var(--bg-card)] border border-[var(--border)] text-[var(--text)] text-sm font-semibold rounded-md hover:border-[var(--amber)] hover:text-[var(--amber)] transition-all hover:scale-[1.01]"
+        >
+          {planType ? "Manage subscription →" : "Upgrade now →"}
+        </a>
+      </div>
     </div>
+    </>
   );
 }

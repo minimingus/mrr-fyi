@@ -7,40 +7,57 @@ import { MRRChart } from "@/components/MRRChart";
 import { MilestoneBadges } from "@/components/MilestoneBadges";
 import { ShareButton } from "@/components/ShareButton";
 import { EmbedButton } from "@/components/EmbedButton";
+import { BadgeButton } from "@/components/BadgeButton";
+import { BadgeSection } from "@/components/BadgeSection";
+import { ReferralSection } from "@/components/ReferralSection";
 import { formatMRR, growthPercent } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
 interface Props {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ updated?: string; submitted?: string }>;
+  searchParams: Promise<{ updated?: string; submitted?: string; payment?: string }>;
 }
 
 async function getFounder(slug: string) {
-  return prisma.founder.findUnique({
+  const founder = await prisma.founder.findUnique({
     where: { slug },
     include: {
       snapshots: {
         orderBy: { recordedAt: "desc" },
-        take: 24,
+        take: 12,
       },
       milestones: {
         orderBy: { amount: "asc" },
       },
       _count: {
-        select: { referralsMade: true },
+        select: { referralsMade: true, snapshots: true },
       },
     },
   });
+
+  if (!founder) return null;
+
+  const referrer = founder.referredBy
+    ? await prisma.founder.findUnique({
+        where: { referralCode: founder.referredBy },
+        select: { name: true, slug: true, productName: true },
+      })
+    : null;
+
+  return { founder, referrer };
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const founder = await getFounder(slug);
+  const result = await getFounder(slug);
+  const founder = result?.founder;
   if (!founder || !founder.emailVerified) return {};
 
   const title = `${founder.productName} — ${formatMRR(founder.mrr, founder.currency)}/mo`;
   const description = `${founder.name} is making ${formatMRR(founder.mrr, founder.currency)}/mo with ${founder.productName}. Follow their journey on MRR.fyi.`;
+
+  const ogImageUrl = `https://mrr.fyi/${founder.slug}/opengraph-image`;
 
   return {
     title,
@@ -50,11 +67,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description,
       url: `https://mrr.fyi/${founder.slug}`,
       type: "profile",
+      images: [{ url: ogImageUrl, width: 1200, height: 630, alt: title }],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
+      images: [ogImageUrl],
       ...(founder.twitter && { creator: `@${founder.twitter}` }),
     },
   };
@@ -62,15 +81,23 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function FounderProfile({ params, searchParams }: Props) {
   const { slug } = await params;
-  const founder = await getFounder(slug);
+  const result = await getFounder(slug);
+  const founder = result?.founder;
+  const referrer = result?.referrer ?? null;
 
   if (!founder || !founder.emailVerified) notFound();
 
-  const { updated, submitted } = await searchParams;
+  const { updated, submitted, payment } = await searchParams;
 
   const previousMRR = founder.snapshots[1]?.mrr ?? null;
   const growth = previousMRR !== null ? growthPercent(founder.mrr, previousMRR) : null;
   const rank = await prisma.founder.count({ where: { emailVerified: true, mrr: { gt: founder.mrr } } }) + 1;
+
+  const mrrDollars = founder.mrr / 100;
+  const mrrShortText = mrrDollars >= 1000
+    ? `$${Math.round(mrrDollars / 1000)}k`
+    : `$${Math.round(mrrDollars)}`;
+  const shareMRRText = `Crossed ${mrrShortText} MRR with ${founder.productName} 🚀 Tracking progress publicly at mrr.fyi/${founder.slug}`;
 
   const jsonLd = [
     {
@@ -111,6 +138,14 @@ export default async function FounderProfile({ params, searchParams }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+      {payment === "success" && (
+        <div
+          className="mb-6 px-4 py-3 rounded-lg border border-[var(--emerald)] text-sm"
+          style={{ background: "rgba(16,185,129,0.08)", color: "var(--emerald)" }}
+        >
+          Payment successful! Your badge is now active and your listing has been upgraded.
+        </div>
+      )}
       {(updated || submitted) && (
         <div
           className="mb-6 px-4 py-3 rounded-lg border border-[var(--emerald)] text-sm flex items-center justify-between gap-4 flex-wrap"
@@ -154,42 +189,75 @@ export default async function FounderProfile({ params, searchParams }: Props) {
         }`}
       >
         <div className="flex items-start justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 flex-wrap mb-1">
-              <h1
-                className="text-2xl"
-                style={{ fontFamily: "var(--font-dm-serif)" }}
+          <div className="flex items-start gap-4">
+            {/* Avatar */}
+            {founder.avatarUrl ? (
+              <img
+                src={founder.avatarUrl}
+                alt={founder.name}
+                className="w-14 h-14 rounded-full object-cover shrink-0 border border-[var(--border)]"
+              />
+            ) : (
+              <div
+                className="w-14 h-14 rounded-full shrink-0 flex items-center justify-center text-lg font-semibold border border-[var(--border)] bg-[var(--bg)]"
+                style={{ color: "var(--amber)" }}
               >
-                {founder.productName}
-              </h1>
-              {founder.featured && (
-                <span className="text-[10px] font-semibold mono px-1.5 py-0.5 rounded-sm bg-[var(--amber)] text-black">
-                  FEATURED
-                </span>
-              )}
-              {founder.verified && (
-                <span
-                  className="text-[10px] font-semibold mono px-1.5 py-0.5 rounded-sm"
-                  style={{ background: "rgba(16,185,129,0.15)", color: "var(--emerald)" }}
+                {founder.name.split(" ").map((w: string) => w[0]).slice(0, 2).join("").toUpperCase()}
+              </div>
+            )}
+            <div>
+              <div className="flex items-center gap-2 flex-wrap mb-1">
+                <h1
+                  className="text-2xl"
+                  style={{ fontFamily: "var(--font-dm-serif)" }}
                 >
-                  ✓ VERIFIED
-                </span>
-              )}
-            </div>
-            <div className="flex items-center gap-2 text-sm text-[var(--text-muted)]">
-              <span>{founder.name}</span>
-              {founder.twitter && (
-                <>
-                  <span className="text-[var(--text-dim)]">·</span>
-                  <a
-                    href={`https://x.com/${founder.twitter}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:text-[var(--amber)] transition-colors"
+                  {founder.productName}
+                </h1>
+                {founder.featured && (
+                  <span className="text-[10px] font-semibold mono px-1.5 py-0.5 rounded-sm bg-[var(--amber)] text-black">
+                    FEATURED
+                  </span>
+                )}
+                {founder.verified && (
+                  <span
+                    className="text-[10px] font-semibold mono px-1.5 py-0.5 rounded-sm"
+                    style={{ background: "rgba(16,185,129,0.15)", color: "var(--emerald)" }}
                   >
-                    @{founder.twitter}
-                  </a>
-                </>
+                    ✓ VERIFIED
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-2 text-sm text-[var(--text-muted)] flex-wrap">
+                <span>{founder.name}</span>
+                {founder.twitter && (
+                  <>
+                    <span className="text-[var(--text-dim)]">·</span>
+                    <a
+                      href={`https://x.com/${founder.twitter}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-[var(--amber)] transition-colors"
+                    >
+                      @{founder.twitter}
+                    </a>
+                  </>
+                )}
+                {founder.websiteUrl && (
+                  <>
+                    <span className="text-[var(--text-dim)]">·</span>
+                    <a
+                      href={founder.websiteUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-[var(--amber)] transition-colors truncate max-w-[180px]"
+                    >
+                      {founder.websiteUrl.replace(/^https?:\/\//, "")}
+                    </a>
+                  </>
+                )}
+              </div>
+              {founder.bio && (
+                <p className="mt-2 text-sm text-[var(--text-muted)]">{founder.bio}</p>
               )}
             </div>
           </div>
@@ -208,6 +276,21 @@ export default async function FounderProfile({ params, searchParams }: Props) {
           </p>
         )}
 
+        {founder._count.snapshots >= 1 && (
+          <div className="mt-4 pt-4 border-t border-[var(--border)] flex items-center justify-between gap-3">
+            <p className="text-xs text-[var(--text-dim)]">
+              Share your journey — let your followers discover mrr.fyi
+            </p>
+            <ShareButton
+              text={shareMRRText}
+              url={`https://mrr.fyi/${founder.slug}`}
+              variant="amber"
+              label="Share my MRR"
+              source="profile_share_mrr"
+            />
+          </div>
+        )}
+
         <div className="mt-4 flex items-center gap-4">
           <a
             href={founder.productUrl}
@@ -221,6 +304,7 @@ export default async function FounderProfile({ params, searchParams }: Props) {
             Rank #{rank} on leaderboard
           </span>
           <div className="ml-auto flex items-center gap-2">
+            <BadgeButton slug={founder.slug} />
             <EmbedButton slug={founder.slug} />
             <ShareButton
               text={`${founder.productName} is making ${formatMRR(founder.mrr, founder.currency)}/mo — ranked #${rank} on MRR.fyi 🚀`}
@@ -255,16 +339,18 @@ export default async function FounderProfile({ params, searchParams }: Props) {
       )}
 
       {/* MRR Chart */}
-      <div
-        className="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] p-6 mb-6 animate-fade-up stagger-2"
-      >
-        <h2
-          className="text-sm font-medium text-[var(--text-muted)] mb-4 mono uppercase tracking-widest"
+      {founder.snapshots.length >= 2 && (
+        <div
+          className="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] p-6 mb-6 animate-fade-up stagger-2"
         >
-          MRR over time
-        </h2>
-        <MRRChart snapshots={founder.snapshots} currency={founder.currency} />
-      </div>
+          <h2
+            className="text-sm font-medium text-[var(--text-muted)] mb-4 mono uppercase tracking-widest"
+          >
+            MRR over time
+          </h2>
+          <MRRChart snapshots={founder.snapshots} currency={founder.currency} />
+        </div>
+      )}
 
       {/* Milestones */}
       {founder.milestones.length > 0 && (
@@ -298,7 +384,7 @@ export default async function FounderProfile({ params, searchParams }: Props) {
           },
           {
             label: "Snapshots",
-            value: String(founder.snapshots.length),
+            value: String(founder._count.snapshots),
           },
           {
             label: "On board since",
@@ -315,18 +401,52 @@ export default async function FounderProfile({ params, searchParams }: Props) {
                 },
               ]
             : []),
+          ...(referrer
+            ? [
+                {
+                  label: "Referred by",
+                  value: referrer.productName,
+                  href: `/${referrer.slug}`,
+                },
+              ]
+            : []),
         ].map((stat) => (
           <div
             key={stat.label}
             className="rounded-lg border border-[var(--border)] bg-[var(--bg-card)] px-4 py-3"
           >
             <div className="mono text-base font-semibold text-[var(--text)]">
-              {stat.value}
+              {"href" in stat && stat.href ? (
+                <a href={stat.href} className="hover:text-[var(--amber)] transition-colors">
+                  {stat.value}
+                </a>
+              ) : (
+                stat.value
+              )}
             </div>
             <div className="text-xs text-[var(--text-dim)] mt-0.5">{stat.label}</div>
           </div>
         ))}
       </div>
+
+      {/* Share Badge */}
+      <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] p-6 mb-8 animate-fade-up stagger-4">
+        <h2 className="text-sm font-medium text-[var(--text-muted)] mono uppercase tracking-widest mb-4">
+          Share badge
+        </h2>
+        <p className="text-xs text-[var(--text-dim)] mb-4">
+          Add a live MRR badge to your README or website. It updates automatically.
+        </p>
+        <BadgeSection slug={founder.slug} />
+      </div>
+
+      {/* Referral invite */}
+      {founder.referralCode && (
+        <ReferralSection
+          referralCode={founder.referralCode}
+          productName={founder.productName}
+        />
+      )}
 
       {/* Promotion CTA */}
       <div

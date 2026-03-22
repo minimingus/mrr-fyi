@@ -11,6 +11,9 @@ model Founder {
   slug        String        @unique
   name        String
   twitter     String?
+  bio         String?
+  websiteUrl  String?
+  avatarUrl   String?
   productName String
   productUrl  String
   description String?
@@ -22,6 +25,7 @@ model Founder {
   referralCode     String?  @unique
   referredBy       String?
   onboardingStep   Int      @default(0)
+  digestUnsubscribedAt DateTime?
   mrr         Int
   currency    String        @default("USD")
   verified    Boolean       @default(false)
@@ -51,14 +55,17 @@ model MRRSnapshot {
 }
 
 model Payment {
-  id            String      @id @default(cuid())
+  id            String          @id @default(cuid())
   founderId     String
   type          PaymentType
-  externalId    String      @unique
-  active        Boolean     @default(true)
-  trialEndsAt   DateTime?
-  trialReminder Boolean     @default(false)
-  createdAt     DateTime    @default(now())
+  provider      PaymentProvider @default(LEMON_SQUEEZY)
+  externalId    String          @unique
+  active        Boolean         @default(true)
+  trialEndsAt          DateTime?
+  trialReminder        Boolean     @default(false)
+  trialUrgencyReminder Boolean     @default(false)
+  trialExpiredNotice   Boolean     @default(false)
+  createdAt          DateTime    @default(now())
 
   founder Founder @relation(fields: [founderId], references: [id], onDelete: Cascade)
 }
@@ -91,6 +98,11 @@ model Referral {
 enum PaymentType {
   FEATURED
   VERIFIED
+}
+
+enum PaymentProvider {
+  LEMON_SQUEEZY
+  STRIPE
 }
 
 enum FounderCategory {

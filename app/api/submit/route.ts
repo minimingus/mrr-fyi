@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { name, email, twitter, productName, productUrl, description, mrr, currency, category } =
+    const { name, email, twitter, bio, websiteUrl, avatarUrl, productName, productUrl, description, mrr, currency, category } =
       parsed.data;
 
     const baseSlug = slugify(productName);
@@ -49,6 +49,9 @@ export async function POST(req: NextRequest) {
         name,
         email,
         twitter: twitter || null,
+        bio: bio || null,
+        websiteUrl: websiteUrl || null,
+        avatarUrl: avatarUrl || null,
         productName,
         productUrl,
         description: description || null,

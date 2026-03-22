@@ -602,6 +602,60 @@ export async function sendOnboardingRecap(
   });
 }
 
+export async function sendOnboardingTrialEnding(
+  email: string,
+  productName: string,
+  slug: string
+) {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const verifiedUrl = `${appUrl}/pricing?slug=${slug}&plan=VERIFIED`;
+  const featuredUrl = `${appUrl}/pricing?slug=${slug}&plan=FEATURED`;
+  const profileUrl = `${appUrl}/${slug}`;
+
+  const html = emailLayout(`
+    <h1 style="margin:0 0 8px;font-size:20px;font-weight:700;color:${BRAND.text};">
+      Your 7-day window closes tomorrow
+    </h1>
+    <p style="margin:0 0 20px;font-size:14px;color:${BRAND.textMuted};line-height:1.6;">
+      <strong style="color:${BRAND.text};">${productName}</strong> has been on the leaderboard for 6 days. Tomorrow is the last day of your free window — here's what you can do to stand out.
+    </p>
+    <!-- What you lose card -->
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:${BRAND.bg};border:1px solid ${BRAND.border};border-radius:6px;margin-bottom:20px;">
+      <tr>
+        <td style="padding:20px 24px;">
+          <p style="margin:0 0 10px;font-size:12px;color:${BRAND.textMuted};text-transform:uppercase;letter-spacing:0.5px;">Without upgrading, you miss out on</p>
+          <ul style="margin:0;padding-left:20px;">
+            <li style="margin-bottom:8px;font-size:14px;color:${BRAND.textMuted};line-height:1.6;"><strong style="color:${BRAND.text};">Verified badge</strong> — proves your MRR is real to investors &amp; customers</li>
+            <li style="margin-bottom:8px;font-size:14px;color:${BRAND.textMuted};line-height:1.6;"><strong style="color:${BRAND.text};">Featured placement</strong> — pin your profile to the top of the leaderboard</li>
+            <li style="margin-bottom:0;font-size:14px;color:${BRAND.textMuted};line-height:1.6;"><strong style="color:${BRAND.text};">Share your MRR button</strong> — one-click social sharing for milestones</li>
+          </ul>
+        </td>
+      </tr>
+    </table>
+    <!-- Primary CTA: Verified -->
+    ${button("Get Verified — $9/mo", verifiedUrl)}
+    <!-- Secondary CTA: Featured -->
+    <p style="margin:0 0 8px;font-size:13px;color:${BRAND.textMuted};line-height:1.5;text-align:center;">
+      Want top placement too?
+      <a href="${featuredUrl}" style="color:${BRAND.amber};text-decoration:none;">Try Featured for $29/mo</a>
+    </p>
+    <p style="margin:16px 0 0;font-size:12px;color:${BRAND.textMuted};line-height:1.5;">
+      Both plans include a 7-day free trial. Your profile at <a href="${profileUrl}" style="color:${BRAND.amber};text-decoration:none;">mrr.fyi/${slug}</a> stays live either way.
+    </p>
+  `);
+
+  const text = `Your 7-day window closes tomorrow for ${productName} on MRR.fyi.\n\nWithout upgrading, you miss out on:\n- Verified badge ($9/mo): proves your MRR is real\n- Featured placement ($29/mo): pins you to the top of the leaderboard\n- Share your MRR button for milestones\n\nBoth plans include a 7-day free trial.\n\nGet Verified: ${verifiedUrl}\nGet Featured: ${featuredUrl}\n\nYour profile stays live either way: ${profileUrl}\n\n— MRR.fyi`;
+
+  const resend = await getResend();
+  await resend.emails.send({
+    from: "MRR.fyi <onboarding@resend.dev>",
+    to: email,
+    subject: `${productName} — your free window closes tomorrow`,
+    text,
+    html,
+  });
+}
+
 export async function sendTrialStartedEmail(
   email: string,
   productName: string,
@@ -650,6 +704,72 @@ export async function sendTrialStartedEmail(
   });
 }
 
+export async function sendTrialUrgencyEmail(
+  email: string,
+  productName: string,
+  planLabel: string,
+  slug: string,
+  founderCount: number
+) {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const pricingUrl = `${appUrl}/pricing?slug=${slug}`;
+
+  const perks =
+    planLabel === "Featured"
+      ? [
+          "Top placement on the leaderboard",
+          "Featured badge on your profile",
+          "Priority visibility to founders &amp; investors",
+        ]
+      : [
+          "Verified badge — proves your revenue is real",
+          "Increased trust with visitors",
+          "Priority listing over unverified founders",
+        ];
+
+  const perkRows = perks
+    .map(
+      (p) =>
+        `<li style="margin-bottom:8px;font-size:14px;color:${BRAND.textMuted};line-height:1.6;">${p}</li>`
+    )
+    .join("");
+
+  const html = emailLayout(`
+    <h1 style="margin:0 0 8px;font-size:20px;font-weight:700;color:${BRAND.text};">
+      Your trial ends tomorrow
+    </h1>
+    <p style="margin:0 0 20px;font-size:14px;color:${BRAND.textMuted};line-height:1.6;">
+      Lock in your <strong style="color:${BRAND.text};">${planLabel}</strong> profile for <strong style="color:${BRAND.text};">${productName}</strong> before your free trial expires. ${founderCount.toLocaleString()} founders are already sharing their MRR publicly on MRR.fyi.
+    </p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:${BRAND.bg};border:1px solid ${BRAND.border};border-radius:6px;margin-bottom:20px;">
+      <tr>
+        <td style="padding:20px 24px;">
+          <p style="margin:0 0 10px;font-size:12px;color:${BRAND.textMuted};text-transform:uppercase;letter-spacing:0.5px;">What you keep with ${planLabel}</p>
+          <ul style="margin:0;padding-left:20px;">
+            ${perkRows}
+          </ul>
+        </td>
+      </tr>
+    </table>
+    ${button("Lock in my profile →", pricingUrl)}
+    <p style="margin:0;font-size:12px;color:${BRAND.textMuted};line-height:1.5;">
+      Already subscribed? You're all set — no action needed.
+    </p>
+  `);
+
+  const perksPlain = perks.map((p) => `- ${p.replace(/&amp;/g, "&")}`).join("\n");
+  const text = `Your ${planLabel} trial for ${productName} ends tomorrow.\n\n${founderCount.toLocaleString()} founders are already sharing their MRR publicly on MRR.fyi.\n\nWhat you keep with ${planLabel}:\n${perksPlain}\n\nLock in your profile: ${pricingUrl}\n\nAlready subscribed? You're all set.\n\n— MRR.fyi`;
+
+  const resend = await getResend();
+  await resend.emails.send({
+    from: "MRR.fyi <onboarding@resend.dev>",
+    to: email,
+    subject: `Your ${planLabel} trial ends tomorrow — lock in ${productName}`,
+    text,
+    html,
+  });
+}
+
 export async function sendTrialEndingEmail(
   email: string,
   productName: string,
@@ -683,6 +803,131 @@ export async function sendTrialEndingEmail(
     from: "MRR.fyi <onboarding@resend.dev>",
     to: email,
     subject: `Your ${planLabel} trial for ${productName} ends in ${daysLeft} days`,
+    text,
+    html,
+  });
+}
+
+export async function sendWeeklyDigest(
+  email: string,
+  updateToken: string,
+  top5: { productName: string; mrr: number; currency: string }[],
+  topGainers: { productName: string; mrrChangePct: number }[]
+) {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const unsubscribeUrl = `${appUrl}/api/unsubscribe/weekly-digest?token=${updateToken}`;
+  const updateUrl = `${appUrl}/update/${updateToken}`;
+
+  const top5Rows = top5
+    .map((entry, i) => {
+      const s = entry.currency === "EUR" ? "€" : entry.currency === "GBP" ? "£" : "$";
+      const m = (entry.mrr / 100).toLocaleString("en-US");
+      return `<tr>
+      <td style="padding:8px 12px;font-size:14px;color:${BRAND.textMuted};border-bottom:1px solid ${BRAND.border};">#${i + 1}</td>
+      <td style="padding:8px 12px;font-size:14px;color:${BRAND.text};border-bottom:1px solid ${BRAND.border};">${entry.productName}</td>
+      <td style="padding:8px 12px;font-size:14px;color:${BRAND.text};text-align:right;border-bottom:1px solid ${BRAND.border};">${s}${m}</td>
+    </tr>`;
+    })
+    .join("");
+
+  const gainersSection =
+    topGainers.length > 0
+      ? `<p style="margin:20px 0 8px;font-size:13px;color:${BRAND.textMuted};text-transform:uppercase;letter-spacing:0.5px;">Biggest movers this week</p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:${BRAND.bg};border:1px solid ${BRAND.border};border-radius:6px;margin-bottom:20px;">
+      ${topGainers
+        .map(
+          (g) => `<tr>
+        <td style="padding:8px 12px;font-size:14px;color:${BRAND.text};border-bottom:1px solid ${BRAND.border};">${g.productName}</td>
+        <td style="padding:8px 12px;font-size:14px;color:${BRAND.emerald};text-align:right;border-bottom:1px solid ${BRAND.border};">+${g.mrrChangePct.toFixed(0)}%</td>
+      </tr>`
+        )
+        .join("")}
+    </table>`
+      : "";
+
+  const html = emailLayout(`
+    <h1 style="margin:0 0 8px;font-size:20px;font-weight:700;color:${BRAND.text};">
+      Top indie revenue this week
+    </h1>
+    <p style="margin:0 0 20px;font-size:14px;color:${BRAND.textMuted};line-height:1.6;">
+      Here's a snapshot of the MRR.fyi leaderboard for the week.
+    </p>
+    <p style="margin:0 0 8px;font-size:13px;color:${BRAND.textMuted};text-transform:uppercase;letter-spacing:0.5px;">Top 5 by MRR</p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:${BRAND.bg};border:1px solid ${BRAND.border};border-radius:6px;margin-bottom:20px;">
+      ${top5Rows}
+    </table>
+    ${gainersSection}
+    ${button("Update your MRR →", updateUrl)}
+    <p style="margin:0;font-size:12px;color:${BRAND.textMuted};line-height:1.5;">
+      View the full leaderboard at <a href="${appUrl}" style="color:${BRAND.amber};text-decoration:none;">mrr.fyi</a><br />
+      <a href="${unsubscribeUrl}" style="color:${BRAND.textMuted};text-decoration:underline;">Unsubscribe from weekly digest</a>
+    </p>
+  `);
+
+  const top5Plain = top5
+    .map((entry, i) => {
+      const s = entry.currency === "EUR" ? "€" : entry.currency === "GBP" ? "£" : "$";
+      return `  ${i + 1}. ${entry.productName} — ${s}${(entry.mrr / 100).toLocaleString("en-US")}`;
+    })
+    .join("\n");
+  const gainersPlain =
+    topGainers.length > 0
+      ? `\n\nBiggest movers:\n${topGainers.map((g) => `  ${g.productName} +${g.mrrChangePct.toFixed(0)}%`).join("\n")}`
+      : "";
+
+  const text = `MRR.fyi weekly: top indie revenue this week\n\nTop 5 by MRR:\n${top5Plain}${gainersPlain}\n\nUpdate your MRR: ${updateUrl}\n\nUnsubscribe: ${unsubscribeUrl}\n\n— MRR.fyi`;
+
+  const resend = await getResend();
+  await resend.emails.send({
+    from: "MRR.fyi <onboarding@resend.dev>",
+    to: email,
+    subject: "MRR.fyi weekly: top indie revenue this week",
+    text,
+    html,
+  });
+}
+
+export async function sendTrialExpiredEmail(
+  email: string,
+  productName: string,
+  planLabel: string,
+  slug: string
+) {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const pricingUrl = `${appUrl}/pricing?slug=${slug}`;
+
+  const html = emailLayout(`
+    <h1 style="margin:0 0 8px;font-size:20px;font-weight:700;color:${BRAND.text};">
+      Your free trial has ended
+    </h1>
+    <p style="margin:0 0 20px;font-size:14px;color:${BRAND.textMuted};line-height:1.6;">
+      Your ${planLabel} trial for <strong style="color:${BRAND.text};">${productName}</strong> has expired. Your ${planLabel.toLowerCase()} badge has been removed from the leaderboard.
+    </p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:${BRAND.bg};border:1px solid ${BRAND.border};border-radius:6px;margin-bottom:20px;">
+      <tr>
+        <td style="padding:20px 24px;">
+          <p style="margin:0 0 8px;font-size:14px;color:${BRAND.textMuted};">Upgrade to get back:</p>
+          <ul style="margin:0;padding-left:20px;font-size:14px;color:${BRAND.textMuted};line-height:1.8;">
+            <li>Your ${planLabel.toLowerCase()} badge on the leaderboard</li>
+            <li>Increased visibility among founders</li>
+            <li>Trust signal for your product</li>
+          </ul>
+        </td>
+      </tr>
+    </table>
+    ${button("Upgrade now →", pricingUrl)}
+    <p style="margin:0;font-size:12px;color:${BRAND.textMuted};line-height:1.5;">
+      Questions? Reply to this email and we'll help.
+    </p>
+  `);
+
+  const text = `Your ${planLabel} free trial for ${productName} has ended.\n\nUpgrade to restore your ${planLabel.toLowerCase()} badge: ${pricingUrl}\n\n— MRR.fyi`;
+
+  const resend = await getResend();
+  await resend.emails.send({
+    from: "MRR.fyi <onboarding@resend.dev>",
+    to: email,
+    subject: `Your ${planLabel} trial for ${productName} has ended`,
     text,
     html,
   });

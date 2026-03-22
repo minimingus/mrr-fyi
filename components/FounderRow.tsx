@@ -38,6 +38,22 @@ export function FounderRow({ founder, rank, style }: FounderRowProps) {
           {rankDisplay}
         </span>
 
+        {/* Avatar */}
+        {founder.avatarUrl ? (
+          <img
+            src={founder.avatarUrl}
+            alt={founder.name}
+            className="w-8 h-8 rounded-full object-cover shrink-0 border border-[var(--border)]"
+          />
+        ) : (
+          <div
+            className="w-8 h-8 rounded-full shrink-0 flex items-center justify-center text-xs font-semibold border border-[var(--border)] bg-[var(--bg)]"
+            style={{ color: "var(--amber)" }}
+          >
+            {founder.name.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase()}
+          </div>
+        )}
+
         {/* Product info */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">

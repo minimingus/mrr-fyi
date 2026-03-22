@@ -13,6 +13,7 @@ interface LeaderboardListProps {
   founders: FounderWithSnapshots[];
   totalCount: number;
   pageSize: number;
+  lockedCategory?: string;
 }
 
 const CATEGORIES = [
@@ -42,7 +43,7 @@ function parseMRRRange(range: string): [number, number] | null {
   return [min, max];
 }
 
-export function LeaderboardList({ founders: initialFounders, totalCount, pageSize }: LeaderboardListProps) {
+export function LeaderboardList({ founders: initialFounders, totalCount, pageSize, lockedCategory }: LeaderboardListProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -84,8 +85,9 @@ export function LeaderboardList({ founders: initialFounders, totalCount, pageSiz
       );
     }
 
-    if (category) {
-      result = result.filter((f) => f.category === category);
+    const activeCategory = lockedCategory || category;
+    if (activeCategory) {
+      result = result.filter((f) => f.category === activeCategory);
     }
 
     const mrrRange = parseMRRRange(range);
@@ -100,7 +102,8 @@ export function LeaderboardList({ founders: initialFounders, totalCount, pageSiz
   const loadMore = useCallback(() => {
     const nextPage = Math.floor(allFounders.length / pageSize) + 1;
     startLoadMore(async () => {
-      const res = await fetch(`/api/v1/leaderboard?page=${nextPage}&limit=${pageSize}`);
+      const categoryParam = lockedCategory ? `&category=${lockedCategory}` : "";
+      const res = await fetch(`/api/v1/leaderboard?page=${nextPage}&limit=${pageSize}${categoryParam}`);
       if (!res.ok) return;
       const json = await res.json();
       const newFounders: FounderWithSnapshots[] = json.data.map((d: Record<string, unknown>) => ({
@@ -108,6 +111,7 @@ export function LeaderboardList({ founders: initialFounders, totalCount, pageSiz
         slug: d.slug as string,
         name: d.name as string,
         twitter: d.twitter as string | null,
+        avatarUrl: (d.avatarUrl as string | null) ?? null,
         productName: d.productName as string,
         productUrl: d.productUrl as string | null,
         description: d.description as string | null,

@@ -61,39 +61,53 @@ export function MRRChart({ snapshots, currency }: MRRChartProps) {
   }
 
   const maxMRR = Math.max(...data.map((d) => d.mrr));
+  const first = data[0];
+  const last = data[data.length - 1];
 
   return (
-    <ResponsiveContainer width="100%" height={180}>
-      <LineChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
-        <XAxis
-          dataKey="date"
-          tick={{ fill: "var(--text-dim)", fontSize: 11, fontFamily: "var(--font-jetbrains)" }}
-          axisLine={false}
-          tickLine={false}
-        />
-        <YAxis
-          tickFormatter={(v) => formatMRR(v, currency)}
-          tick={{ fill: "var(--text-dim)", fontSize: 11, fontFamily: "var(--font-jetbrains)" }}
-          axisLine={false}
-          tickLine={false}
-          width={70}
-        />
-        <Tooltip content={<CustomTooltip currency={currency} />} />
-        <ReferenceLine
-          y={maxMRR}
-          stroke="var(--amber)"
-          strokeDasharray="4 4"
-          strokeOpacity={0.3}
-        />
-        <Line
-          type="monotone"
-          dataKey="mrr"
-          stroke="var(--amber)"
-          strokeWidth={2}
-          dot={{ fill: "var(--amber)", r: 3, strokeWidth: 0 }}
-          activeDot={{ fill: "var(--amber)", r: 5, strokeWidth: 0 }}
-        />
-      </LineChart>
-    </ResponsiveContainer>
+    <div>
+      <ResponsiveContainer width="100%" height={180}>
+        <LineChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
+          <XAxis
+            dataKey="date"
+            tick={{ fill: "var(--text-dim)", fontSize: 11, fontFamily: "var(--font-jetbrains)" }}
+            axisLine={false}
+            tickLine={false}
+          />
+          <YAxis
+            tickFormatter={(v) => formatMRR(v, currency)}
+            tick={{ fill: "var(--text-dim)", fontSize: 11, fontFamily: "var(--font-jetbrains)" }}
+            axisLine={false}
+            tickLine={false}
+            width={70}
+          />
+          <Tooltip content={<CustomTooltip currency={currency} />} />
+          <ReferenceLine
+            y={maxMRR}
+            stroke="var(--amber)"
+            strokeDasharray="4 4"
+            strokeOpacity={0.3}
+          />
+          <Line
+            type="monotone"
+            dataKey="mrr"
+            stroke="var(--amber)"
+            strokeWidth={2}
+            dot={{ fill: "var(--amber)", r: 3, strokeWidth: 0 }}
+            activeDot={{ fill: "var(--amber)", r: 5, strokeWidth: 0 }}
+          />
+        </LineChart>
+      </ResponsiveContainer>
+      <div className="flex items-center justify-between mt-2 px-1">
+        <div className="text-xs text-[var(--text-dim)]">
+          <span className="mono">{first.date}</span>
+          <span className="ml-1 text-[var(--text-muted)]">{formatMRR(first.mrr, currency)}</span>
+        </div>
+        <div className="text-xs text-[var(--text-dim)] text-right">
+          <span className="mr-1 text-[var(--text-muted)]">{formatMRR(last.mrr, currency)}</span>
+          <span className="mono">{last.date}</span>
+        </div>
+      </div>
+    </div>
   );
 }
