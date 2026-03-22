@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { NICHE_SLUGS } from "@/app/niche/[niche]/page";
 import { getAllPosts } from "@/lib/blog";
 
-export const revalidate = 3600; // rebuild sitemap every hour
+export const dynamic = "force-dynamic";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const founders = await prisma.founder.findMany({
@@ -13,21 +13,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   });
 
   const staticRoutes: MetadataRoute.Sitemap = [
-    { url: "https://mrr.fyi", lastModified: new Date(), changeFrequency: "hourly", priority: 1 },
-    { url: "https://mrr.fyi/submit", lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
-    { url: "https://mrr.fyi/pricing", lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
-    { url: "https://mrr.fyi/changelog", lastModified: new Date(), changeFrequency: "weekly", priority: 0.6 },
+    { url: "https://mrr-fyi.dev", lastModified: new Date(), changeFrequency: "hourly", priority: 1 },
+    { url: "https://mrr-fyi.dev/submit", lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
+    { url: "https://mrr-fyi.dev/pricing", lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
+    { url: "https://mrr-fyi.dev/changelog", lastModified: new Date(), changeFrequency: "weekly", priority: 0.6 },
   ];
 
   const nicheRoutes: MetadataRoute.Sitemap = NICHE_SLUGS.map((niche) => ({
-    url: `https://mrr.fyi/niche/${niche}`,
+    url: `https://mrr-fyi.dev/niche/${niche}`,
     lastModified: new Date(),
     changeFrequency: "daily",
     priority: 0.7,
   }));
 
   const founderRoutes: MetadataRoute.Sitemap = founders.map((f) => ({
-    url: `https://mrr.fyi/${f.slug}`,
+    url: `https://mrr-fyi.dev/${f.slug}`,
     lastModified: f.updatedAt,
     changeFrequency: "weekly",
     priority: 0.8,
@@ -36,13 +36,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const blogPosts = getAllPosts();
   const blogRoutes: MetadataRoute.Sitemap = [
     {
-      url: "https://mrr.fyi/blog",
+      url: "https://mrr-fyi.dev/blog",
       lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.7,
     },
     ...blogPosts.map((post) => ({
-      url: `https://mrr.fyi/blog/${post.slug}`,
+      url: `https://mrr-fyi.dev/blog/${post.slug}`,
       lastModified: new Date(post.date),
       changeFrequency: "monthly" as const,
       priority: 0.6,
