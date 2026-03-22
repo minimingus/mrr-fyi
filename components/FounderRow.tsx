@@ -23,11 +23,7 @@ export function FounderRow({ founder, rank, style }: FounderRowProps) {
   return (
     <Link href={`/${founder.slug}`}>
       <div
-        className={`group flex items-center gap-4 px-5 py-4 rounded-lg border transition-all duration-200 cursor-pointer
-          ${founder.featured
-            ? "featured-glow bg-[var(--amber-glow)] border-[var(--amber)]"
-            : "border-[var(--border)] bg-[var(--bg-card)] hover:bg-[var(--bg-hover)] hover:border-[var(--border-accent)]"
-          } animate-fade-up`}
+        className="group flex items-center gap-4 px-5 py-4 rounded-lg border transition-all duration-200 cursor-pointer border-[var(--border)] bg-[var(--bg-card)] hover:bg-[var(--bg-hover)] hover:border-[var(--border-accent)] animate-fade-up"
         style={style}
       >
         {/* Rank */}
@@ -99,18 +95,6 @@ export function FounderRow({ founder, rank, style }: FounderRowProps) {
           <MRRBadge mrr={founder.mrr} currency={founder.currency} />
         </div>
 
-        {/* Boost CTA or arrow */}
-        {!founder.featured ? (
-          <span
-            className="text-[10px] mono text-[var(--text-dim)] group-hover:text-[var(--amber)] transition-colors shrink-0 hidden sm:inline"
-            onClick={(e) => {
-              e.preventDefault();
-              window.location.href = `/pricing?slug=${founder.slug}`;
-            }}
-          >
-            Boost ↑
-          </span>
-        ) : null}
         <span className="text-[var(--text-dim)] group-hover:text-[var(--text-muted)] text-sm transition-colors shrink-0">
           →
         </span>

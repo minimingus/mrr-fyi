@@ -13,25 +13,10 @@ const plans = [
     tagline: "Prove your revenue is real",
     features: [
       "✓ Verified badge on your profile",
-      "✓ Stand out in the leaderboard",
-      "✓ Builds trust with visitors",
+      "✓ Stand out on the leaderboard",
+      "✓ Builds trust with visitors and investors",
+      "✓ 7-day free trial",
       "✓ Cancel anytime",
-    ],
-    cta: "Start 7-day free trial",
-    highlight: false,
-  },
-  {
-    key: "FEATURED",
-    name: "Featured Listing",
-    price: 29,
-    period: "/month",
-    tagline: "Pin yourself to the top",
-    features: [
-      "★ Pinned above all organic results",
-      "★ Golden glow on leaderboard",
-      "★ Verified badge included",
-      "★ Maximum visibility",
-      "★ Cancel anytime",
     ],
     cta: "Start 7-day free trial",
     highlight: true,
@@ -85,10 +70,10 @@ function PricingContent() {
           className="text-4xl mb-3"
           style={{ fontFamily: "var(--font-dm-serif)" }}
         >
-          Stand out from the crowd.
+          Prove your revenue is real.
         </h1>
         <p className="text-[var(--text-muted)]">
-          Try any plan free for 7 days. Cancel anytime.
+          Get a Verified badge — free for 7 days, then $9/mo. Cancel anytime.
         </p>
       </div>
 
@@ -110,21 +95,15 @@ function PricingContent() {
       </div>
 
       {/* Plans */}
-      <div className="grid sm:grid-cols-2 gap-4">
+      <div className="max-w-sm mx-auto">
         {plans.map((plan) => (
           <div
             key={plan.key}
-            className={`rounded-xl border p-6 flex flex-col ${
-              plan.highlight
-                ? "featured-glow border-[var(--amber)] bg-[var(--amber-glow)]"
-                : "border-[var(--border)] bg-[var(--bg-card)]"
-            }`}
+            className="rounded-xl border p-6 flex flex-col border-[var(--amber)] bg-[var(--amber-glow)]"
           >
-            {plan.highlight && (
-              <span className="self-start text-[10px] font-semibold mono px-1.5 py-0.5 rounded-sm bg-[var(--amber)] text-black mb-3">
-                MOST POPULAR
-              </span>
-            )}
+            <span className="self-start text-[10px] font-semibold mono px-1.5 py-0.5 rounded-sm bg-[var(--amber)] text-black mb-3">
+              VERIFIED
+            </span>
 
             <h2
               className="text-xl mb-1"
@@ -153,11 +132,7 @@ function PricingContent() {
             <button
               onClick={() => handleCheckout(plan.key)}
               disabled={loading === plan.key}
-              className={`w-full py-2.5 text-sm font-semibold rounded-md transition-all ${
-                plan.highlight
-                  ? "bg-[var(--amber)] text-black hover:bg-amber-400 hover:scale-[1.02]"
-                  : "border border-[var(--border)] text-[var(--text)] hover:border-[var(--amber)] hover:text-[var(--amber)]"
-              } disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100`}
+              className="w-full py-2.5 text-sm font-semibold rounded-md transition-all bg-[var(--amber)] text-black hover:bg-amber-400 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100"
             >
               {loading === plan.key ? "Redirecting..." : plan.cta}
             </button>

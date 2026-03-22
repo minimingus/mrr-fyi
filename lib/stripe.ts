@@ -11,18 +11,16 @@ function getStripe(): Stripe {
 
 export const STRIPE_PLANS = {
   VERIFIED: { price: 9, trialDays: 7 },
-  FEATURED: { price: 29, trialDays: 7 },
 } as const;
 
-export function getStripePriceId(plan: "FEATURED" | "VERIFIED"): string {
-  const key = plan === "FEATURED" ? "STRIPE_FEATURED_PRICE_ID" : "STRIPE_VERIFIED_PRICE_ID";
-  const id = process.env[key];
-  if (!id) throw new Error(`${key} is not set`);
+export function getStripePriceId(plan: "VERIFIED"): string {
+  const id = process.env.STRIPE_VERIFIED_PRICE_ID;
+  if (!id) throw new Error("STRIPE_VERIFIED_PRICE_ID is not set");
   return id;
 }
 
 export async function createStripeCheckoutSession(
-  plan: "FEATURED" | "VERIFIED",
+  plan: "VERIFIED",
   founderId: string,
   redirectUrl: string
 ): Promise<string> {

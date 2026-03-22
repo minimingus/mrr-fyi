@@ -608,8 +608,7 @@ export async function sendOnboardingTrialEnding(
   slug: string
 ) {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-  const verifiedUrl = `${appUrl}/pricing?slug=${slug}&plan=VERIFIED`;
-  const featuredUrl = `${appUrl}/pricing?slug=${slug}&plan=FEATURED`;
+  const verifiedUrl = `${appUrl}/pricing?slug=${slug}`;
   const profileUrl = `${appUrl}/${slug}`;
 
   const html = emailLayout(`
@@ -626,25 +625,18 @@ export async function sendOnboardingTrialEnding(
           <p style="margin:0 0 10px;font-size:12px;color:${BRAND.textMuted};text-transform:uppercase;letter-spacing:0.5px;">Without upgrading, you miss out on</p>
           <ul style="margin:0;padding-left:20px;">
             <li style="margin-bottom:8px;font-size:14px;color:${BRAND.textMuted};line-height:1.6;"><strong style="color:${BRAND.text};">Verified badge</strong> — proves your MRR is real to investors &amp; customers</li>
-            <li style="margin-bottom:8px;font-size:14px;color:${BRAND.textMuted};line-height:1.6;"><strong style="color:${BRAND.text};">Featured placement</strong> — pin your profile to the top of the leaderboard</li>
             <li style="margin-bottom:0;font-size:14px;color:${BRAND.textMuted};line-height:1.6;"><strong style="color:${BRAND.text};">Share your MRR button</strong> — one-click social sharing for milestones</li>
           </ul>
         </td>
       </tr>
     </table>
-    <!-- Primary CTA: Verified -->
     ${button("Get Verified — $9/mo", verifiedUrl)}
-    <!-- Secondary CTA: Featured -->
-    <p style="margin:0 0 8px;font-size:13px;color:${BRAND.textMuted};line-height:1.5;text-align:center;">
-      Want top placement too?
-      <a href="${featuredUrl}" style="color:${BRAND.amber};text-decoration:none;">Try Featured for $29/mo</a>
-    </p>
     <p style="margin:16px 0 0;font-size:12px;color:${BRAND.textMuted};line-height:1.5;">
-      Both plans include a 7-day free trial. Your profile at <a href="${profileUrl}" style="color:${BRAND.amber};text-decoration:none;">mrr.fyi/${slug}</a> stays live either way.
+      Includes a 7-day free trial. Your profile at <a href="${profileUrl}" style="color:${BRAND.amber};text-decoration:none;">mrr.fyi/${slug}</a> stays live either way.
     </p>
   `);
 
-  const text = `Your 7-day window closes tomorrow for ${productName} on MRR.fyi.\n\nWithout upgrading, you miss out on:\n- Verified badge ($9/mo): proves your MRR is real\n- Featured placement ($29/mo): pins you to the top of the leaderboard\n- Share your MRR button for milestones\n\nBoth plans include a 7-day free trial.\n\nGet Verified: ${verifiedUrl}\nGet Featured: ${featuredUrl}\n\nYour profile stays live either way: ${profileUrl}\n\n— MRR.fyi`;
+  const text = `Your 7-day window closes tomorrow for ${productName} on MRR.fyi.\n\nWithout upgrading, you miss out on:\n- Verified badge ($9/mo): proves your MRR is real\n- Share your MRR button for milestones\n\nIncludes a 7-day free trial.\n\nGet Verified: ${verifiedUrl}\n\nYour profile stays live either way: ${profileUrl}\n\n— MRR.fyi`;
 
   const resend = await getResend();
   await resend.emails.send({

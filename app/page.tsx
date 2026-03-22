@@ -365,7 +365,7 @@ export default async function Home() {
             {
               icon: Sparkles,
               title: "Get discovered",
-              desc: "Featured founders appear at the top of the leaderboard. Put your product in front of customers and investors.",
+              desc: "A Verified badge signals credibility. Put your product in front of customers and investors who trust transparent founders.",
               color: "var(--amber)",
             },
             {
