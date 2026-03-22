@@ -98,6 +98,8 @@ export default async function FounderProfile({ params, searchParams }: Props) {
     ? `$${Math.round(mrrDollars / 1000)}k`
     : `$${Math.round(mrrDollars)}`;
   const shareMRRText = `Crossed ${mrrShortText} MRR with ${founder.productName} 🚀 Tracking progress publicly at mrr.fyi/${founder.slug}`;
+  const rankMedal = rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : null;
+  const shareRankText = `${rankMedal ? `${rankMedal} ` : ""}Ranked #${rank} on the MRR.fyi leaderboard — ${founder.productName} is making ${formatMRR(founder.mrr, founder.currency)}/mo 🚀`;
 
   const jsonLd = [
     {
@@ -311,6 +313,35 @@ export default async function FounderProfile({ params, searchParams }: Props) {
               url={`https://mrr.fyi/${founder.slug}`}
             />
           </div>
+        </div>
+      </div>
+
+      {/* Share my rank card */}
+      <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] p-5 mb-6 animate-fade-up stagger-2">
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <div className="flex items-center gap-3">
+            <div
+              className="flex items-center justify-center w-12 h-12 rounded-lg shrink-0 font-bold text-xl"
+              style={{ background: "rgba(245,158,11,0.12)", color: "var(--amber)" }}
+            >
+              {rankMedal ?? `#${rank}`}
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-[var(--text)]">
+                {rankMedal ? `${rankMedal} Ranked #${rank} on MRR.fyi` : `Ranked #${rank} on MRR.fyi`}
+              </p>
+              <p className="text-xs text-[var(--text-dim)] mt-0.5">
+                Share your rank and let the world know
+              </p>
+            </div>
+          </div>
+          <ShareButton
+            text={shareRankText}
+            url={`https://mrr.fyi/${founder.slug}`}
+            variant="amber"
+            label="Share my rank"
+            source="profile_share_rank"
+          />
         </div>
       </div>
 

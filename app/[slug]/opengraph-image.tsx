@@ -37,6 +37,13 @@ export default async function Image({ params }: Props) {
   const isVerified = founder?.verified ?? false;
   const avatarUrl = founder?.avatarUrl ?? null;
 
+  // Calculate rank
+  const rank = founder
+    ? await prisma.founder.count({ where: { emailVerified: true, mrr: { gt: founder.mrr } } }) + 1
+    : null;
+
+  const rankLabel = rank === 1 ? "🥇 #1" : rank === 2 ? "🥈 #2" : rank === 3 ? "🥉 #3" : rank ? `#${rank}` : null;
+
   // Generate initials fallback
   const initials = name
     .split(" ")
@@ -73,12 +80,38 @@ export default async function Image({ params }: Props) {
           fontFamily: "system-ui, sans-serif",
         }}
       >
-        {/* Top: Logo */}
-        <div style={{ display: "flex", alignItems: "center" }}>
-          <span style={{ color: "#f59e0b", fontSize: "20px", fontWeight: 700, marginRight: "10px" }}>
-            MRR.fyi
-          </span>
-          <span style={{ color: "#52525b", fontSize: "16px" }}>indie revenue leaderboard</span>
+        {/* Top: Logo + Rank badge */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <span style={{ color: "#f59e0b", fontSize: "20px", fontWeight: 700, marginRight: "10px" }}>
+              MRR.fyi
+            </span>
+            <span style={{ color: "#52525b", fontSize: "16px" }}>indie revenue leaderboard</span>
+          </div>
+          {rankLabel && (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                background: rank && rank <= 3 ? "rgba(245,158,11,0.15)" : "rgba(39,39,42,0.8)",
+                border: `1px solid ${rank && rank <= 3 ? "#f59e0b" : "#3f3f46"}`,
+                borderRadius: "8px",
+                padding: "8px 16px",
+              }}
+            >
+              <span
+                style={{
+                  color: rank && rank <= 3 ? "#f59e0b" : "#a1a1aa",
+                  fontSize: "22px",
+                  fontWeight: 700,
+                }}
+              >
+                {rankLabel}
+              </span>
+              <span style={{ color: "#52525b", fontSize: "14px" }}>on leaderboard</span>
+            </div>
+          )}
         </div>
 
         {/* Middle: Founder info */}
