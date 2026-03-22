@@ -228,6 +228,15 @@ export default async function FounderProfile({ params, searchParams }: Props) {
                     ✓ VERIFIED
                   </span>
                 )}
+                {founder.stripeAccountId && (
+                  <span
+                    className="text-[10px] font-semibold mono px-1.5 py-0.5 rounded-sm"
+                    style={{ background: "rgba(99,102,241,0.15)", color: "#818cf8" }}
+                    title="MRR verified via Stripe"
+                  >
+                    ⚡ STRIPE VERIFIED
+                  </span>
+                )}
               </div>
               <div className="flex items-center gap-2 text-sm text-[var(--text-muted)] flex-wrap">
                 <span>{founder.name}</span>
@@ -269,6 +278,11 @@ export default async function FounderProfile({ params, searchParams }: Props) {
             <div className="mt-1 flex items-center justify-end gap-2">
               <GrowthBadge percent={growth} />
             </div>
+            {founder.stripeAccountId && (
+              <p className="mt-1 text-[10px] mono" style={{ color: "#818cf8" }}>
+                ⚡ stripe verified
+              </p>
+            )}
           </div>
         </div>
 

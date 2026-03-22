@@ -55,6 +55,8 @@ export async function GET(req: NextRequest) {
         featured: true,
         slug: true,
         referralCode: true,
+        stripeAccountId: true,
+        stripeMrr: true,
         payments: {
           where: { active: true },
           select: { trialEndsAt: true, type: true },
@@ -94,6 +96,8 @@ export async function GET(req: NextRequest) {
       trialExpired,
       trialEndsAt: activePayment?.trialEndsAt ?? null,
       planType: activePayment?.type ?? null,
+      stripeConnected: !!founder.stripeAccountId,
+      stripeMrr: founder.stripeMrr,
     });
   } catch (err) {
     console.error("[update-profile:get]", err);

@@ -30,6 +30,8 @@ model Founder {
   currency    String        @default("USD")
   verified    Boolean       @default(false)
   featured    Boolean       @default(false)
+  stripeAccountId  String?  @unique
+  stripeMrr        Int?
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 
