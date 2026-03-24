@@ -65,6 +65,7 @@ export async function GET(req: NextRequest) {
       growthPercent,
       verified: f.verified,
       featured: f.featured,
+      stripeVerified: !!f.stripeAccountId,
       updatedAt: f.updatedAt.toISOString(),
     };
   });
