@@ -66,6 +66,7 @@ export async function GET(req: NextRequest) {
       verified: f.verified,
       featured: f.featured,
       stripeVerified: !!f.stripeAccountId,
+      stripeMrr: f.stripeMrr ?? null,
       updatedAt: f.updatedAt.toISOString(),
     };
   });

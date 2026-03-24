@@ -114,6 +114,23 @@ export async function POST(req: NextRequest) {
         break;
       }
 
+      case "account.application.deauthorized": {
+        // Fired when a founder revokes Stripe Connect access via their Stripe dashboard.
+        // event.account is the connected account ID that deauthorized the app.
+        const stripeAccountId = event.account;
+        if (!stripeAccountId) break;
+
+        await prisma.founder.updateMany({
+          where: { stripeAccountId },
+          data: { stripeAccountId: null, stripeMrr: null },
+        });
+
+        console.log(
+          `[stripe/webhook] cleared stripeAccountId/stripeMrr for account ${stripeAccountId}`
+        );
+        break;
+      }
+
       case "customer.subscription.updated": {
         const subscription = event.data.object as Stripe.Subscription;
         const isActive = subscription.status === "active" || subscription.status === "trialing";

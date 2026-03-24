@@ -1,0 +1,115 @@
+---
+title: "How to Track MRR with Stripe"
+date: "2026-03-25"
+description: "A step-by-step guide to getting accurate MRR out of Stripe — using the Stripe API, Stripe Sigma, or an automated tool like mrr.fyi that connects via Stripe Connect."
+slug: "how-to-track-mrr-with-stripe"
+author: "mrr.fyi"
+---
+
+Stripe is the payment processor of choice for most indie hackers and SaaS founders. But Stripe's native MRR tracking is a starting point — not the whole picture. Here's how to get the number right, using the Stripe API or a tool built on top of it.
+
+## How Stripe calculates MRR (and why it's not always right)
+
+Stripe derives MRR by summing active subscriptions and normalizing to monthly. For simple monthly plans, this is accurate. For everything else, there are caveats:
+
+- **Annual plans**: Stripe counts `annual_price / 12` as MRR each month. That's correct for recognized revenue, but some founders prefer to only count months as they pass.
+- **Trials**: Active trials appear in subscription lists with `status: trialing`. Stripe may include them in MRR even though no money has changed hands.
+- **Paused subscriptions**: On Stripe Billing, subscriptions can be paused. These still appear in the subscription list.
+- **Free tiers / $0 plans**: If you have a Stripe product with a $0 price, it shows up as a subscription with zero contribution.
+
+The fix is to query Stripe yourself, with the right filters.
+
+## Option 1: Use the Stripe API
+
+Here's a minimal script to calculate accurate MRR:
+
+```javascript
+const Stripe = require('stripe');
+const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
+
+async function calculateMRR() {
+  let mrr = 0;
+  let hasMore = true;
+  let startingAfter = undefined;
+
+  while (hasMore) {
+    const { data, has_more } = await stripe.subscriptions.list({
+      status: 'active',
+      limit: 100,
+      starting_after: startingAfter,
+      expand: ['data.items.data.price'],
+    });
+
+    for (const sub of data) {
+      for (const item of sub.items.data) {
+        const price = item.price;
+        const amount = (price.unit_amount / 100) * item.quantity;
+
+        if (price.recurring.interval === 'month') {
+          mrr += amount;
+        } else if (price.recurring.interval === 'year') {
+          mrr += amount / 12;
+        }
+      }
+    }
+
+    hasMore = has_more;
+    startingAfter = data[data.length - 1]?.id;
+  }
+
+  return mrr;
+}
+```
+
+Key filters to add depending on your setup:
+- Skip `trialing` subscriptions: change `status: 'active'` to also exclude `trial_end > Date.now()`
+- Skip $0 prices: add `if (price.unit_amount === 0) continue`
+
+## Option 2: Stripe Sigma
+
+If you're on Stripe Sigma (available on paid plans), you can write SQL directly against your Stripe data:
+
+```sql
+select
+  round(sum(
+    case
+      when p.interval = 'month' then si.quantity * p.unit_amount / 100.0
+      when p.interval = 'year'  then si.quantity * p.unit_amount / 100.0 / 12
+    end
+  ), 2) as mrr
+from subscriptions s
+join subscription_items si on s.id = si.subscription_id
+join prices p on si.price = p.id
+where s.status = 'active'
+  and p.unit_amount > 0
+```
+
+This gives you a single MRR figure without the edge cases. You can extend it to add filters by product, plan, or date.
+
+## Option 3: Automate it with Stripe Connect
+
+If you want Stripe MRR tracking without writing code, [mrr.fyi](https://mrr.fyi) connects via Stripe Connect with read-only access. It reads your active subscriptions, calculates your verified MRR, and displays it on a public profile with a Verified badge.
+
+The process:
+1. Sign up at [mrr.fyi](https://mrr.fyi)
+2. Go to your profile settings → Connect Stripe
+3. Authorize read-only access via Stripe Connect
+4. Your MRR is calculated, verified, and displayed publicly
+
+The Verified badge matters because anyone can self-report MRR. A Stripe-connected profile shows your number is pulled directly from live subscription data — not entered by hand.
+
+## Why track MRR at all?
+
+MRR is the heartbeat metric for any subscription business. It tells you:
+
+- Whether you're growing month-over-month
+- How much revenue you can count on next month
+- Whether churn is eating your growth
+
+A weekly habit of checking your Stripe MRR — whether via the dashboard, a script, or a tool like [mrr.fyi](https://mrr.fyi) — is the minimum viable analytics setup for any indie SaaS founder.
+
+Start there. Layer on churn rate and expansion MRR once your subscription count makes it worth tracking.
+
+---
+
+**Ready to track your MRR automatically?** [Connect Stripe on mrr.fyi →](https://mrr.fyi)
