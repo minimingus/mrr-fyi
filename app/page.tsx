@@ -11,20 +11,42 @@ export const dynamic = "force-dynamic";
 const LEADERBOARD_PAGE_SIZE = 50;
 
 async function getLeaderboard() {
-  const [founders, total] = await Promise.all([
+  const [rows, total] = await Promise.all([
     prisma.founder.findMany({
       where: { emailVerified: true },
       orderBy: [{ featured: "desc" }, { mrr: "desc" }],
       take: LEADERBOARD_PAGE_SIZE,
-      include: {
+      select: {
+        id: true,
+        slug: true,
+        name: true,
+        twitter: true,
+        avatarUrl: true,
+        productName: true,
+        productUrl: true,
+        description: true,
+        category: true,
+        mrr: true,
+        currency: true,
+        verified: true,
+        featured: true,
+        stripeAccountId: true,
+        stripeMrr: true,
+        createdAt: true,
+        updatedAt: true,
         snapshots: {
           orderBy: { recordedAt: "desc" },
           take: 2,
+          select: { mrr: true, recordedAt: true },
         },
       },
     }),
     prisma.founder.count({ where: { emailVerified: true } }),
   ]);
+  const founders = rows.map(({ stripeAccountId, ...f }) => ({
+    ...f,
+    stripeVerified: !!stripeAccountId,
+  }));
   return { founders, total };
 }
 

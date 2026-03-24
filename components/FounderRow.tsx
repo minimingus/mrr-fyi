@@ -1,13 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { Founder } from "@prisma/client";
+import type { PublicFounder } from "./LeaderboardList";
 import { MRRBadge } from "./MRRBadge";
 import { GrowthBadge } from "./GrowthBadge";
 import { growthPercent } from "@/lib/utils";
 
 interface FounderRowProps {
-  founder: Founder & { snapshots: { mrr: number; recordedAt: Date }[] };
+  founder: PublicFounder & { snapshots: { mrr: number; recordedAt: Date }[] };
   rank: number;
   style?: React.CSSProperties;
 }
@@ -69,7 +69,7 @@ export function FounderRow({ founder, rank, style }: FounderRowProps) {
                 ✓ VERIFIED
               </span>
             )}
-            {founder.stripeAccountId && (
+            {founder.stripeVerified && (
               <span
                 className="text-[10px] font-semibold mono px-2 py-0.5 rounded-sm shrink-0 border"
                 style={{
@@ -105,7 +105,14 @@ export function FounderRow({ founder, rank, style }: FounderRowProps) {
         {/* MRR + growth */}
         <div className="flex items-center gap-3 shrink-0">
           <GrowthBadge percent={growth} />
-          <MRRBadge mrr={founder.mrr} currency={founder.currency} />
+          {founder.stripeMrr ? (
+            <div className="flex items-center gap-1">
+              <span className="text-xs" style={{ color: "#818cf8" }}>⚡</span>
+              <MRRBadge mrr={founder.stripeMrr} currency={founder.currency} />
+            </div>
+          ) : (
+            <MRRBadge mrr={founder.mrr} currency={founder.currency} />
+          )}
         </div>
 
         <span className="text-[var(--text-dim)] group-hover:text-[var(--text-muted)] text-sm transition-colors shrink-0">

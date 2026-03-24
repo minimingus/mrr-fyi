@@ -62,20 +62,42 @@ interface Props {
 
 async function getLeaderboard(category: FounderCategory) {
   const where = { emailVerified: true, category };
-  const [founders, total] = await Promise.all([
+  const [rows, total] = await Promise.all([
     prisma.founder.findMany({
       where,
       orderBy: [{ featured: "desc" }, { mrr: "desc" }],
       take: PAGE_SIZE,
-      include: {
+      select: {
+        id: true,
+        slug: true,
+        name: true,
+        twitter: true,
+        avatarUrl: true,
+        productName: true,
+        productUrl: true,
+        description: true,
+        category: true,
+        mrr: true,
+        currency: true,
+        verified: true,
+        featured: true,
+        stripeAccountId: true,
+        stripeMrr: true,
+        createdAt: true,
+        updatedAt: true,
         snapshots: {
           orderBy: { recordedAt: "desc" },
           take: 2,
+          select: { mrr: true, recordedAt: true },
         },
       },
     }),
     prisma.founder.count({ where }),
   ]);
+  const founders = rows.map(({ stripeAccountId, ...f }) => ({
+    ...f,
+    stripeVerified: !!stripeAccountId,
+  }));
   return { founders, total };
 }
 

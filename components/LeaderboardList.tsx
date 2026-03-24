@@ -3,10 +3,30 @@
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useCallback, useMemo, useState, useTransition } from "react";
 import { FounderRow } from "./FounderRow";
-import type { Founder, MRRSnapshot } from "@prisma/client";
+import type { FounderCategory } from "@prisma/client";
 
-type FounderWithSnapshots = Founder & {
-  snapshots: Pick<MRRSnapshot, "mrr" | "recordedAt">[];
+export type PublicFounder = {
+  id: string;
+  slug: string;
+  name: string;
+  twitter: string | null;
+  avatarUrl: string | null;
+  productName: string;
+  productUrl: string;
+  description: string | null;
+  category: FounderCategory | null;
+  mrr: number;
+  currency: string;
+  verified: boolean;
+  featured: boolean;
+  stripeVerified: boolean;
+  stripeMrr: number | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+type FounderWithSnapshots = PublicFounder & {
+  snapshots: { mrr: number; recordedAt: Date }[];
 };
 
 interface LeaderboardListProps {
@@ -51,11 +71,12 @@ export function LeaderboardList({ founders: initialFounders, totalCount, pageSiz
   const query = searchParams.get("q") ?? "";
   const range = searchParams.get("range") ?? "";
   const category = searchParams.get("category") ?? "";
+  const stripeOnly = searchParams.get("stripe") === "1";
 
   const [allFounders, setAllFounders] = useState(initialFounders);
   const [isLoadingMore, startLoadMore] = useTransition();
   const hasMore = allFounders.length < totalCount;
-  const isFiltering = Boolean(query || range || category);
+  const isFiltering = Boolean(query || range || category || stripeOnly);
 
   const updateParams = useCallback(
     (updates: Record<string, string>) => {
@@ -96,8 +117,12 @@ export function LeaderboardList({ founders: initialFounders, totalCount, pageSiz
       result = result.filter((f) => f.mrr >= min && f.mrr < max);
     }
 
+    if (stripeOnly) {
+      result = result.filter((f) => f.stripeVerified);
+    }
+
     return result;
-  }, [allFounders, query, range, category]);
+  }, [allFounders, query, range, category, stripeOnly]);
 
   const loadMore = useCallback(() => {
     const nextPage = Math.floor(allFounders.length / pageSize) + 1;
@@ -113,15 +138,15 @@ export function LeaderboardList({ founders: initialFounders, totalCount, pageSiz
         twitter: d.twitter as string | null,
         avatarUrl: (d.avatarUrl as string | null) ?? null,
         productName: d.productName as string,
-        productUrl: d.productUrl as string | null,
+        productUrl: (d.productUrl as string | null) ?? "",
         description: d.description as string | null,
-        category: (d.category as string) ?? null,
-        email: null,
-        updateToken: "",
+        category: (d.category as FounderCategory) ?? null,
         mrr: d.mrr as number,
         currency: d.currency as string,
         verified: d.verified as boolean,
         featured: d.featured as boolean,
+        stripeVerified: d.stripeVerified as boolean,
+        stripeMrr: (d.stripeMrr as number | null) ?? null,
         createdAt: new Date(),
         updatedAt: new Date(d.updatedAt as string),
         snapshots: d.growthPercent != null
@@ -167,7 +192,7 @@ export function LeaderboardList({ founders: initialFounders, totalCount, pageSiz
       </div>
 
       {/* Category filters */}
-      <div className="mb-4 flex gap-1.5 flex-wrap">
+      <div className="mb-4 flex gap-1.5 flex-wrap items-center">
         {CATEGORIES.map((c) => {
           const active = category === c.value;
           return (
@@ -184,6 +209,17 @@ export function LeaderboardList({ founders: initialFounders, totalCount, pageSiz
             </button>
           );
         })}
+        <button
+          onClick={() => updateParams({ stripe: stripeOnly ? "" : "1" })}
+          className={`px-3 py-2 rounded-lg text-xs mono border transition-colors whitespace-nowrap ${
+            stripeOnly
+              ? "border-[#6366f1] text-[#818cf8]"
+              : "border-[var(--border)] bg-[var(--bg-card)] text-[var(--text-dim)] hover:border-[#6366f1] hover:text-[#818cf8]"
+          }`}
+          style={stripeOnly ? { background: "rgba(99,102,241,0.15)" } : {}}
+        >
+          ⚡ Stripe-verified
+        </button>
       </div>
 
       {/* Column headers */}
@@ -200,10 +236,24 @@ export function LeaderboardList({ founders: initialFounders, totalCount, pageSiz
       {filtered.length === 0 ? (
         <div className="text-center py-16">
           <p className="text-[var(--text-muted)] text-sm">
-            No founders found
-            {query && <> matching &ldquo;{query}&rdquo;</>}
-            {range && <> in this MRR range</>}
+            {stripeOnly && !query && !range
+              ? "No Stripe-verified founders yet — be the first"
+              : <>
+                  No founders found
+                  {query && <> matching &ldquo;{query}&rdquo;</>}
+                  {range && <> in this MRR range</>}
+                </>
+            }
           </p>
+          {stripeOnly && !query && !range && (
+            <a
+              href="/submit"
+              className="inline-flex items-center gap-1.5 mt-4 px-4 py-2 rounded-lg text-xs border transition-colors"
+              style={{ borderColor: "#6366f1", color: "#818cf8", background: "rgba(99,102,241,0.1)" }}
+            >
+              ⚡ Connect Stripe and get verified →
+            </a>
+          )}
         </div>
       ) : (
         <div className="flex flex-col gap-2">
