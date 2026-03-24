@@ -98,6 +98,9 @@ export default async function FounderProfile({ params, searchParams }: Props) {
     ? `$${Math.round(mrrDollars / 1000)}k`
     : `$${Math.round(mrrDollars)}`;
   const shareMRRText = `Crossed ${mrrShortText} MRR with ${founder.productName} 🚀 Tracking progress publicly at mrr.fyi/${founder.slug}`;
+  const tweetMRRText = founder.mrr === 0
+    ? `Building ${founder.productName} in public — tracking MRR at mrr.fyi/${founder.slug} #buildinpublic`
+    : `I make ${formatMRR(founder.mrr, founder.currency)}/mo with ${founder.productName} — tracking it publicly at mrr.fyi/${founder.slug} #buildinpublic #indiehacker`;
   const rankMedal = rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : null;
   const shareRankText = `${rankMedal ? `${rankMedal} ` : ""}${founder.productName} is making ${formatMRR(founder.mrr, founder.currency)}/mo — verified MRR profile on mrr.fyi 🚀`;
 
@@ -274,15 +277,33 @@ export default async function FounderProfile({ params, searchParams }: Props) {
           </div>
 
           <div className="text-right shrink-0">
-            <MRRBadge mrr={founder.mrr} currency={founder.currency} size="lg" />
+            {founder.stripeMrr ? (
+              <div>
+                <MRRBadge mrr={founder.stripeMrr} currency={founder.currency} size="lg" />
+                <p className="mt-1 text-[10px] mono" style={{ color: "#818cf8" }}>
+                  ⚡ Stripe-verified MRR
+                </p>
+              </div>
+            ) : (
+              <div>
+                <MRRBadge mrr={founder.mrr} currency={founder.currency} size="lg" />
+                {founder.stripeAccountId && (
+                  <p className="mt-1 text-[10px] mono" style={{ color: "#818cf8" }}>
+                    ⚡ stripe verified
+                  </p>
+                )}
+              </div>
+            )}
             <div className="mt-1 flex items-center justify-end gap-2">
               <GrowthBadge percent={growth} />
             </div>
-            {founder.stripeAccountId && (
-              <p className="mt-1 text-[10px] mono" style={{ color: "#818cf8" }}>
-                ⚡ stripe verified
-              </p>
-            )}
+            <div className="mt-2 flex justify-end">
+              <ShareButton
+                text={tweetMRRText}
+                url={`https://mrr.fyi/${founder.slug}`}
+                source="profile_mrr_display"
+              />
+            </div>
           </div>
         </div>
 
