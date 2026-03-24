@@ -5,6 +5,7 @@ import { ShareButton } from "@/components/ShareButton";
 import { formatMRR } from "@/lib/utils";
 import { BadgeCheck, Quote, Sparkles, TrendingUp, Users, Zap, Link2, Globe } from "lucide-react";
 import { getAllPosts } from "@/lib/blog";
+import { EmailCaptureForm } from "@/components/EmailCaptureForm";
 
 export const dynamic = "force-dynamic";
 
@@ -277,6 +278,9 @@ export default async function Home() {
           </div>
         </div>
       )}
+
+      {/* Email capture */}
+      <EmailCaptureForm />
 
       {/* Share leaderboard */}
       <div className="flex justify-end mb-4 animate-fade-up stagger-2">

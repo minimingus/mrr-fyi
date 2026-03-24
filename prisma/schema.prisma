@@ -107,6 +107,13 @@ enum PaymentProvider {
   STRIPE
 }
 
+model EmailSignup {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  source    String   @default("homepage")
+  createdAt DateTime @default(now())
+}
+
 enum FounderCategory {
   SAAS
   ECOMMERCE
