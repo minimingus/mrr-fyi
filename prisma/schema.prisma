@@ -108,9 +108,16 @@ enum PaymentProvider {
 }
 
 model EmailSignup {
+  id              String    @id @default(cuid())
+  email           String    @unique
+  source          String    @default("homepage")
+  unsubscribedAt  DateTime?
+  createdAt       DateTime  @default(now())
+}
+
+model SystemEvent {
   id        String   @id @default(cuid())
-  email     String   @unique
-  source    String   @default("homepage")
+  key       String   @unique
   createdAt DateTime @default(now())
 }
 

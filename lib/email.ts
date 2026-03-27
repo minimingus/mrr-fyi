@@ -924,3 +924,53 @@ export async function sendTrialExpiredEmail(
     html,
   });
 }
+
+export async function sendPaymentsLaunchEmail(
+  email: string,
+  unsubscribeToken: string
+) {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const pricingUrl = `${appUrl}/pricing`;
+  const unsubscribeUrl = `${appUrl}/api/unsubscribe/waitlist?token=${unsubscribeToken}`;
+
+  const html = emailLayout(`
+    <h1 style="margin:0 0 8px;font-size:20px;font-weight:700;color:${BRAND.text};">
+      mrr.fyi payments are live
+    </h1>
+    <p style="margin:0 0 20px;font-size:14px;color:${BRAND.textMuted};line-height:1.6;">
+      You signed up for early access — payments are now live on MRR.fyi.
+    </p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:${BRAND.bg};border:1px solid ${BRAND.border};border-radius:6px;margin-bottom:20px;">
+      <tr>
+        <td style="padding:20px 24px;">
+          <p style="margin:0 0 12px;font-size:15px;font-weight:600;color:${BRAND.text};">
+            Verified badge — $9/mo
+          </p>
+          <p style="margin:0 0 12px;font-size:14px;color:${BRAND.textMuted};line-height:1.6;">
+            Connect your Stripe account and we'll verify your MRR is real — straight from your Stripe dashboard. No screenshots, no self-reporting.
+          </p>
+          <ul style="margin:0;padding-left:20px;font-size:14px;color:${BRAND.textMuted};line-height:1.8;">
+            <li>Verified badge on the leaderboard</li>
+            <li>MRR pulled directly from Stripe Connect</li>
+            <li>7-day free trial, cancel anytime</li>
+          </ul>
+        </td>
+      </tr>
+    </table>
+    ${button("Get your Verified badge →", pricingUrl)}
+    <p style="margin:0;font-size:12px;color:${BRAND.textMuted};line-height:1.5;">
+      <a href="${unsubscribeUrl}" style="color:${BRAND.textMuted};text-decoration:underline;">Unsubscribe</a>
+    </p>
+  `);
+
+  const text = `mrr.fyi payments are live — get your Verified badge\n\nYou signed up for early access — payments are now live on MRR.fyi.\n\nVerified badge ($9/mo, 7-day free trial):\n- Verified badge on the leaderboard\n- MRR pulled directly from Stripe Connect — no screenshots, no self-reporting\n- Cancel anytime\n\nGet your Verified badge: ${pricingUrl}\n\nUnsubscribe: ${unsubscribeUrl}\n\n— MRR.fyi`;
+
+  const resend = await getResend();
+  await resend.emails.send({
+    from: "MRR.fyi <onboarding@resend.dev>",
+    to: email,
+    subject: "mrr.fyi payments are live — get your Verified badge",
+    text,
+    html,
+  });
+}
