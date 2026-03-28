@@ -25,8 +25,31 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { name, email, twitter, bio, websiteUrl, avatarUrl, productName, productUrl, description, mrr, currency, category } =
+    const { name, email, twitter, bio, websiteUrl, avatarUrl, productName, productUrl, description, mrr, currency, category, mrrRangeMin, mrrRangeMax } =
       parsed.data;
+
+    // Reachability check: HEAD request with 3s timeout
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3000);
+      const headRes = await fetch(productUrl, {
+        method: "HEAD",
+        signal: controller.signal,
+        redirect: "follow",
+      });
+      clearTimeout(timeoutId);
+      if (headRes.status >= 400) {
+        return NextResponse.json(
+          { error: "Product URL returned an error. Please check the URL and try again." },
+          { status: 400 }
+        );
+      }
+    } catch {
+      return NextResponse.json(
+        { error: "Product URL could not be reached. Please check the URL and try again." },
+        { status: 400 }
+      );
+    }
 
     const baseSlug = slugify(productName);
     let slug = baseSlug;
@@ -59,6 +82,8 @@ export async function POST(req: NextRequest) {
         category: category || null,
         mrr: mrrCents,
         currency,
+        mrrRangeMin: mrrRangeMin ?? null,
+        mrrRangeMax: mrrRangeMax ?? null,
         updateToken,
         emailVerifyToken,
         referralCode,
