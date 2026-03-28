@@ -19,6 +19,9 @@ interface ProfileData {
   bio: string;
   websiteUrl: string;
   avatarUrl: string;
+  logoUrl: string;
+  tags: string;
+  linkedinUrl: string;
   referralCode: string | null;
   referralCount: number;
 }
@@ -41,6 +44,9 @@ export default function UpdatePage() {
     bio: "",
     websiteUrl: "",
     avatarUrl: "",
+    logoUrl: "",
+    tags: "",
+    linkedinUrl: "",
     referralCode: null,
     referralCount: 0,
   });
@@ -53,6 +59,7 @@ export default function UpdatePage() {
   const [trialHoursLeft, setTrialHoursLeft] = useState<number | null>(null);
   const [founderSlug, setFounderSlug] = useState<string | null>(null);
   const [bannerDismissed, setBannerDismissed] = useState(false);
+  const [isPro, setIsPro] = useState(false);
   const [planType, setPlanType] = useState<"FEATURED" | "VERIFIED" | null>(null);
 
   useEffect(() => {
@@ -78,11 +85,15 @@ export default function UpdatePage() {
             bio: data.bio ?? "",
             websiteUrl: data.websiteUrl ?? "",
             avatarUrl: data.avatarUrl ?? "",
+            logoUrl: data.logoUrl ?? "",
+            tags: (data.tags ?? []).join(", "),
+            linkedinUrl: data.linkedinUrl ?? "",
             referralCode: data.referralCode ?? null,
             referralCount: data.referralCount ?? 0,
           });
           if (data.trialExpired) setTrialExpired(true);
           if (data.slug) setFounderSlug(data.slug);
+          if (data.isPro) setIsPro(true);
           if (data.planType) setPlanType(data.planType);
           if (data.trialEndsAt && !data.trialExpired) {
             const hoursLeft = Math.ceil(
@@ -144,6 +155,9 @@ export default function UpdatePage() {
     setProfileError(null);
     setProfileSuccess(false);
     try {
+      const tags = profile.tags
+        ? profile.tags.split(",").map((t) => t.trim()).filter(Boolean).slice(0, 5)
+        : [];
       const res = await fetch("/api/update-profile", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -158,6 +172,11 @@ export default function UpdatePage() {
           bio: profile.bio || undefined,
           websiteUrl: profile.websiteUrl || undefined,
           avatarUrl: profile.avatarUrl || undefined,
+          ...(isPro && {
+            logoUrl: profile.logoUrl || undefined,
+            tags,
+            linkedinUrl: profile.linkedinUrl || undefined,
+          }),
         }),
       });
       const json = await res.json();
@@ -490,6 +509,55 @@ export default function UpdatePage() {
                 className={inputClass}
               />
             </div>
+
+            {isPro && (
+              <>
+                <div className="pt-4 border-t border-[var(--border)]">
+                  <p className="text-xs font-semibold text-[var(--amber)] mono uppercase tracking-widest mb-4">
+                    ✦ Pro Profile
+                  </p>
+                </div>
+                <div>
+                  <label className={labelClass}>
+                    Logo URL{" "}
+                    <span className="text-[var(--text-dim)] font-normal">(optional)</span>
+                  </label>
+                  <input
+                    type="url"
+                    value={profile.logoUrl}
+                    onChange={(e) => updateProfile("logoUrl", e.target.value)}
+                    placeholder="https://yourcompany.com/logo.png"
+                    className={inputClass}
+                  />
+                </div>
+                <div>
+                  <label className={labelClass}>
+                    Tags{" "}
+                    <span className="text-[var(--text-dim)] font-normal">(optional, comma-separated, max 5)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={profile.tags}
+                    onChange={(e) => updateProfile("tags", e.target.value)}
+                    placeholder="SaaS, bootstrapped, solo founder"
+                    className={inputClass}
+                  />
+                </div>
+                <div>
+                  <label className={labelClass}>
+                    LinkedIn URL{" "}
+                    <span className="text-[var(--text-dim)] font-normal">(optional)</span>
+                  </label>
+                  <input
+                    type="url"
+                    value={profile.linkedinUrl}
+                    onChange={(e) => updateProfile("linkedinUrl", e.target.value)}
+                    placeholder="https://linkedin.com/in/yourhandle"
+                    className={inputClass}
+                  />
+                </div>
+              </>
+            )}
 
             {profileError && (
               <div className="rounded-md border border-[var(--red)] bg-red-950/20 px-4 py-3 text-sm text-[var(--red)]">

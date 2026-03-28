@@ -31,6 +31,22 @@ const schema = z.object({
     .refine((url) => !url.toLowerCase().startsWith("javascript:"), { message: "Invalid URL scheme" })
     .optional()
     .or(z.literal("")),
+  logoUrl: z
+    .string()
+    .url("Must be a valid URL")
+    .refine((url) => !url.toLowerCase().startsWith("javascript:"), { message: "Invalid URL scheme" })
+    .optional()
+    .or(z.literal("")),
+  tags: z
+    .array(z.string().max(20, "Each tag must be max 20 characters"))
+    .max(5, "Max 5 tags")
+    .optional(),
+  linkedinUrl: z
+    .string()
+    .url("Must be a valid URL")
+    .refine((url) => !url.toLowerCase().startsWith("javascript:"), { message: "Invalid URL scheme" })
+    .optional()
+    .or(z.literal("")),
 });
 
 export async function GET(req: NextRequest) {
@@ -54,6 +70,10 @@ export async function GET(req: NextRequest) {
         avatarUrl: true,
         verified: true,
         featured: true,
+        isPro: true,
+        logoUrl: true,
+        tags: true,
+        linkedinUrl: true,
         slug: true,
         referralCode: true,
         stripeAccountId: true,
@@ -91,6 +111,10 @@ export async function GET(req: NextRequest) {
       avatarUrl: founder.avatarUrl,
       verified: founder.verified,
       featured: founder.featured,
+      isPro: founder.isPro,
+      logoUrl: founder.logoUrl,
+      tags: founder.tags,
+      linkedinUrl: founder.linkedinUrl,
       slug: founder.slug,
       referralCode: founder.referralCode,
       referralCount: founder._count.referralsMade,
@@ -128,11 +152,12 @@ export async function PATCH(req: NextRequest) {
       );
     }
 
-    const { token, name, productName, productUrl, description, category, twitter, bio, websiteUrl, avatarUrl } =
+    const { token, name, productName, productUrl, description, category, twitter, bio, websiteUrl, avatarUrl, logoUrl, tags, linkedinUrl } =
       parsed.data;
 
     const founder = await prisma.founder.findUnique({
       where: { updateToken: token },
+      select: { id: true, isPro: true, emailVerified: true, stripeAccountId: true, updatedAt: true, productUrl: true, verified: true },
     });
 
     if (!founder) {
@@ -154,20 +179,25 @@ export async function PATCH(req: NextRequest) {
         bio: bio ?? null,
         websiteUrl: websiteUrl || null,
         avatarUrl: avatarUrl || null,
+        ...(founder.isPro && {
+          logoUrl: logoUrl || null,
+          tags: tags ?? [],
+          linkedinUrl: linkedinUrl || null,
+        }),
       },
     });
 
     // Recompute trust score and verification status after profile update
     try {
       const trustScore = await computeTrustScore({
-        emailVerified: updated.emailVerified,
-        stripeAccountId: updated.stripeAccountId,
+        emailVerified: founder.emailVerified,
+        stripeAccountId: founder.stripeAccountId,
         updatedAt: updated.updatedAt,
         productUrl: updated.productUrl,
       });
       const verificationStatus = computeVerificationStatus({
-        verified: updated.verified,
-        stripeAccountId: updated.stripeAccountId,
+        verified: founder.verified,
+        stripeAccountId: founder.stripeAccountId,
       });
       await prisma.founder.update({
         where: { id: updated.id },

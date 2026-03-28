@@ -211,6 +211,13 @@ export default async function FounderProfile({ params, searchParams }: Props) {
               </div>
             )}
             <div>
+              {founder.logoUrl && (
+                <img
+                  src={founder.logoUrl}
+                  alt={`${founder.productName} logo`}
+                  className="h-8 mb-2 object-contain"
+                />
+              )}
               <div className="flex items-center gap-2 flex-wrap mb-1">
                 <h1
                   className="text-2xl"
@@ -260,9 +267,34 @@ export default async function FounderProfile({ params, searchParams }: Props) {
                     </a>
                   </>
                 )}
+                {founder.linkedinUrl && (
+                  <>
+                    <span className="text-[var(--text-dim)]">·</span>
+                    <a
+                      href={founder.linkedinUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-[var(--amber)] transition-colors text-xs"
+                    >
+                      LinkedIn
+                    </a>
+                  </>
+                )}
               </div>
               {founder.bio && (
                 <p className="mt-2 text-sm text-[var(--text-muted)]">{founder.bio}</p>
+              )}
+              {founder.tags && founder.tags.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {founder.tags.map((tag: string) => (
+                    <span
+                      key={tag}
+                      className="text-[10px] mono px-1.5 py-0.5 rounded-sm border border-[var(--border)] text-[var(--text-dim)]"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
               )}
             </div>
           </div>
