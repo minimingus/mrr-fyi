@@ -32,6 +32,10 @@ model Founder {
   featured    Boolean       @default(false)
   stripeAccountId  String?  @unique
   stripeMrr        Int?
+  verificationStatus VerificationStatus @default(SELF_REPORTED)
+  trustScore         Int                @default(0)
+  mrrRangeMin        Int?
+  mrrRangeMax        Int?
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 
@@ -119,6 +123,12 @@ model SystemEvent {
   id        String   @id @default(cuid())
   key       String   @unique
   createdAt DateTime @default(now())
+}
+
+enum VerificationStatus {
+  SELF_REPORTED
+  CONNECTED
+  VERIFIED
 }
 
 enum FounderCategory {
