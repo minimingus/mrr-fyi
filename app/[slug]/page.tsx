@@ -102,7 +102,7 @@ export default async function FounderProfile({ params, searchParams }: Props) {
     ? `Building ${founder.productName} in public — tracking MRR at mrr.fyi/${founder.slug} #buildinpublic`
     : `I make ${formatMRR(founder.mrr, founder.currency)}/mo with ${founder.productName} — tracking it publicly at mrr.fyi/${founder.slug} #buildinpublic #indiehacker`;
   const rankMedal = rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : null;
-  const shareRankText = `${rankMedal ? `${rankMedal} ` : ""}${founder.productName} is making ${formatMRR(founder.mrr, founder.currency)}/mo — verified MRR profile on mrr.fyi 🚀`;
+  const shareRankText = `${rankMedal ? `${rankMedal} ` : ""}${founder.productName} is making ${formatMRR(founder.mrr, founder.currency)}/mo — MRR profile on mrr.fyi 🚀`;
 
   const jsonLd = [
     {
@@ -174,7 +174,7 @@ export default async function FounderProfile({ params, searchParams }: Props) {
           href={`/pricing?slug=${founder.slug}`}
           className="block mb-6 px-4 py-3 rounded-lg border border-dashed border-[var(--border-accent)] text-sm text-[var(--text-muted)] hover:border-[var(--amber)] hover:text-[var(--text)] transition-colors text-center"
         >
-          Stand out — try a <span className="text-[var(--emerald)] font-semibold">verified badge</span> free for 7 days →
+          Stand out — try <span className="text-[var(--amber)] font-semibold">Pro</span> free for 7 days →
         </a>
       )}
       {/* Back */}
@@ -226,18 +226,9 @@ export default async function FounderProfile({ params, searchParams }: Props) {
                 {founder.verified && (
                   <span
                     className="text-[10px] font-semibold mono px-1.5 py-0.5 rounded-sm"
-                    style={{ background: "rgba(16,185,129,0.15)", color: "var(--emerald)" }}
+                    style={{ background: "rgba(251,191,36,0.15)", color: "var(--amber)" }}
                   >
-                    ✓ VERIFIED
-                  </span>
-                )}
-                {founder.stripeAccountId && (
-                  <span
-                    className="text-[10px] font-semibold mono px-1.5 py-0.5 rounded-sm"
-                    style={{ background: "rgba(99,102,241,0.15)", color: "#818cf8" }}
-                    title="MRR verified via Stripe"
-                  >
-                    ⚡ STRIPE VERIFIED
+                    ✦ PRO
                   </span>
                 )}
               </div>
@@ -277,23 +268,9 @@ export default async function FounderProfile({ params, searchParams }: Props) {
           </div>
 
           <div className="text-right shrink-0">
-            {founder.stripeMrr ? (
-              <div>
-                <MRRBadge mrr={founder.stripeMrr} currency={founder.currency} size="lg" />
-                <p className="mt-1 text-[10px] mono" style={{ color: "#818cf8" }}>
-                  ⚡ Stripe-verified MRR
-                </p>
-              </div>
-            ) : (
-              <div>
-                <MRRBadge mrr={founder.mrr} currency={founder.currency} size="lg" />
-                {founder.stripeAccountId && (
-                  <p className="mt-1 text-[10px] mono" style={{ color: "#818cf8" }}>
-                    ⚡ stripe verified
-                  </p>
-                )}
-              </div>
-            )}
+            <div>
+              <MRRBadge mrr={founder.stripeMrr ?? founder.mrr} currency={founder.currency} size="lg" />
+            </div>
             <div className="mt-1 flex items-center justify-end gap-2">
               <GrowthBadge percent={growth} />
             </div>
@@ -390,12 +367,12 @@ export default async function FounderProfile({ params, searchParams }: Props) {
             <span className="text-[var(--text-muted)]">
               <span
                 className="inline-block text-[10px] font-semibold mono px-1.5 py-0.5 rounded-sm mr-2"
-                style={{ background: "rgba(16,185,129,0.15)", color: "var(--emerald)" }}
+                style={{ background: "rgba(251,191,36,0.15)", color: "var(--amber)" }}
               >
-                ✓
+                ✦
               </span>
-              Try verified or{" "}
-              <span className="text-[var(--amber)]">featured free for 7 days</span>
+              Go{" "}
+              <span className="text-[var(--amber)]">Pro or Featured free for 7 days</span>
             </span>
             <span className="text-xs text-[var(--text-dim)] group-hover:text-[var(--text-muted)] transition-colors">
               Learn more →
@@ -519,7 +496,7 @@ export default async function FounderProfile({ params, searchParams }: Props) {
         className="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] p-6 text-center animate-fade-up stagger-4"
       >
         <p className="text-sm text-[var(--text-muted)] mb-3">
-          Is this your product? Get a verified badge or featured placement.
+          Is this your product? Go Pro or get Featured placement.
         </p>
         <a
           href={`/pricing?slug=${founder.slug}`}

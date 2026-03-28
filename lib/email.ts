@@ -316,12 +316,12 @@ export async function sendChurnRecoveryEmail(
 ) {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
   const profileUrl = `${appUrl}/${slug}`;
-  const planLabel = planType === "FEATURED" ? "Featured" : "Verified";
+  const planLabel = planType === "FEATURED" ? "Featured" : "Pro";
 
   const loseFeature =
     planType === "FEATURED"
       ? "top placement on the leaderboard and your Featured badge"
-      : "your Verified badge";
+      : "your Pro membership benefits";
 
   const html = emailLayout(`
     <h1 style="margin:0 0 8px;font-size:20px;font-weight:700;color:${BRAND.text};">
@@ -537,9 +537,9 @@ export async function sendOnboardingTips(
       </tr>
     </table>
     <p style="margin:0 0 20px;font-size:14px;color:${BRAND.textMuted};line-height:1.6;">
-      Want to stand out? A <strong style="color:${BRAND.emerald};">verified badge</strong> shows visitors your revenue is real. Try it free for 7 days.
+      Want to stand out? Go <strong style="color:${BRAND.amber};">Pro</strong> for analytics, full MRR history, and a Pro badge. Try it free for 7 days.
     </p>
-    ${button("Try Verified free for 7 days", pricingUrl)}
+    ${button("Try Pro free for 7 days", pricingUrl)}
   `);
 
   const text = `Tips for building in public with ${productName}:\n\n1. Share your milestones — tweet real numbers\n2. Show the journey — authenticity builds audience\n3. Engage with other founders on the leaderboard\n\nWant to stand out? Try Verified free for 7 days: ${pricingUrl}\n\n— MRR.fyi`;
@@ -624,19 +624,20 @@ export async function sendOnboardingTrialEnding(
         <td style="padding:20px 24px;">
           <p style="margin:0 0 10px;font-size:12px;color:${BRAND.textMuted};text-transform:uppercase;letter-spacing:0.5px;">Without upgrading, you miss out on</p>
           <ul style="margin:0;padding-left:20px;">
-            <li style="margin-bottom:8px;font-size:14px;color:${BRAND.textMuted};line-height:1.6;"><strong style="color:${BRAND.text};">Verified badge</strong> — proves your MRR is real to investors &amp; customers</li>
-            <li style="margin-bottom:0;font-size:14px;color:${BRAND.textMuted};line-height:1.6;"><strong style="color:${BRAND.text};">Share your MRR button</strong> — one-click social sharing for milestones</li>
+            <li style="margin-bottom:8px;font-size:14px;color:${BRAND.textMuted};line-height:1.6;"><strong style="color:${BRAND.text};">Pro badge</strong> — stand out on the leaderboard and your profile</li>
+            <li style="margin-bottom:8px;font-size:14px;color:${BRAND.textMuted};line-height:1.6;"><strong style="color:${BRAND.text};">Analytics dashboard</strong> — profile views, link clicks, referrer sources</li>
+            <li style="margin-bottom:0;font-size:14px;color:${BRAND.textMuted};line-height:1.6;"><strong style="color:${BRAND.text};">Full MRR history chart</strong> — show your growth trajectory</li>
           </ul>
         </td>
       </tr>
     </table>
-    ${button("Get Verified — $9/mo", verifiedUrl)}
+    ${button("Go Pro — $9/mo", verifiedUrl)}
     <p style="margin:16px 0 0;font-size:12px;color:${BRAND.textMuted};line-height:1.5;">
       Includes a 7-day free trial. Your profile at <a href="${profileUrl}" style="color:${BRAND.amber};text-decoration:none;">mrr.fyi/${slug}</a> stays live either way.
     </p>
   `);
 
-  const text = `Your 7-day window closes tomorrow for ${productName} on MRR.fyi.\n\nWithout upgrading, you miss out on:\n- Verified badge ($9/mo): proves your MRR is real\n- Share your MRR button for milestones\n\nIncludes a 7-day free trial.\n\nGet Verified: ${verifiedUrl}\n\nYour profile stays live either way: ${profileUrl}\n\n— MRR.fyi`;
+  const text = `Your 7-day window closes tomorrow for ${productName} on MRR.fyi.\n\nWithout upgrading, you miss out on:\n- Pro badge: stand out on the leaderboard\n- Analytics dashboard: profile views, link clicks, referrer sources\n- Full MRR history chart: show your growth trajectory\n\nIncludes a 7-day free trial.\n\nGo Pro: ${verifiedUrl}\n\nYour profile stays live either way: ${profileUrl}\n\n— MRR.fyi`;
 
   const resend = await getResend();
   await resend.emails.send({
@@ -714,9 +715,9 @@ export async function sendTrialUrgencyEmail(
           "Priority visibility to founders &amp; investors",
         ]
       : [
-          "Verified badge — proves your revenue is real",
-          "Increased trust with visitors",
-          "Priority listing over unverified founders",
+          "Pro badge on the leaderboard and your profile",
+          "Analytics dashboard — profile views, clicks, referrer sources",
+          "Full MRR history chart — show your growth trajectory",
         ];
 
   const perkRows = perks

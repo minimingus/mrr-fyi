@@ -180,7 +180,7 @@ export default async function Home() {
             LIVE
           </span>
           <span className="text-xs text-[var(--text-dim)]">
-            Stripe-verified · updated in real-time
+            Self-reported · updated in real-time
           </span>
         </div>
 
@@ -188,15 +188,15 @@ export default async function Home() {
           className="text-5xl sm:text-6xl leading-tight mb-4"
           style={{ fontFamily: "var(--font-dm-serif)", color: "var(--text)" }}
         >
-          Your Stripe-verified
+          Your MRR.
           <br />
-          <span style={{ color: "var(--amber)" }}>MRR. One link.</span>
+          <span style={{ color: "var(--amber)" }}>One link.</span>
           <br />
           Share anywhere.
         </h1>
 
         <p className="text-[var(--text-muted)] text-base max-w-lg mb-2">
-          Stripe-verified MRR profiles for indie founders. No VCs, no employees — just provably real revenue.
+          Public MRR profiles for indie founders. No VCs, no employees — just real revenue, tracked in public.
         </p>
 
         <p className="text-xs text-[var(--text-dim)] mb-6 flex items-center gap-4 flex-wrap">
@@ -218,7 +218,7 @@ export default async function Home() {
           href="/submit"
           className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--amber)] text-black font-semibold rounded-md hover:bg-amber-400 transition-all hover:scale-[1.02]"
         >
-          Get Your Stripe-Verified Profile →
+          Get Your Pro Profile →
         </a>
 
         {stats.totalFounders > 0 && (
@@ -228,7 +228,7 @@ export default async function Home() {
             <strong className="text-[var(--text-muted)]">{stats.totalFounders} founders</strong>{" "}
             tracking{" "}
             <strong className="text-[var(--text-muted)]">{formatMRR(stats.totalMRR)}/mo</strong>{" "}
-            in Stripe-verified revenue
+            in combined revenue
           </p>
         )}
       </div>
@@ -309,7 +309,7 @@ export default async function Home() {
             href="/submit"
             className="inline-flex items-center gap-2 px-5 py-2.5 bg-[var(--amber)] text-black text-sm font-semibold rounded-md hover:bg-amber-400 transition-colors"
           >
-            Get Your Verified Profile →
+            Get Your Pro Profile →
           </a>
         </div>
       ) : (
@@ -403,14 +403,14 @@ export default async function Home() {
           {[
             {
               icon: BadgeCheck,
-              title: "Stripe-verified credibility",
-              desc: "Connect Stripe to get a Stripe-verified badge — provably real revenue that investors and customers can trust.",
+              title: "Pro badge credibility",
+              desc: "Go Pro to stand out on the leaderboard with a Pro badge — signal commitment and get noticed by investors and customers.",
               color: "var(--emerald)",
             },
             {
               icon: Sparkles,
               title: "Get discovered",
-              desc: "A Stripe-verified badge signals real traction. Put your product in front of customers and investors who trust transparent founders.",
+              desc: "A Pro badge signals real traction. Put your product in front of customers and investors who trust transparent founders.",
               color: "var(--amber)",
             },
             {
@@ -474,7 +474,7 @@ export default async function Home() {
             </p>
             <ul className="space-y-2 text-sm text-[var(--text-muted)]">
               <li className="flex items-start gap-2"><span className="mt-0.5 shrink-0 text-[var(--emerald)]">✓</span> Permanent public founder profile</li>
-              <li className="flex items-start gap-2"><span className="mt-0.5 shrink-0 text-[var(--emerald)]">✓</span> Stripe-verified MRR — provably real</li>
+              <li className="flex items-start gap-2"><span className="mt-0.5 shrink-0 text-[var(--emerald)]">✓</span> Pro badge — stand out on the leaderboard</li>
               <li className="flex items-start gap-2"><span className="mt-0.5 shrink-0 text-[var(--emerald)]">✓</span> One link to share everywhere</li>
               <li className="flex items-start gap-2"><span className="mt-0.5 shrink-0 text-[var(--emerald)]">✓</span> MRR chart, milestones, growth history</li>
             </ul>
@@ -547,13 +547,13 @@ export default async function Home() {
           {stats.totalFounders} founders are already here.
         </h2>
         <p className="text-[var(--text-muted)] text-sm mb-5">
-          Building something people pay for? Connect Stripe and get your verified profile. Takes 60 seconds.
+          Building something people pay for? Submit your MRR and track your progress in public. Takes 60 seconds.
         </p>
         <a
           href="/submit"
           className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--amber)] text-black font-semibold rounded-md hover:bg-amber-400 transition-all hover:scale-[1.02]"
         >
-          Get Your Stripe-Verified Profile →
+          Get Your Pro Profile →
         </a>
         <p className="text-xs text-[var(--text-dim)] mt-4">
           Already listed?{" "}

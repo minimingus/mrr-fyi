@@ -7,24 +7,24 @@ import { BadgeCheck, ShieldCheck, Zap, ChevronDown, ChevronUp } from "lucide-rea
 
 const FAQ = [
   {
-    q: "What does Verified mean?",
-    a: "Verified means your MRR is confirmed directly from Stripe. You connect your Stripe account, we read your MRR from Stripe Connect, and display a Verified badge on your profile. No screenshots, no self-reporting.",
+    q: "What does Pro include?",
+    a: "Pro gives you an analytics dashboard (profile views, link clicks, referrer sources), full MRR history chart, enhanced profile fields (bio, logo, tags, LinkedIn), and a Pro badge on the leaderboard and your profile.",
   },
   {
-    q: "Is my Stripe data private?",
-    a: "We only read your MRR total. We don't store your transactions, customers, or any other Stripe data. You can disconnect your Stripe account at any time from your profile settings.",
+    q: "What's the analytics dashboard?",
+    a: "You get a private dashboard showing how many founders viewed your profile, clicked your product link, and where they came from — by day, week, and month. Accessible via your update link.",
   },
   {
     q: "Can I cancel anytime?",
-    a: "Yes — cancel with one click from your billing email. Your Verified badge and MRR history chart stay active until the end of your billing period. No fees, no friction.",
+    a: "Yes — cancel with one click from your billing email. Your Pro features stay active until the end of your billing period. No fees, no friction.",
   },
   {
     q: "What happens when I cancel?",
-    a: "Your profile reverts to free (no Verified badge, no history chart). All your data stays safe. You can re-subscribe anytime.",
+    a: "Your profile reverts to free (no Pro badge, no full history chart, no analytics). All your data stays safe. You can re-subscribe anytime.",
   },
   {
     q: "What's a 'free' profile?",
-    a: "A public profile page and MRR milestone emails — all free, forever. The Verified badge and MRR history chart are paid extras.",
+    a: "A public profile page and MRR milestone emails — all free, forever. Analytics, full history, enhanced profile, and the Pro badge are paid extras.",
   },
   {
     q: "Is there a refund policy?",
@@ -102,17 +102,17 @@ function PricingInner({ verifiedCount }: { verifiedCount: number }) {
           className="text-4xl mb-3"
           style={{ fontFamily: "var(--font-dm-serif)" }}
         >
-          Prove your MRR is real.
+          Go Pro. Stand out.
         </h1>
         <p className="text-[var(--text-muted)] mb-4">
-          Connect Stripe, get a Verified badge. No screenshots. No self-reporting.
+          Analytics, full MRR history, enhanced profile. Track what matters and show it off.
         </p>
 
         {/* Social proof counter */}
         {verifiedCount > 0 && (
           <p className="text-sm text-[var(--text-dim)]">
             <span className="text-[var(--amber)] font-semibold mono">{verifiedCount}</span>{" "}
-            {verifiedCount === 1 ? "founder has" : "founders have"} verified their MRR with Stripe.
+            {verifiedCount === 1 ? "founder is" : "founders are"} already Pro.
           </p>
         )}
       </div>
@@ -123,7 +123,7 @@ function PricingInner({ verifiedCount }: { verifiedCount: number }) {
           <div className="flex items-center justify-between mb-4">
             <div>
               <span className="self-start text-[10px] font-semibold mono px-1.5 py-0.5 rounded-sm bg-[var(--amber)] text-black">
-                VERIFIED
+                PRO
               </span>
               <div className="flex items-baseline gap-1 mt-2">
                 <span className="mono text-3xl font-bold text-[var(--text)]">$9</span>
@@ -135,10 +135,10 @@ function PricingInner({ verifiedCount }: { verifiedCount: number }) {
 
           <ul className="flex flex-col gap-2 mb-5">
             {[
-              "Stripe-verified badge on your profile",
-              "MRR pulled directly from Stripe Connect",
-              "MRR history chart — show off your growth",
-              "Priority listing in verified profiles",
+              "Pro badge on your profile and leaderboard",
+              "Analytics dashboard — views, clicks, referrer sources",
+              "Full MRR history chart — track your growth trajectory",
+              "Enhanced profile — logo, tags, LinkedIn, bio",
               "7-day free trial — no charge today",
               "Cancel anytime, instantly",
             ].map((f) => (
@@ -194,7 +194,7 @@ function PricingInner({ verifiedCount }: { verifiedCount: number }) {
         Payments processed securely by Stripe.
       </p>
 
-      {/* Free vs Verified comparison */}
+      {/* Free vs Pro comparison */}
       <div className="mb-12 rounded-xl border border-[var(--border)] overflow-hidden">
         <div className="grid grid-cols-3 bg-[var(--bg-card)]">
           <div className="py-3 px-4 text-xs text-[var(--text-dim)] font-medium uppercase tracking-widest mono" />
@@ -202,17 +202,17 @@ function PricingInner({ verifiedCount }: { verifiedCount: number }) {
             <span className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-widest mono">Free</span>
           </div>
           <div className="py-3 px-4 text-center border-l border-[var(--amber)] bg-[var(--amber-glow)]">
-            <span className="text-xs font-semibold text-[var(--amber)] uppercase tracking-widest mono">Verified</span>
+            <span className="text-xs font-semibold text-[var(--amber)] uppercase tracking-widest mono">Pro</span>
           </div>
         </div>
         {[
           { feature: "Public profile page", free: true, paid: true },
           { feature: "Public profile listing", free: true, paid: true },
           { feature: "Milestone emails", free: true, paid: true },
-          { feature: "Stripe-verified badge", free: false, paid: true },
-          { feature: "MRR from Stripe Connect", free: false, paid: true },
-          { feature: "MRR history chart", free: false, paid: true },
-          { feature: "Priority listing position", free: false, paid: true },
+          { feature: "Pro badge on profile + leaderboard", free: false, paid: true },
+          { feature: "Analytics dashboard", free: false, paid: true },
+          { feature: "Full MRR history chart", free: false, paid: true },
+          { feature: "Enhanced profile (logo, tags, LinkedIn)", free: false, paid: true },
         ].map((row, i) => (
           <div
             key={row.feature}

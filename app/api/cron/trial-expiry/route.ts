@@ -28,7 +28,7 @@ export async function GET(request: Request) {
   for (const payment of payments) {
     if (!payment.founder.email || !payment.trialEndsAt) continue;
 
-    const planLabel = payment.type === "FEATURED" ? "Featured" : "Verified";
+    const planLabel = payment.type === "FEATURED" ? "Featured" : "Pro";
 
     try {
       await sendTrialExpiredEmail(

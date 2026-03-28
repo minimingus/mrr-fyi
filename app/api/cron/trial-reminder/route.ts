@@ -34,7 +34,7 @@ export async function GET(request: Request) {
     const daysLeft = Math.ceil(
       (payment.trialEndsAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24)
     );
-    const planLabel = payment.type === "FEATURED" ? "Featured" : "Verified";
+    const planLabel = payment.type === "FEATURED" ? "Featured" : "Pro";
 
     try {
       await sendTrialEndingEmail(

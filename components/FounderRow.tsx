@@ -17,10 +17,9 @@ function TrustBadge({ status }: { status: PublicFounder["verificationStatus"] })
     return (
       <span
         className="inline-flex items-center gap-1 text-[10px] font-semibold mono px-1.5 py-0.5 rounded-sm shrink-0"
-        style={{ background: "rgba(16,185,129,0.15)", color: "var(--emerald)" }}
+        style={{ background: "rgba(251,191,36,0.15)", color: "var(--amber)" }}
       >
-        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" style={{ background: "#34d399" }} />
-        Stripe Verified
+        ✦ Pro
       </span>
     );
   }

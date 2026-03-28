@@ -84,7 +84,7 @@ export default function BillingPage() {
     data?.planType === "FEATURED"
       ? "Featured"
       : data?.planType === "VERIFIED"
-      ? "Verified"
+      ? "Pro"
       : null;
 
   const isInTrial =
@@ -140,10 +140,10 @@ export default function BillingPage() {
                     style={
                       data.planType === "FEATURED"
                         ? { background: "var(--amber)", color: "black" }
-                        : { background: "rgba(16,185,129,0.15)", color: "var(--emerald)" }
+                        : { background: "rgba(251,191,36,0.15)", color: "var(--amber)" }
                     }
                   >
-                    {data.planType === "FEATURED" ? "★ FEATURED" : "✓ VERIFIED"}
+                    {data.planType === "FEATURED" ? "★ FEATURED" : "✦ PRO"}
                   </span>
                 </div>
 

@@ -110,8 +110,8 @@ export default async function BlogPostPage({ params }: Props) {
             Put your MRR on the record.
           </p>
           <p className="text-sm text-[var(--text-muted)] mb-5 max-w-sm mx-auto">
-            Free profile, verified badge, MRR history chart. Takes 60 seconds.
-            7-day free trial on Verified.
+            Free profile, Pro badge, MRR history chart. Takes 60 seconds.
+            7-day free trial on Pro.
           </p>
           <a
             href="/submit"

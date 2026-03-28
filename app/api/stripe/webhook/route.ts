@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
               select: { email: true, productName: true, slug: true },
             });
             if (founder?.email) {
-              const planLabel = plan === "FEATURED" ? "Featured" : "Verified";
+              const planLabel = plan === "FEATURED" ? "Featured" : "Pro";
               await sendTrialStartedEmail(
                 founder.email,
                 founder.productName,

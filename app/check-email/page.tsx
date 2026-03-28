@@ -37,7 +37,7 @@ function CheckEmailContent() {
         {[
           { step: "1", label: "Click the link in your email", detail: "Usually arrives in under a minute." },
           { step: "2", label: "Your profile goes live", detail: "Your public profile is live, shareable URL ready." },
-          { step: "3", label: "Upgrade to Verified (optional)", detail: "Add the Verified badge and MRR history chart — $9/mo, 7-day free trial." },
+          { step: "3", label: "Go Pro (optional)", detail: "Get the Pro badge, analytics dashboard, and full MRR history chart — $9/mo, 7-day free trial." },
         ].map((item) => (
           <div key={item.step} className="flex items-start gap-3">
             <span className="mono text-xs font-bold text-[var(--amber)] w-4 shrink-0 mt-0.5">{item.step}</span>
