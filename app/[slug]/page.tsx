@@ -382,7 +382,7 @@ export default async function FounderProfile({ params, searchParams }: Props) {
       )}
 
       {/* MRR Chart */}
-      {founder.snapshots.length >= 2 && (
+      {founder.isPro && founder.snapshots.length >= 2 && (
         <div
           className="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] p-6 mb-6 animate-fade-up stagger-2"
         >
@@ -393,6 +393,23 @@ export default async function FounderProfile({ params, searchParams }: Props) {
           </h2>
           <MRRChart snapshots={founder.snapshots} currency={founder.currency} />
         </div>
+      )}
+      {!founder.isPro && founder.snapshots.length >= 2 && (
+        <a
+          href={`/pricing?slug=${founder.slug}`}
+          className="block rounded-xl border border-dashed border-[var(--border-accent)] bg-[var(--bg-card)] p-6 mb-6 animate-fade-up stagger-2 hover:border-[var(--amber)] transition-colors group"
+        >
+          <h2 className="text-sm font-medium text-[var(--text-muted)] mb-2 mono uppercase tracking-widest">
+            MRR over time
+          </h2>
+          <p className="text-sm text-[var(--text-muted)] mb-3">
+            Full MRR history is a{" "}
+            <span className="text-[var(--amber)] font-semibold">Pro</span> feature.
+          </p>
+          <span className="text-xs text-[var(--amber)] group-hover:underline">
+            Unlock full history →
+          </span>
+        </a>
       )}
 
       {/* Milestones */}
