@@ -86,7 +86,7 @@ export default async function Image({ params }: Props) {
             <span style={{ color: "#f59e0b", fontSize: "20px", fontWeight: 700, marginRight: "10px" }}>
               MRR.fyi
             </span>
-            <span style={{ color: "#52525b", fontSize: "16px" }}>indie revenue leaderboard</span>
+            <span style={{ color: "#52525b", fontSize: "16px" }}>verified founder profiles</span>
           </div>
           {rankLabel && (
             <div
@@ -109,7 +109,7 @@ export default async function Image({ params }: Props) {
               >
                 {rankLabel}
               </span>
-              <span style={{ color: "#52525b", fontSize: "14px" }}>on leaderboard</span>
+              <span style={{ color: "#52525b", fontSize: "14px" }}>verified profile</span>
             </div>
           )}
         </div>

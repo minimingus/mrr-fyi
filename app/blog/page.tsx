@@ -32,7 +32,7 @@ export default function BlogIndexPage() {
         href="/"
         className="inline-flex items-center gap-1 text-xs text-[var(--text-dim)] hover:text-[var(--text-muted)] mb-8 transition-colors"
       >
-        &larr; Back to leaderboard
+        &larr; Back to profiles
       </a>
 
       <div className="mb-12">

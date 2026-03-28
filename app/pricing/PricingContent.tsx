@@ -8,7 +8,7 @@ import { BadgeCheck, ShieldCheck, Zap, ChevronDown, ChevronUp } from "lucide-rea
 const FAQ = [
   {
     q: "What does Verified mean?",
-    a: "Verified means your MRR is confirmed directly from Stripe. You connect your Stripe account, we read your MRR from Stripe Connect, and display a Verified badge on your leaderboard profile. No screenshots, no self-reporting.",
+    a: "Verified means your MRR is confirmed directly from Stripe. You connect your Stripe account, we read your MRR from Stripe Connect, and display a Verified badge on your profile. No screenshots, no self-reporting.",
   },
   {
     q: "Is my Stripe data private?",
@@ -24,7 +24,7 @@ const FAQ = [
   },
   {
     q: "What's a 'free' profile?",
-    a: "Listing on the leaderboard, a public profile page, and MRR milestone emails — all free, forever. The Verified badge and MRR history chart are paid extras.",
+    a: "A public profile page and MRR milestone emails — all free, forever. The Verified badge and MRR history chart are paid extras.",
   },
   {
     q: "Is there a refund policy?",
@@ -138,7 +138,7 @@ function PricingInner({ verifiedCount }: { verifiedCount: number }) {
               "Stripe-verified badge on your profile",
               "MRR pulled directly from Stripe Connect",
               "MRR history chart — show off your growth",
-              "Priority listing on the leaderboard",
+              "Priority listing in verified profiles",
               "7-day free trial — no charge today",
               "Cancel anytime, instantly",
             ].map((f) => (
@@ -207,7 +207,7 @@ function PricingInner({ verifiedCount }: { verifiedCount: number }) {
         </div>
         {[
           { feature: "Public profile page", free: true, paid: true },
-          { feature: "Leaderboard listing", free: true, paid: true },
+          { feature: "Public profile listing", free: true, paid: true },
           { feature: "Milestone emails", free: true, paid: true },
           { feature: "Stripe-verified badge", free: false, paid: true },
           { feature: "MRR from Stripe Connect", free: false, paid: true },

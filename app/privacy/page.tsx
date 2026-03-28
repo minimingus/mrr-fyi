@@ -10,7 +10,7 @@ export default function PrivacyPage() {
         href="/"
         className="inline-flex items-center gap-1 text-xs text-[var(--text-dim)] hover:text-[var(--text-muted)] mb-8 transition-colors"
       >
-        ← Back to leaderboard
+        ← Back to profiles
       </a>
 
       <h1 className="text-3xl mb-2" style={{ fontFamily: "var(--font-dm-serif)" }}>
@@ -69,7 +69,7 @@ export default function PrivacyPage() {
           </h2>
           <ul className="list-disc list-inside flex flex-col gap-1">
             <li>Provide, maintain, and improve the Service</li>
-            <li>Display your profile and MRR on the public leaderboard (where you have opted in)</li>
+            <li>Display your verified profile and MRR publicly (where you have opted in)</li>
             <li>Process subscription payments via Lemon Squeezy</li>
             <li>Send transactional emails (subscription confirmation, billing receipts)</li>
             <li>Comply with legal obligations</li>

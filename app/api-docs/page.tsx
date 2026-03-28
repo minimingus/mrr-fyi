@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "API Documentation — MRR.fyi",
   description:
-    "Public API for accessing the MRR.fyi indie revenue leaderboard. Get founder data, rankings, and milestones.",
+    "Public API for accessing MRR.fyi verified founder profiles. Get founder data, rankings, and milestones.",
 };
 
 const endpoints = [
@@ -88,7 +88,7 @@ export default function ApiDocsPage() {
         href="/"
         className="inline-flex items-center gap-1 text-xs text-[var(--text-dim)] hover:text-[var(--text-muted)] mb-8 transition-colors"
       >
-        &larr; Back to leaderboard
+        &larr; Back to profiles
       </a>
 
       <div className="mb-12">
@@ -99,7 +99,7 @@ export default function ApiDocsPage() {
           Public API
         </h1>
         <p className="text-[var(--text-muted)] max-w-lg">
-          Free, read-only access to the MRR.fyi leaderboard. No API key required.
+          Free, read-only access to MRR.fyi verified founder profiles. No API key required.
           All monetary values are in <strong className="text-[var(--text)]">cents</strong>.
         </p>
       </div>

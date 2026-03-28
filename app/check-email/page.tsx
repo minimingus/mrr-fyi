@@ -36,7 +36,7 @@ function CheckEmailContent() {
         <p className="text-xs mono uppercase tracking-widest text-[var(--text-dim)]">What happens next</p>
         {[
           { step: "1", label: "Click the link in your email", detail: "Usually arrives in under a minute." },
-          { step: "2", label: "Your profile goes live", detail: "Listed on the leaderboard, shareable URL ready." },
+          { step: "2", label: "Your profile goes live", detail: "Your public profile is live, shareable URL ready." },
           { step: "3", label: "Upgrade to Verified (optional)", detail: "Add the Verified badge and MRR history chart — $9/mo, 7-day free trial." },
         ].map((item) => (
           <div key={item.step} className="flex items-start gap-3">

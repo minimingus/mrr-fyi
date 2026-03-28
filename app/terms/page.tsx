@@ -10,7 +10,7 @@ export default function TermsPage() {
         href="/"
         className="inline-flex items-center gap-1 text-xs text-[var(--text-dim)] hover:text-[var(--text-muted)] mb-8 transition-colors"
       >
-        ← Back to leaderboard
+        ← Back to profiles
       </a>
 
       <h1 className="text-3xl mb-2" style={{ fontFamily: "var(--font-dm-serif)" }}>

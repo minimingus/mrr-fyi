@@ -282,7 +282,7 @@ export default async function Home() {
       {/* Email capture */}
       <EmailCaptureForm />
 
-      {/* Share leaderboard */}
+      {/* Share profiles */}
       <div className="flex justify-end mb-4 animate-fade-up stagger-2">
         <ShareButton
           text={`${stats.totalFounders} indie founders are making ${formatMRR(stats.totalMRR)}/mo combined on MRR.fyi`}

@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Changelog — MRR.fyi",
   description:
-    "Recent product updates and new features on MRR.fyi, the public indie revenue leaderboard.",
+    "Recent product updates and new features on MRR.fyi, the verified MRR platform for indie founders.",
 };
 
 const entries = [
@@ -23,13 +23,13 @@ const entries = [
     date: "Mar 19, 2026",
     title: "Public API v1",
     description:
-      "Free, read-only API for the leaderboard and individual founder data. No API key required — perfect for building integrations and dashboards.",
+      "Free, read-only API for founder profiles and individual founder data. No API key required — perfect for building integrations and dashboards.",
   },
   {
     date: "Mar 19, 2026",
     title: "Admin Dashboard",
     description:
-      "Internal dashboard for managing founders, verifying revenue data, and monitoring platform health. Keeps the leaderboard accurate and trustworthy.",
+      "Internal dashboard for managing founders, verifying revenue data, and monitoring platform health. Keeps verified profiles accurate and trustworthy.",
   },
   {
     date: "Mar 19, 2026",
@@ -64,7 +64,7 @@ export default function ChangelogPage() {
         href="/"
         className="inline-flex items-center gap-1 text-xs text-[var(--text-dim)] hover:text-[var(--text-muted)] mb-8 transition-colors"
       >
-        &larr; Back to leaderboard
+        &larr; Back to profiles
       </a>
 
       <div className="mb-12">
