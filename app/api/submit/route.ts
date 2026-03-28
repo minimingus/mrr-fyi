@@ -4,6 +4,7 @@ import { submitSchema } from "@/lib/validations";
 import { slugify } from "@/lib/utils";
 import { sendVerificationEmail } from "@/lib/email";
 import { rateLimit } from "@/lib/rate-limit";
+import { computeTrustScore, computeVerificationStatus } from "@/lib/trust";
 
 function generateReferralCode(): string {
   return crypto.randomUUID().replace(/-/g, "").slice(0, 8);
@@ -72,6 +73,26 @@ export async function POST(req: NextRequest) {
       await sendVerificationEmail(email, productName, emailVerifyToken);
     } catch (err) {
       console.error("[email] failed to send verification email:", err);
+    }
+
+    // Compute initial trust score and verification status
+    try {
+      const trustScore = await computeTrustScore({
+        emailVerified: founder.emailVerified,
+        stripeAccountId: founder.stripeAccountId,
+        updatedAt: founder.updatedAt,
+        productUrl: founder.productUrl,
+      });
+      const verificationStatus = computeVerificationStatus({
+        verified: founder.verified,
+        stripeAccountId: founder.stripeAccountId,
+      });
+      await prisma.founder.update({
+        where: { id: founder.id },
+        data: { trustScore, verificationStatus },
+      });
+    } catch (err) {
+      console.error("[submit] trust score computation failed:", err);
     }
 
     const response = NextResponse.json({ slug: founder.slug }, { status: 201 });

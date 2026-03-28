@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { constructStripeEvent } from "@/lib/stripe";
 import { prisma } from "@/lib/prisma";
 import { sendChurnRecoveryEmail, sendTrialStartedEmail } from "@/lib/email";
+import { computeVerificationStatus } from "@/lib/trust";
 import Stripe from "stripe";
 
 export async function POST(req: NextRequest) {
@@ -120,10 +121,21 @@ export async function POST(req: NextRequest) {
         const stripeAccountId = event.account;
         if (!stripeAccountId) break;
 
-        await prisma.founder.updateMany({
+        const affectedFounders = await prisma.founder.findMany({
           where: { stripeAccountId },
-          data: { stripeAccountId: null, stripeMrr: null },
+          select: { id: true, verified: true },
         });
+
+        for (const f of affectedFounders) {
+          const verificationStatus = computeVerificationStatus({
+            verified: f.verified,
+            stripeAccountId: null,
+          });
+          await prisma.founder.update({
+            where: { id: f.id },
+            data: { stripeAccountId: null, stripeMrr: null, verificationStatus },
+          });
+        }
 
         console.log(
           `[stripe/webhook] cleared stripeAccountId/stripeMrr for account ${stripeAccountId}`

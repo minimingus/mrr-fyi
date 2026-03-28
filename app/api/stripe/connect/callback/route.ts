@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { exchangeStripeConnectCode, calculateMRRFromStripe } from "@/lib/stripe";
+import { computeTrustScore, computeVerificationStatus } from "@/lib/trust";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl;
@@ -41,11 +42,34 @@ export async function GET(req: NextRequest) {
     console.error("[stripe/connect/callback] MRR calculation failed:", err);
   }
 
+  // Compute trust score and verification status now that Stripe is connected
+  const updatedFounder = {
+    ...founder,
+    stripeAccountId: stripeUserId,
+  };
+  let trustScore = founder.trustScore;
+  let verificationStatus = computeVerificationStatus({
+    verified: updatedFounder.verified,
+    stripeAccountId: updatedFounder.stripeAccountId,
+  });
+  try {
+    trustScore = await computeTrustScore({
+      emailVerified: updatedFounder.emailVerified,
+      stripeAccountId: updatedFounder.stripeAccountId,
+      updatedAt: updatedFounder.updatedAt,
+      productUrl: updatedFounder.productUrl,
+    });
+  } catch (err) {
+    console.error("[stripe/connect/callback] trust score computation failed:", err);
+  }
+
   await prisma.founder.update({
     where: { id: founder.id },
     data: {
       stripeAccountId: stripeUserId,
       ...(stripeMrr !== null ? { stripeMrr } : {}),
+      trustScore,
+      verificationStatus,
     },
   });
 

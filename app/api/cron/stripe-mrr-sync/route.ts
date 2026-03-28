@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { calculateMRRFromStripe } from "@/lib/stripe";
+import { computeTrustScore, computeVerificationStatus } from "@/lib/trust";
 
 export const dynamic = "force-dynamic";
 
@@ -17,7 +18,14 @@ export async function GET(request: Request) {
 
   const founders = await prisma.founder.findMany({
     where: { stripeAccountId: { not: null } },
-    select: { id: true, stripeAccountId: true },
+    select: {
+      id: true,
+      stripeAccountId: true,
+      emailVerified: true,
+      updatedAt: true,
+      productUrl: true,
+      verified: true,
+    },
   });
 
   let updated = 0;
@@ -26,9 +34,19 @@ export async function GET(request: Request) {
   for (const founder of founders) {
     try {
       const stripeMrr = await calculateMRRFromStripe(founder.stripeAccountId!);
+      const trustScore = await computeTrustScore({
+        emailVerified: founder.emailVerified,
+        stripeAccountId: founder.stripeAccountId,
+        updatedAt: founder.updatedAt,
+        productUrl: founder.productUrl,
+      });
+      const verificationStatus = computeVerificationStatus({
+        verified: founder.verified,
+        stripeAccountId: founder.stripeAccountId,
+      });
       await prisma.founder.update({
         where: { id: founder.id },
-        data: { stripeMrr },
+        data: { stripeMrr, trustScore, verificationStatus },
       });
       updated++;
     } catch (err) {
