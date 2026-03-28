@@ -72,7 +72,7 @@ export default function SubmitPage() {
         href="/"
         className="inline-flex items-center gap-1 text-xs text-[var(--text-dim)] hover:text-[var(--text-muted)] mb-8 transition-colors"
       >
-        ← Back to leaderboard
+        ← Back to profiles
       </a>
 
       {referrer && (
@@ -150,7 +150,7 @@ export default function SubmitPage() {
             <label className={labelClass}>Short Description</label>
             <textarea
               {...register("description")}
-              placeholder="One sentence about what it does (max 280 chars)"
+              placeholder="One sentence about what it does (20–280 chars)"
               rows={2}
               className={inputClass + " resize-none"}
             />
@@ -190,6 +190,36 @@ export default function SubmitPage() {
                 <option value="CAD">CAD ($)</option>
                 <option value="AUD">AUD ($)</option>
               </select>
+            </div>
+          </div>
+
+          <div>
+            <label className={labelClass}>MRR Range <span className="text-[var(--text-dim)] font-normal">(optional — if you prefer a range over exact figure)</span></label>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <input
+                  {...register("mrrRangeMin", { valueAsNumber: true })}
+                  type="number"
+                  placeholder="Min (e.g. 1000)"
+                  min="0"
+                  className={inputClass + " mono"}
+                />
+                {errors.mrrRangeMin && (
+                  <p className={errorClass}>{errors.mrrRangeMin.message}</p>
+                )}
+              </div>
+              <div>
+                <input
+                  {...register("mrrRangeMax", { valueAsNumber: true })}
+                  type="number"
+                  placeholder="Max (e.g. 2000)"
+                  min="0"
+                  className={inputClass + " mono"}
+                />
+                {errors.mrrRangeMax && (
+                  <p className={errorClass}>{errors.mrrRangeMax.message}</p>
+                )}
+              </div>
             </div>
           </div>
 
@@ -304,7 +334,7 @@ export default function SubmitPage() {
           disabled={isSubmitting}
           className="w-full py-3 bg-[var(--amber)] text-black font-semibold rounded-md hover:bg-amber-400 transition-all hover:scale-[1.01] disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100"
         >
-          {isSubmitting ? "Submitting..." : "Add to Leaderboard →"}
+          {isSubmitting ? "Submitting..." : "Create My Verified Profile →"}
         </button>
 
         <p className="text-xs text-center text-[var(--text-dim)]">

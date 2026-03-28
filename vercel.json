@@ -1,5 +1,8 @@
 {
   "buildCommand": "prisma generate && next build",
   "installCommand": "npm install",
-  "framework": "nextjs"
+  "framework": "nextjs",
+  "crons": [
+    { "path": "/api/cron/stripe-mrr-sync", "schedule": "0 4 * * *" }
+  ]
 }

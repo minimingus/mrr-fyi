@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { constructStripeEvent } from "@/lib/stripe";
 import { prisma } from "@/lib/prisma";
 import { sendChurnRecoveryEmail, sendTrialStartedEmail } from "@/lib/email";
+import { computeVerificationStatus } from "@/lib/trust";
 import Stripe from "stripe";
 
 export async function POST(req: NextRequest) {
@@ -111,6 +112,34 @@ export async function POST(req: NextRequest) {
             console.error("[stripe/webhook] failed to send churn recovery email:", err);
           }
         }
+        break;
+      }
+
+      case "account.application.deauthorized": {
+        // Fired when a founder revokes Stripe Connect access via their Stripe dashboard.
+        // event.account is the connected account ID that deauthorized the app.
+        const stripeAccountId = event.account;
+        if (!stripeAccountId) break;
+
+        const affectedFounders = await prisma.founder.findMany({
+          where: { stripeAccountId },
+          select: { id: true, verified: true },
+        });
+
+        for (const f of affectedFounders) {
+          const verificationStatus = computeVerificationStatus({
+            verified: f.verified,
+            stripeAccountId: null,
+          });
+          await prisma.founder.update({
+            where: { id: f.id },
+            data: { stripeAccountId: null, stripeMrr: null, verificationStatus },
+          });
+        }
+
+        console.log(
+          `[stripe/webhook] cleared stripeAccountId/stripeMrr for account ${stripeAccountId}`
+        );
         break;
       }
 

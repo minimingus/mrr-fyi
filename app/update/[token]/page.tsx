@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useRouter, useParams, useSearchParams } from "next/navigation";
 import { trackEvent } from "@/lib/plausible";
 
 function buildTwitterIntentUrl(text: string, url: string) {
@@ -26,6 +26,7 @@ interface ProfileData {
 export default function UpdatePage() {
   const params = useParams<{ token: string }>();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [mrr, setMrr] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -54,6 +55,9 @@ export default function UpdatePage() {
   const [founderSlug, setFounderSlug] = useState<string | null>(null);
   const [bannerDismissed, setBannerDismissed] = useState(false);
   const [planType, setPlanType] = useState<"FEATURED" | "VERIFIED" | null>(null);
+  const [stripeConnected, setStripeConnected] = useState(false);
+  const [stripeMrr, setStripeMrr] = useState<number | null>(null);
+  const [stripeNotice, setStripeNotice] = useState<"connected" | "error" | null>(null);
 
   useEffect(() => {
     const dismissed = sessionStorage.getItem("trial-warning-dismissed");
@@ -84,6 +88,8 @@ export default function UpdatePage() {
           if (data.trialExpired) setTrialExpired(true);
           if (data.slug) setFounderSlug(data.slug);
           if (data.planType) setPlanType(data.planType);
+          if (data.stripeConnected) setStripeConnected(true);
+          if (data.stripeMrr != null) setStripeMrr(data.stripeMrr);
           if (data.trialEndsAt && !data.trialExpired) {
             const hoursLeft = Math.ceil(
               (new Date(data.trialEndsAt).getTime() - Date.now()) / (1000 * 60 * 60)
@@ -101,6 +107,16 @@ export default function UpdatePage() {
     }
     loadProfile();
   }, [params.token]);
+
+  useEffect(() => {
+    const stripe = searchParams.get("stripe");
+    if (stripe === "connected") {
+      setStripeNotice("connected");
+      setStripeConnected(true);
+    } else if (stripe === "error") {
+      setStripeNotice("error");
+    }
+  }, [searchParams]);
 
   function dismissBanner() {
     sessionStorage.setItem("trial-warning-dismissed", "1");
@@ -188,7 +204,7 @@ export default function UpdatePage() {
       {trialHoursLeft !== null && !bannerDismissed && (
         <div className="sticky top-0 z-50 w-full px-4 py-3 flex items-center justify-between gap-4 bg-[var(--amber)] text-black text-sm font-medium">
           <span className="flex-1 text-center">
-            Your trial expires in {trialHoursLeft} hour{trialHoursLeft !== 1 ? "s" : ""} — upgrade to keep your Verified badge and stay on the leaderboard.{" "}
+            Your trial expires in {trialHoursLeft} hour{trialHoursLeft !== 1 ? "s" : ""} — upgrade to keep your Verified badge and stay on your verified profile.{" "}
             <a
               href={founderSlug ? `/pricing?slug=${founderSlug}` : "/pricing"}
               onClick={() => trackEvent("Trial Expiry Banner Click")}
@@ -211,7 +227,7 @@ export default function UpdatePage() {
         href="/"
         className="inline-flex items-center gap-1 text-xs text-[var(--text-dim)] hover:text-[var(--text-muted)] mb-10 transition-colors"
       >
-        ← Leaderboard
+        ← Back
       </a>
 
       {trialExpired && (
@@ -220,7 +236,7 @@ export default function UpdatePage() {
             Your free trial has ended
           </p>
           <p className="text-xs text-[var(--text-muted)] mb-3">
-            Upgrade now to keep your verified badge and stay visible on the leaderboard.
+            Upgrade now to keep your verified badge and stay visible with your verified profile.
           </p>
           <a
             href={founderSlug ? `/pricing?slug=${founderSlug}` : "/pricing"}
@@ -240,7 +256,7 @@ export default function UpdatePage() {
       </h1>
       <p className="text-sm text-[var(--text-muted)] mb-8">
         Enter your current monthly recurring revenue. A new snapshot will be
-        recorded and your position on the leaderboard will update immediately.
+        recorded and your verified profile will update immediately.
       </p>
 
       {mrrSuccess ? (
@@ -259,7 +275,7 @@ export default function UpdatePage() {
 
             <a
               href={buildTwitterIntentUrl(
-                `Just updated my MRR on the @mrrfyi leaderboard — building in public. Check it out: #buildinpublic`,
+                `Just updated my verified MRR profile on @mrrfyi — building in public. Check it out: #buildinpublic`,
                 `https://mrr.fyi/${mrrSuccess.slug}`
               )}
               target="_blank"
@@ -559,6 +575,63 @@ export default function UpdatePage() {
           )}
         </div>
       )}
+      {/* Stripe Verification Section */}
+      <div className="mt-16 pt-10 border-t border-[var(--border)]">
+        <h2
+          className="text-2xl mb-2"
+          style={{ fontFamily: "var(--font-dm-serif)" }}
+        >
+          Verify with Stripe.
+        </h2>
+        <p className="text-sm text-[var(--text-muted)] mb-6">
+          Connect your Stripe account to show a provably-real MRR badge — pulled
+          directly from your live subscriptions.
+        </p>
+
+        {stripeNotice === "connected" && (
+          <div className="mb-4 rounded-md border border-green-700 bg-green-950/20 px-4 py-3 text-sm text-green-400">
+            Stripe connected! Your MRR badge is now Stripe-verified.
+          </div>
+        )}
+        {stripeNotice === "error" && (
+          <div className="mb-4 rounded-md border border-[var(--red)] bg-red-950/20 px-4 py-3 text-sm text-[var(--red)]">
+            Stripe connection failed. Please try again.
+          </div>
+        )}
+
+        {stripeConnected ? (
+          <div className="flex flex-col gap-3">
+            <div
+              className="flex items-center gap-2 px-4 py-3 rounded-md border text-sm"
+              style={{ borderColor: "rgba(99,102,241,0.4)", background: "rgba(99,102,241,0.08)", color: "#818cf8" }}
+            >
+              <span>⚡</span>
+              <span className="font-semibold mono">Stripe connected</span>
+              {stripeMrr !== null && (
+                <span className="ml-auto text-[var(--text-muted)]">
+                  ${(stripeMrr / 100).toLocaleString()}/mo from Stripe
+                </span>
+              )}
+            </div>
+            <a
+              href={`/api/stripe/connect/authorize?token=${encodeURIComponent(params.token)}`}
+              className="text-xs text-[var(--text-dim)] hover:text-[var(--amber)] transition-colors"
+            >
+              Reconnect Stripe account →
+            </a>
+          </div>
+        ) : (
+          <a
+            href={`/api/stripe/connect/authorize?token=${encodeURIComponent(params.token)}`}
+            onClick={() => trackEvent("Stripe Connect Click")}
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-[var(--bg-card)] border border-[var(--border)] text-[var(--text)] text-sm font-semibold rounded-md hover:border-[var(--amber)] hover:text-[var(--amber)] transition-all hover:scale-[1.01]"
+          >
+            <span>⚡</span>
+            Connect Stripe →
+          </a>
+        )}
+      </div>
+
       {/* Billing Section */}
       <div className="mt-16 pt-10 border-t border-[var(--border)]">
         <h2
@@ -570,7 +643,7 @@ export default function UpdatePage() {
         <p className="text-sm text-[var(--text-muted)] mb-6">
           {planType
             ? `You're on the ${planType === "FEATURED" ? "Featured" : "Verified"} plan.`
-            : "No active plan. Upgrade to get a badge and stand out on the leaderboard."}
+            : "No active plan. Upgrade to get a verified badge and stand out with your profile."}
         </p>
         <a
           href={`/billing/${params.token}`}

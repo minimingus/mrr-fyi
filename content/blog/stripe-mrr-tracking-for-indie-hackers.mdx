@@ -1,0 +1,77 @@
+---
+title: "Stripe MRR Tracking: What the Dashboard Misses (and How to Fix It)"
+date: "2026-03-22"
+description: "Stripe's built-in analytics are good but incomplete. Here's how indie hackers can get accurate MRR out of Stripe — and why a public profile makes the number mean something."
+slug: "stripe-mrr-tracking-for-indie-hackers"
+---
+
+Stripe is where the money comes in. But Stripe's MRR number is often wrong — or at least, misleading.
+
+Here's why that happens, and what to do about it.
+
+## Why Stripe's MRR estimate is off
+
+Stripe calculates MRR by annualizing active subscriptions and dividing by 12. That sounds right but there are gotchas:
+
+- **Annual plans inflate MRR**. If someone pays $120/year, Stripe books $10/mo MRR. But that's recognition accounting — you haven't "earned" each month yet.
+- **Trials count**. Stripe often includes trialing subscriptions in its MRR. If 20 people are trialing your $9/mo plan, Stripe shows $180 MRR you haven't collected.
+- **Paused subscriptions**. Some Stripe plans allow subscription pauses. Stripe may still count these.
+- **Currency conversion**. If you charge in USD and EUR, Stripe's blended MRR depends on today's exchange rate. It fluctuates.
+
+## The MRR formula indie hackers should use
+
+For a bootstrapped SaaS, simple is better:
+
+```
+MRR = (active monthly subscribers × monthly price)
+    + (active annual subscribers × annual price / 12)
+```
+
+Exclude:
+- Trials (they haven't paid)
+- Lifetime deals (not recurring)
+- One-off charges
+
+This gives you the number you actually care about: predictable revenue you can plan around.
+
+## How to pull accurate MRR from Stripe
+
+**Option 1: Stripe Sigma** (paid)
+Run a SQL query against your Stripe data:
+
+```sql
+select
+  sum(
+    case when interval = 'month' then amount / 100.0
+         when interval = 'year'  then amount / 100.0 / 12
+    end
+  ) as mrr_usd
+from subscriptions
+join subscription_items using (subscription_id)
+join prices using (price_id)
+where subscriptions.status = 'active'
+```
+
+**Option 2: Stripe API + a script**
+Pull all active subscriptions, filter to `status: active`, and sum recurring amounts. Exclude trials with `trial_end > now()`.
+
+**Option 3: Use a tool**
+Services like Baremetrics, ChartMogul, or [mrr.fyi](https://mrr.fyi) let you display your MRR publicly — which adds an accountability layer that Stripe dashboards don't.
+
+## Why public MRR matters beyond the number
+
+The Stripe dashboard is private. Your MRR lives in a tab no one else sees.
+
+Putting your MRR on a public profile — even a simple self-reported one — does a few things:
+
+1. **Forces you to commit to a number.** No more "it depends on how you count it."
+2. **Builds trust with customers and investors.** Transparent founders look credible.
+3. **Creates accountability.** When your MRR is public, updating it becomes a ritual.
+
+[MRR.fyi](https://mrr.fyi) lets founders display their MRR publicly with a Verified badge. It takes 60 seconds to set up and the free tier is unlimited.
+
+## The practical takeaway
+
+Don't trust Stripe's headline MRR blindly. Calculate your own. Then put it somewhere public — it turns a private number into a signal others can trust.
+
+That's when MRR stops being a vanity metric and starts doing real work.

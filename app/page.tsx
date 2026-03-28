@@ -3,27 +3,54 @@ import { prisma } from "@/lib/prisma";
 import { LeaderboardList } from "@/components/LeaderboardList";
 import { ShareButton } from "@/components/ShareButton";
 import { formatMRR } from "@/lib/utils";
-import { BadgeCheck, Quote, Sparkles, TrendingUp, Users } from "lucide-react";
+import { BadgeCheck, Quote, Sparkles, TrendingUp, Users, Zap, Link2, Globe } from "lucide-react";
+import { getAllPosts } from "@/lib/blog";
+import { EmailCaptureForm } from "@/components/EmailCaptureForm";
 
 export const dynamic = "force-dynamic";
 
 const LEADERBOARD_PAGE_SIZE = 50;
 
 async function getLeaderboard() {
-  const [founders, total] = await Promise.all([
+  const [rows, total] = await Promise.all([
     prisma.founder.findMany({
       where: { emailVerified: true },
       orderBy: [{ featured: "desc" }, { mrr: "desc" }],
       take: LEADERBOARD_PAGE_SIZE,
-      include: {
+      select: {
+        id: true,
+        slug: true,
+        name: true,
+        twitter: true,
+        avatarUrl: true,
+        productName: true,
+        productUrl: true,
+        description: true,
+        category: true,
+        mrr: true,
+        currency: true,
+        verified: true,
+        featured: true,
+        stripeAccountId: true,
+        stripeMrr: true,
+        verificationStatus: true,
+        mrrRangeMin: true,
+        mrrRangeMax: true,
+        createdAt: true,
+        updatedAt: true,
         snapshots: {
           orderBy: { recordedAt: "desc" },
           take: 2,
+          select: { mrr: true, recordedAt: true },
         },
       },
     }),
     prisma.founder.count({ where: { emailVerified: true } }),
   ]);
+  const founders = rows.map(({ stripeAccountId, ...f }) => ({
+    ...f,
+    stripeVerified: !!stripeAccountId,
+  }));
   return { founders, total };
 }
 
@@ -92,7 +119,7 @@ async function getRecentActivity() {
       name: f.name,
       slug: f.slug,
       productName: f.productName,
-      detail: "joined the leaderboard",
+      detail: "got a verified profile",
       at: f.createdAt,
     })),
   ];
@@ -125,7 +152,7 @@ const TESTIMONIALS = [
   },
   {
     quote:
-      "Investors actually found me through the leaderboard. If you're building in public, there's no reason not to be here.",
+      "Investors actually found me through my verified profile. If you're building in public, there's no reason not to be here.",
     name: "Priya R.",
     product: "FormStack AI",
   },
@@ -153,7 +180,7 @@ export default async function Home() {
             LIVE
           </span>
           <span className="text-xs text-[var(--text-dim)]">
-            self-reported · updated in real-time
+            Stripe-verified · updated in real-time
           </span>
         </div>
 
@@ -161,22 +188,37 @@ export default async function Home() {
           className="text-5xl sm:text-6xl leading-tight mb-4"
           style={{ fontFamily: "var(--font-dm-serif)", color: "var(--text)" }}
         >
-          Who&rsquo;s actually
+          Your Stripe-verified
           <br />
-          <span style={{ color: "var(--amber)" }}>making money</span>
+          <span style={{ color: "var(--amber)" }}>MRR. One link.</span>
           <br />
-          building in public?
+          Share anywhere.
         </h1>
 
-        <p className="text-[var(--text-muted)] text-base max-w-lg mb-6">
-          Real MRR from real indie founders. No VCs, no employees, no bullshit.
+        <p className="text-[var(--text-muted)] text-base max-w-lg mb-2">
+          Stripe-verified MRR profiles for indie founders. No VCs, no employees — just provably real revenue.
+        </p>
+
+        <p className="text-xs text-[var(--text-dim)] mb-6 flex items-center gap-4 flex-wrap">
+          <span className="flex items-center gap-1">
+            <Zap size={12} style={{ color: "#818cf8" }} />
+            Share on X
+          </span>
+          <span className="flex items-center gap-1">
+            <Globe size={12} style={{ color: "var(--amber)" }} />
+            Product Hunt
+          </span>
+          <span className="flex items-center gap-1">
+            <Link2 size={12} style={{ color: "var(--emerald)" }} />
+            Your own site
+          </span>
         </p>
 
         <a
           href="/submit"
           className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--amber)] text-black font-semibold rounded-md hover:bg-amber-400 transition-all hover:scale-[1.02]"
         >
-          Join the Leaderboard →
+          Get Your Stripe-Verified Profile →
         </a>
 
         {stats.totalFounders > 0 && (
@@ -186,7 +228,7 @@ export default async function Home() {
             <strong className="text-[var(--text-muted)]">{stats.totalFounders} founders</strong>{" "}
             tracking{" "}
             <strong className="text-[var(--text-muted)]">{formatMRR(stats.totalMRR)}/mo</strong>{" "}
-            in revenue
+            in Stripe-verified revenue
           </p>
         )}
       </div>
@@ -240,7 +282,10 @@ export default async function Home() {
         </div>
       )}
 
-      {/* Share leaderboard */}
+      {/* Email capture */}
+      <EmailCaptureForm />
+
+      {/* Share profiles */}
       <div className="flex justify-end mb-4 animate-fade-up stagger-2">
         <ShareButton
           text={`${stats.totalFounders} indie founders are making ${formatMRR(stats.totalMRR)}/mo combined on MRR.fyi`}
@@ -264,7 +309,7 @@ export default async function Home() {
             href="/submit"
             className="inline-flex items-center gap-2 px-5 py-2.5 bg-[var(--amber)] text-black text-sm font-semibold rounded-md hover:bg-amber-400 transition-colors"
           >
-            Join the Leaderboard →
+            Get Your Verified Profile →
           </a>
         </div>
       ) : (
@@ -358,14 +403,14 @@ export default async function Home() {
           {[
             {
               icon: BadgeCheck,
-              title: "Build in public credibility",
-              desc: "Get a verified badge to prove your numbers are real. Investors and customers trust transparent founders.",
+              title: "Stripe-verified credibility",
+              desc: "Connect Stripe to get a Stripe-verified badge — provably real revenue that investors and customers can trust.",
               color: "var(--emerald)",
             },
             {
               icon: Sparkles,
               title: "Get discovered",
-              desc: "Featured founders appear at the top of the leaderboard. Put your product in front of customers and investors.",
+              desc: "A Stripe-verified badge signals real traction. Put your product in front of customers and investors who trust transparent founders.",
               color: "var(--amber)",
             },
             {
@@ -395,6 +440,91 @@ export default async function Home() {
         </div>
       </div>
 
+      {/* Comparison section */}
+      <div className="mt-16 animate-fade-up" style={{ animationDelay: "0.25s", opacity: 0 }}>
+        <h2
+          className="text-xl mb-2 text-center"
+          style={{ fontFamily: "var(--font-dm-serif)" }}
+        >
+          Your profile. Your proof.
+        </h2>
+        <p className="text-center text-sm text-[var(--text-dim)] mb-8">
+          Unlike revenue feeds, mrr.fyi is your permanent founder profile
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="p-5 rounded-lg border border-[var(--border)] bg-[var(--bg-card)] opacity-60">
+            <p className="text-xs mono uppercase tracking-widest text-[var(--text-dim)] mb-3">Revenue feeds</p>
+            <ul className="space-y-2 text-sm text-[var(--text-dim)]">
+              <li className="flex items-start gap-2"><span className="mt-0.5 shrink-0">✗</span> Ephemeral posts that disappear</li>
+              <li className="flex items-start gap-2"><span className="mt-0.5 shrink-0">✗</span> No verification — anyone can claim anything</li>
+              <li className="flex items-start gap-2"><span className="mt-0.5 shrink-0">✗</span> Scattered across platforms</li>
+              <li className="flex items-start gap-2"><span className="mt-0.5 shrink-0">✗</span> Hard to share as a single link</li>
+            </ul>
+          </div>
+          <div
+            className="p-5 rounded-lg border bg-[var(--bg-card)]"
+            style={{ borderColor: "var(--amber)", boxShadow: "0 0 0 1px var(--amber-glow)" }}
+          >
+            <p
+              className="text-xs mono uppercase tracking-widest mb-3 flex items-center gap-1.5"
+              style={{ color: "var(--amber)" }}
+            >
+              <Zap size={11} />
+              mrr.fyi profile
+            </p>
+            <ul className="space-y-2 text-sm text-[var(--text-muted)]">
+              <li className="flex items-start gap-2"><span className="mt-0.5 shrink-0 text-[var(--emerald)]">✓</span> Permanent public founder profile</li>
+              <li className="flex items-start gap-2"><span className="mt-0.5 shrink-0 text-[var(--emerald)]">✓</span> Stripe-verified MRR — provably real</li>
+              <li className="flex items-start gap-2"><span className="mt-0.5 shrink-0 text-[var(--emerald)]">✓</span> One link to share everywhere</li>
+              <li className="flex items-start gap-2"><span className="mt-0.5 shrink-0 text-[var(--emerald)]">✓</span> MRR chart, milestones, growth history</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      {/* Blog section */}
+      {(() => {
+        const posts = getAllPosts().slice(0, 3);
+        if (posts.length === 0) return null;
+        return (
+          <div className="mt-16 animate-fade-up" style={{ animationDelay: "0.26s", opacity: 0 }}>
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-xl" style={{ fontFamily: "var(--font-dm-serif)" }}>
+                From the blog
+              </h2>
+              <a
+                href="/blog"
+                className="text-xs text-[var(--text-dim)] hover:text-[var(--text-muted)] transition-colors"
+              >
+                All posts →
+              </a>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {posts.map((post) => (
+                <a
+                  key={post.slug}
+                  href={`/blog/${post.slug}`}
+                  className="group p-4 rounded-lg border border-[var(--border)] bg-[var(--bg-card)] hover:border-[var(--amber)] transition-colors flex flex-col gap-2"
+                >
+                  <p className="text-xs text-[var(--text-dim)] mono">
+                    {new Date(post.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                  </p>
+                  <h3 className="text-sm font-medium text-[var(--text)] group-hover:text-[var(--amber)] transition-colors leading-snug">
+                    {post.title}
+                  </h3>
+                  <p className="text-xs text-[var(--text-dim)] leading-relaxed line-clamp-2 flex-1">
+                    {post.description}
+                  </p>
+                  <span className="text-xs text-[var(--text-dim)] group-hover:text-[var(--amber)] transition-colors">
+                    Read →
+                  </span>
+                </a>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
+
       {/* Trust line */}
       <div
         className="mt-16 text-center animate-fade-up"
@@ -417,13 +547,13 @@ export default async function Home() {
           {stats.totalFounders} founders are already here.
         </h2>
         <p className="text-[var(--text-muted)] text-sm mb-5">
-          Building something people pay for? This is where you prove it. Takes 60 seconds.
+          Building something people pay for? Connect Stripe and get your verified profile. Takes 60 seconds.
         </p>
         <a
           href="/submit"
           className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--amber)] text-black font-semibold rounded-md hover:bg-amber-400 transition-all hover:scale-[1.02]"
         >
-          Join the Leaderboard →
+          Get Your Stripe-Verified Profile →
         </a>
         <p className="text-xs text-[var(--text-dim)] mt-4">
           Already listed?{" "}

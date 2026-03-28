@@ -12,7 +12,7 @@ export function ReferralSection({ referralCode, productName }: ReferralSectionPr
   const [copied, setCopied] = useState(false);
 
   const referralUrl = `https://mrr.fyi/ref/${referralCode}`;
-  const tweetText = `Join me on @mrr_fyi — the leaderboard for indie hackers building in public 🚀\n${referralUrl}`;
+  const tweetText = `Join me on @mrr_fyi — get your verified MRR profile and build in public 🚀\n${referralUrl}`;
 
   function handleCopy() {
     navigator.clipboard.writeText(referralUrl).then(() => {

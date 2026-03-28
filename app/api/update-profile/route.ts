@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { rateLimit } from "@/lib/rate-limit";
+import { computeTrustScore, computeVerificationStatus } from "@/lib/trust";
 
 const schema = z.object({
   token: z.string().min(1),
@@ -55,6 +56,8 @@ export async function GET(req: NextRequest) {
         featured: true,
         slug: true,
         referralCode: true,
+        stripeAccountId: true,
+        stripeMrr: true,
         payments: {
           where: { active: true },
           select: { trialEndsAt: true, type: true },
@@ -94,6 +97,8 @@ export async function GET(req: NextRequest) {
       trialExpired,
       trialEndsAt: activePayment?.trialEndsAt ?? null,
       planType: activePayment?.type ?? null,
+      stripeConnected: !!founder.stripeAccountId,
+      stripeMrr: founder.stripeMrr,
     });
   } catch (err) {
     console.error("[update-profile:get]", err);
@@ -137,7 +142,7 @@ export async function PATCH(req: NextRequest) {
       );
     }
 
-    await prisma.founder.update({
+    const updated = await prisma.founder.update({
       where: { id: founder.id },
       data: {
         name,
@@ -151,6 +156,26 @@ export async function PATCH(req: NextRequest) {
         avatarUrl: avatarUrl || null,
       },
     });
+
+    // Recompute trust score and verification status after profile update
+    try {
+      const trustScore = await computeTrustScore({
+        emailVerified: updated.emailVerified,
+        stripeAccountId: updated.stripeAccountId,
+        updatedAt: updated.updatedAt,
+        productUrl: updated.productUrl,
+      });
+      const verificationStatus = computeVerificationStatus({
+        verified: updated.verified,
+        stripeAccountId: updated.stripeAccountId,
+      });
+      await prisma.founder.update({
+        where: { id: updated.id },
+        data: { trustScore, verificationStatus },
+      });
+    } catch (err) {
+      console.error("[update-profile] trust score computation failed:", err);
+    }
 
     return NextResponse.json({ slug: founder.slug });
   } catch (err) {

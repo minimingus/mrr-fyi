@@ -4,6 +4,7 @@ import { submitSchema } from "@/lib/validations";
 import { slugify } from "@/lib/utils";
 import { sendVerificationEmail } from "@/lib/email";
 import { rateLimit } from "@/lib/rate-limit";
+import { computeTrustScore, computeVerificationStatus } from "@/lib/trust";
 
 function generateReferralCode(): string {
   return crypto.randomUUID().replace(/-/g, "").slice(0, 8);
@@ -24,8 +25,31 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { name, email, twitter, bio, websiteUrl, avatarUrl, productName, productUrl, description, mrr, currency, category } =
+    const { name, email, twitter, bio, websiteUrl, avatarUrl, productName, productUrl, description, mrr, currency, category, mrrRangeMin, mrrRangeMax } =
       parsed.data;
+
+    // Reachability check: HEAD request with 3s timeout
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3000);
+      const headRes = await fetch(productUrl, {
+        method: "HEAD",
+        signal: controller.signal,
+        redirect: "follow",
+      });
+      clearTimeout(timeoutId);
+      if (headRes.status >= 400) {
+        return NextResponse.json(
+          { error: "Product URL returned an error. Please check the URL and try again." },
+          { status: 400 }
+        );
+      }
+    } catch {
+      return NextResponse.json(
+        { error: "Product URL could not be reached. Please check the URL and try again." },
+        { status: 400 }
+      );
+    }
 
     const baseSlug = slugify(productName);
     let slug = baseSlug;
@@ -58,6 +82,8 @@ export async function POST(req: NextRequest) {
         category: category || null,
         mrr: mrrCents,
         currency,
+        mrrRangeMin: mrrRangeMin ?? null,
+        mrrRangeMax: mrrRangeMax ?? null,
         updateToken,
         emailVerifyToken,
         referralCode,
@@ -72,6 +98,26 @@ export async function POST(req: NextRequest) {
       await sendVerificationEmail(email, productName, emailVerifyToken);
     } catch (err) {
       console.error("[email] failed to send verification email:", err);
+    }
+
+    // Compute initial trust score and verification status
+    try {
+      const trustScore = await computeTrustScore({
+        emailVerified: founder.emailVerified,
+        stripeAccountId: founder.stripeAccountId,
+        updatedAt: founder.updatedAt,
+        productUrl: founder.productUrl,
+      });
+      const verificationStatus = computeVerificationStatus({
+        verified: founder.verified,
+        stripeAccountId: founder.stripeAccountId,
+      });
+      await prisma.founder.update({
+        where: { id: founder.id },
+        data: { trustScore, verificationStatus },
+      });
+    } catch (err) {
+      console.error("[submit] trust score computation failed:", err);
     }
 
     const response = NextResponse.json({ slug: founder.slug }, { status: 201 });

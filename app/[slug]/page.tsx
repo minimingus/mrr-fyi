@@ -98,6 +98,11 @@ export default async function FounderProfile({ params, searchParams }: Props) {
     ? `$${Math.round(mrrDollars / 1000)}k`
     : `$${Math.round(mrrDollars)}`;
   const shareMRRText = `Crossed ${mrrShortText} MRR with ${founder.productName} 🚀 Tracking progress publicly at mrr.fyi/${founder.slug}`;
+  const tweetMRRText = founder.mrr === 0
+    ? `Building ${founder.productName} in public — tracking MRR at mrr.fyi/${founder.slug} #buildinpublic`
+    : `I make ${formatMRR(founder.mrr, founder.currency)}/mo with ${founder.productName} — tracking it publicly at mrr.fyi/${founder.slug} #buildinpublic #indiehacker`;
+  const rankMedal = rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : null;
+  const shareRankText = `${rankMedal ? `${rankMedal} ` : ""}${founder.productName} is making ${formatMRR(founder.mrr, founder.currency)}/mo — verified MRR profile on mrr.fyi 🚀`;
 
   const jsonLd = [
     {
@@ -153,7 +158,7 @@ export default async function FounderProfile({ params, searchParams }: Props) {
         >
           <span>
             {submitted
-              ? "You're on the leaderboard. Check your email for your private update link."
+              ? "Your profile is live. Check your email for your private update link."
               : "MRR updated. New snapshot recorded."}
           </span>
           <ShareButton
@@ -177,7 +182,7 @@ export default async function FounderProfile({ params, searchParams }: Props) {
         href="/"
         className="inline-flex items-center gap-1 text-xs text-[var(--text-dim)] hover:text-[var(--text-muted)] mb-8 transition-colors"
       >
-        ← Back to leaderboard
+        ← Back to profiles
       </a>
 
       {/* Header card */}
@@ -226,6 +231,15 @@ export default async function FounderProfile({ params, searchParams }: Props) {
                     ✓ VERIFIED
                   </span>
                 )}
+                {founder.stripeAccountId && (
+                  <span
+                    className="text-[10px] font-semibold mono px-1.5 py-0.5 rounded-sm"
+                    style={{ background: "rgba(99,102,241,0.15)", color: "#818cf8" }}
+                    title="MRR verified via Stripe"
+                  >
+                    ⚡ STRIPE VERIFIED
+                  </span>
+                )}
               </div>
               <div className="flex items-center gap-2 text-sm text-[var(--text-muted)] flex-wrap">
                 <span>{founder.name}</span>
@@ -263,9 +277,32 @@ export default async function FounderProfile({ params, searchParams }: Props) {
           </div>
 
           <div className="text-right shrink-0">
-            <MRRBadge mrr={founder.mrr} currency={founder.currency} size="lg" />
+            {founder.stripeMrr ? (
+              <div>
+                <MRRBadge mrr={founder.stripeMrr} currency={founder.currency} size="lg" />
+                <p className="mt-1 text-[10px] mono" style={{ color: "#818cf8" }}>
+                  ⚡ Stripe-verified MRR
+                </p>
+              </div>
+            ) : (
+              <div>
+                <MRRBadge mrr={founder.mrr} currency={founder.currency} size="lg" />
+                {founder.stripeAccountId && (
+                  <p className="mt-1 text-[10px] mono" style={{ color: "#818cf8" }}>
+                    ⚡ stripe verified
+                  </p>
+                )}
+              </div>
+            )}
             <div className="mt-1 flex items-center justify-end gap-2">
               <GrowthBadge percent={growth} />
+            </div>
+            <div className="mt-2 flex justify-end">
+              <ShareButton
+                text={tweetMRRText}
+                url={`https://mrr.fyi/${founder.slug}`}
+                source="profile_mrr_display"
+              />
             </div>
           </div>
         </div>
@@ -301,7 +338,7 @@ export default async function FounderProfile({ params, searchParams }: Props) {
             Visit {founder.productName} →
           </a>
           <span className="text-xs text-[var(--text-dim)]">
-            Rank #{rank} on leaderboard
+            Rank #{rank} on MRR.fyi
           </span>
           <div className="ml-auto flex items-center gap-2">
             <BadgeButton slug={founder.slug} />
@@ -311,6 +348,35 @@ export default async function FounderProfile({ params, searchParams }: Props) {
               url={`https://mrr.fyi/${founder.slug}`}
             />
           </div>
+        </div>
+      </div>
+
+      {/* Share my rank card */}
+      <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] p-5 mb-6 animate-fade-up stagger-2">
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <div className="flex items-center gap-3">
+            <div
+              className="flex items-center justify-center w-12 h-12 rounded-lg shrink-0 font-bold text-xl"
+              style={{ background: "rgba(245,158,11,0.12)", color: "var(--amber)" }}
+            >
+              {rankMedal ?? `#${rank}`}
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-[var(--text)]">
+                {rankMedal ? `${rankMedal} Ranked #${rank} on MRR.fyi` : `Ranked #${rank} on MRR.fyi`}
+              </p>
+              <p className="text-xs text-[var(--text-dim)] mt-0.5">
+                Share your rank and let the world know
+              </p>
+            </div>
+          </div>
+          <ShareButton
+            text={shareRankText}
+            url={`https://mrr.fyi/${founder.slug}`}
+            variant="amber"
+            label="Share my rank"
+            source="profile_share_rank"
+          />
         </div>
       </div>
 

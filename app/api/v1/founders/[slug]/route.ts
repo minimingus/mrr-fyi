@@ -44,6 +44,7 @@ export async function GET(
     rank: rank + 1,
     verified: founder.verified,
     featured: founder.featured,
+    stripeVerified: !!founder.stripeAccountId,
     milestones,
     snapshots: founder.snapshots.map((s) => ({
       mrr: s.mrr,

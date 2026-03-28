@@ -20,37 +20,37 @@ const NICHES: Record<string, NicheConfig> = {
   saas: {
     label: "SaaS",
     category: "SAAS",
-    h1: "SaaS MRR Leaderboard",
+    h1: "SaaS Verified MRR Profiles",
     description:
-      "See real revenue from SaaS founders sharing their MRR publicly on mrr.fyi. Track who's building profitable software businesses in public.",
+      "Verified MRR profiles from SaaS founders building in public on mrr.fyi. See who's building profitable software businesses with provably real revenue.",
   },
   newsletter: {
     label: "Newsletter",
     category: "CREATOR",
-    h1: "Newsletter Revenue Leaderboard",
+    h1: "Newsletter Verified MRR Profiles",
     description:
-      "See real revenue from newsletter founders sharing their MRR publicly on mrr.fyi. Discover which indie newsletters are actually making money.",
+      "Verified MRR profiles from newsletter founders building in public on mrr.fyi. Discover which indie newsletters are actually making money.",
   },
   "ai-tools": {
     label: "AI Tools",
     category: "DEV_TOOLS",
-    h1: "AI Tools MRR Leaderboard",
+    h1: "AI Tools Verified MRR Profiles",
     description:
-      "See real revenue from AI tools founders sharing their MRR publicly on mrr.fyi. Track who's monetizing AI in the indie hacker space.",
+      "Verified MRR profiles from AI tools founders building in public on mrr.fyi. See who's monetizing AI in the indie hacker space with real revenue.",
   },
   "mobile-app": {
     label: "Mobile App",
     category: "SAAS",
-    h1: "Mobile App Revenue Leaderboard",
+    h1: "Mobile App Verified MRR Profiles",
     description:
-      "See real revenue from mobile app founders sharing their MRR publicly on mrr.fyi. Discover profitable indie mobile apps built by solo founders.",
+      "Verified MRR profiles from mobile app founders building in public on mrr.fyi. Discover profitable indie mobile apps built by solo founders.",
   },
   "chrome-extension": {
     label: "Chrome Extension",
     category: "DEV_TOOLS",
-    h1: "Chrome Extension Revenue Leaderboard",
+    h1: "Chrome Extension Verified MRR Profiles",
     description:
-      "See real revenue from Chrome extension founders sharing their MRR publicly on mrr.fyi. Track who's building profitable browser extensions in public.",
+      "Verified MRR profiles from Chrome extension founders building in public on mrr.fyi. See who's building profitable browser extensions with real revenue.",
   },
 };
 
@@ -62,20 +62,45 @@ interface Props {
 
 async function getLeaderboard(category: FounderCategory) {
   const where = { emailVerified: true, category };
-  const [founders, total] = await Promise.all([
+  const [rows, total] = await Promise.all([
     prisma.founder.findMany({
       where,
       orderBy: [{ featured: "desc" }, { mrr: "desc" }],
       take: PAGE_SIZE,
-      include: {
+      select: {
+        id: true,
+        slug: true,
+        name: true,
+        twitter: true,
+        avatarUrl: true,
+        productName: true,
+        productUrl: true,
+        description: true,
+        category: true,
+        mrr: true,
+        currency: true,
+        verified: true,
+        featured: true,
+        stripeAccountId: true,
+        stripeMrr: true,
+        verificationStatus: true,
+        mrrRangeMin: true,
+        mrrRangeMax: true,
+        createdAt: true,
+        updatedAt: true,
         snapshots: {
           orderBy: { recordedAt: "desc" },
           take: 2,
+          select: { mrr: true, recordedAt: true },
         },
       },
     }),
     prisma.founder.count({ where }),
   ]);
+  const founders = rows.map(({ stripeAccountId, ...f }) => ({
+    ...f,
+    stripeVerified: !!stripeAccountId,
+  }));
   return { founders, total };
 }
 
@@ -127,7 +152,7 @@ export default async function NichePage({ params }: Props) {
         href="/"
         className="inline-flex items-center gap-1 text-xs text-[var(--text-dim)] hover:text-[var(--text-muted)] mb-8 transition-colors"
       >
-        ← Back to leaderboard
+        ← Back to profiles
       </a>
 
       <div className="mb-10 animate-fade-up stagger-1">
@@ -148,7 +173,7 @@ export default async function NichePage({ params }: Props) {
           style={{ fontFamily: "var(--font-dm-serif)", color: "var(--text)" }}
         >
           {config.label}{" "}
-          <span style={{ color: "var(--amber)" }}>MRR Leaderboard</span>
+          <span style={{ color: "var(--amber)" }}>Verified MRR Profiles</span>
         </h1>
 
         <p className="text-[var(--text-muted)] text-base max-w-lg mb-6">
@@ -159,7 +184,7 @@ export default async function NichePage({ params }: Props) {
           href="/submit"
           className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--amber)] text-black font-semibold rounded-md hover:bg-amber-400 transition-all hover:scale-[1.02]"
         >
-          Join the Leaderboard →
+          Get Your Verified Profile →
         </a>
       </div>
 
@@ -197,7 +222,7 @@ export default async function NichePage({ params }: Props) {
             href="/submit"
             className="inline-flex items-center gap-2 px-5 py-2.5 bg-[var(--amber)] text-black text-sm font-semibold rounded-md hover:bg-amber-400 transition-colors"
           >
-            Join the Leaderboard →
+            Get Your Verified Profile →
           </a>
         </div>
       ) : (
@@ -222,13 +247,13 @@ export default async function NichePage({ params }: Props) {
           Building a {config.label} product?
         </h2>
         <p className="text-[var(--text-muted)] text-sm mb-5">
-          Add your MRR to the {config.label} leaderboard. Takes 60 seconds.
+          Get your verified {config.label} MRR profile. Takes 60 seconds.
         </p>
         <a
           href="/submit"
           className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--amber)] text-black font-semibold rounded-md hover:bg-amber-400 transition-all hover:scale-[1.02]"
         >
-          Join the Leaderboard →
+          Get Your Verified Profile →
         </a>
       </div>
     </div>

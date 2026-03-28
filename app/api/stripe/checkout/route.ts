@@ -5,7 +5,7 @@ import { z } from "zod";
 
 const schema = z.object({
   slug: z.string(),
-  plan: z.enum(["FEATURED", "VERIFIED"]),
+  plan: z.enum(["VERIFIED"]),
 });
 
 export async function POST(req: NextRequest) {

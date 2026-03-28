@@ -10,6 +10,9 @@ export function Footer() {
           <a href="/pricing" className="hover:text-[var(--text-muted)] transition-colors">
             Pricing
           </a>
+          <a href="/privacy" className="hover:text-[var(--text-muted)] transition-colors">
+            Privacy
+          </a>
           <a href="/terms" className="hover:text-[var(--text-muted)] transition-colors">
             Terms
           </a>

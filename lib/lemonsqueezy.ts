@@ -1,10 +1,4 @@
 export const PLANS = {
-  FEATURED: {
-    variantId: process.env.LS_FEATURED_VARIANT_ID!,
-    name: "Featured Listing",
-    price: 29,
-    description: "Pinned to the top of the leaderboard",
-  },
   VERIFIED: {
     variantId: process.env.LS_VERIFIED_VARIANT_ID!,
     name: "Verified Badge",

@@ -65,6 +65,11 @@ export async function GET(req: NextRequest) {
       growthPercent,
       verified: f.verified,
       featured: f.featured,
+      stripeVerified: !!f.stripeAccountId,
+      stripeMrr: f.stripeMrr ?? null,
+      verificationStatus: f.verificationStatus,
+      mrrRangeMin: f.mrrRangeMin ?? null,
+      mrrRangeMax: f.mrrRangeMax ?? null,
       updatedAt: f.updatedAt.toISOString(),
     };
   });

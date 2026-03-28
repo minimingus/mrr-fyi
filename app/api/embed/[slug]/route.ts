@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { VerificationStatus } from "@prisma/client";
 
 function formatCompactMRR(cents: number, currency = "USD"): string {
   const amount = cents / 100;
@@ -7,6 +8,14 @@ function formatCompactMRR(cents: number, currency = "USD"): string {
   if (amount >= 1_000_000) return `${symbol}${(amount / 1_000_000).toFixed(1)}M`;
   if (amount >= 1_000) return `${symbol}${(amount / 1_000).toFixed(1)}K`;
   return `${symbol}${Math.round(amount)}`;
+}
+
+function formatDaysAgo(date: Date): string {
+  const diffMs = Date.now() - date.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  if (diffDays === 0) return "today";
+  if (diffDays === 1) return "1 day ago";
+  return `${diffDays} days ago`;
 }
 
 function buildSparklineSVG(values: number[], color: string): string {
@@ -60,10 +69,13 @@ export async function GET(
       verified: true,
       featured: true,
       emailVerified: true,
+      verificationStatus: true,
+      mrrRangeMin: true,
+      mrrRangeMax: true,
       snapshots: {
         orderBy: { recordedAt: "desc" },
         take: 6,
-        select: { mrr: true },
+        select: { mrr: true, recordedAt: true },
       },
     },
   });
@@ -86,6 +98,8 @@ export async function GET(
         dim: "#52525b",
         amber: "#f59e0b",
         emerald: "#10b981",
+        yellow: "#eab308",
+        zinc: "#a1a1aa",
       }
     : {
         bg: "#ffffff",
@@ -95,17 +109,45 @@ export async function GET(
         dim: "#a1a1aa",
         amber: "#d97706",
         emerald: "#059669",
+        yellow: "#ca8a04",
+        zinc: "#71717a",
       };
+
+  const verificationStatus = founder.verificationStatus ?? VerificationStatus.SELF_REPORTED;
+  const isVerified = verificationStatus === VerificationStatus.VERIFIED;
+  const isConnected = verificationStatus === VerificationStatus.CONNECTED;
 
   const name = escapeHtml(founder.name);
   const productName = escapeHtml(founder.productName);
-  const mrrDisplay = escapeHtml(
-    formatCompactMRR(founder.mrr, founder.currency)
-  );
+
+  // MRR display: exact for VERIFIED, range for others if available
+  let mrrDisplay: string;
+  if (isVerified) {
+    mrrDisplay = escapeHtml(formatCompactMRR(founder.mrr, founder.currency));
+  } else if (founder.mrrRangeMin != null && founder.mrrRangeMax != null) {
+    const lo = escapeHtml(formatCompactMRR(founder.mrrRangeMin, founder.currency));
+    const hi = escapeHtml(formatCompactMRR(founder.mrrRangeMax, founder.currency));
+    mrrDisplay = `${lo}–${hi}`;
+  } else {
+    mrrDisplay = escapeHtml(formatCompactMRR(founder.mrr, founder.currency));
+  }
+
   const sparkline = buildSparklineSVG(sparklineValues, c.amber);
 
-  const verifiedBadge = founder.verified
-    ? `<span style="font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;background:${isDark ? "rgba(16,185,129,0.15)" : "rgba(5,150,105,0.1)"};color:${c.emerald};letter-spacing:0.05em;line-height:16px">✓</span>`
+  // Trust badge
+  let trustBadge: string;
+  if (isVerified) {
+    trustBadge = `<span style="font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;background:${isDark ? "rgba(16,185,129,0.15)" : "rgba(5,150,105,0.1)"};color:${c.emerald};letter-spacing:0.05em;line-height:16px">✓ Stripe Verified</span>`;
+  } else if (isConnected) {
+    trustBadge = `<span style="font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;background:${isDark ? "rgba(234,179,8,0.15)" : "rgba(202,138,4,0.1)"};color:${c.yellow};letter-spacing:0.05em;line-height:16px">◉ Connected</span>`;
+  } else {
+    trustBadge = `<span style="font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;background:${isDark ? "rgba(161,161,170,0.15)" : "rgba(113,113,122,0.1)"};color:${c.zinc};letter-spacing:0.05em;line-height:16px">○ Self-reported</span>`;
+  }
+
+  // Last synced for verified
+  const latestSnapshot = founder.snapshots[0];
+  const lastSyncedLine = isVerified && latestSnapshot
+    ? `<span class="last-synced">Synced ${escapeHtml(formatDaysAgo(latestSnapshot.recordedAt))}</span>`
     : "";
 
   const html = `<!DOCTYPE html>
@@ -132,6 +174,7 @@ export async function GET(
     .footer{margin-top:12px;padding-top:10px;border-top:1px solid ${c.border};display:flex;align-items:center;justify-content:space-between}
     .tracked{font-size:10px;color:${c.dim};letter-spacing:0.03em}
     .tracked b{font-weight:600;color:${c.muted}}
+    .last-synced{font-size:10px;color:${c.dim};letter-spacing:0.03em}
   </style>
 </head>
 <body>
@@ -140,18 +183,23 @@ export async function GET(
       <div class="info">
         <div class="product-row">
           <span class="product-name">${productName}</span>
-          ${verifiedBadge}
         </div>
         <span class="founder-name">${name}</span>
       </div>
-      <div class="mrr">${mrrDisplay}<span class="mrr-unit">/mo</span></div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+        <div class="mrr">${mrrDisplay}<span class="mrr-unit">/mo</span></div>
+        ${trustBadge}
+      </div>
     </div>
     <div class="middle">
       ${sparkline}
       <span class="rank">Rank #${rank}</span>
     </div>
     <div class="footer">
-      <span class="tracked">Tracked on <b>MRR.fyi</b></span>
+      <div style="display:flex;flex-direction:column;gap:2px">
+        <span class="tracked">Tracked on <b>MRR.fyi</b></span>
+        ${lastSyncedLine}
+      </div>
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${c.dim}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
     </div>
   </a>

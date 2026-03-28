@@ -10,28 +10,70 @@ export default function RefundPage() {
         href="/"
         className="inline-flex items-center gap-1 text-xs text-[var(--text-dim)] hover:text-[var(--text-muted)] mb-8 transition-colors"
       >
-        ← Back to leaderboard
+        ← Back to profiles
       </a>
 
       <h1 className="text-3xl mb-2" style={{ fontFamily: "var(--font-dm-serif)" }}>
         Refund Policy
       </h1>
-      <p className="text-xs text-[var(--text-dim)] mb-8">Last updated: March 2025</p>
+      <p className="text-xs text-[var(--text-dim)] mb-8">Last updated: March 2026</p>
 
       <div className="flex flex-col gap-6 text-sm text-[var(--text-muted)] leading-relaxed">
         <section>
           <h2 className="text-base font-semibold text-[var(--text)] mb-2">Overview</h2>
           <p>
-            MRR.fyi offers monthly subscriptions for Verified and Featured badges. We want you to
-            be happy with your purchase. This policy explains how refunds and cancellations work.
+            MRR.fyi offers monthly subscriptions for Verified and Featured badges. Payments are
+            processed by{" "}
+            <a
+              href="https://www.lemonsqueezy.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[var(--amber)] hover:underline"
+            >
+              Lemon Squeezy
+            </a>
+            , which acts as our <strong>Merchant of Record</strong> — they handle payment
+            processing, invoicing, tax collection, and related compliance on our behalf. We want
+            you to be happy with your purchase. This policy explains how refunds and cancellations
+            work.
           </p>
         </section>
 
         <section>
           <h2 className="text-base font-semibold text-[var(--text)] mb-2">Free Trial</h2>
           <p>
-            All paid plans include a 7-day free trial. You will not be charged during the trial
-            period. You may cancel at any time before the trial ends without being billed.
+            All paid plans include a <strong>7-day free trial</strong>. You will not be charged
+            during the trial period. You may cancel at any time before the trial ends without
+            being billed. No credit card is charged until the trial period expires.
+          </p>
+        </section>
+
+        <section>
+          <h2 className="text-base font-semibold text-[var(--text)] mb-2">
+            EU / EEA Consumer Rights
+          </h2>
+          <p>
+            If you are a consumer resident in the European Union or European Economic Area, you
+            have the right to withdraw from a subscription contract within 14 days of purchase
+            (the &quot;cooling-off period&quot;) under the EU Consumer Rights Directive
+            (2011/83/EU).
+          </p>
+          <p className="mt-2">
+            <strong>
+              By starting your subscription or free trial, you expressly request that we begin
+              providing the Service immediately. You acknowledge that you lose your right of
+              withdrawal once the Service has been fully performed — however, if the Service has
+              only been partially performed, you remain entitled to a pro-rated refund for the
+              unused portion.
+            </strong>
+          </p>
+          <p className="mt-2">
+            This statutory right is in addition to, and does not affect, any other rights you have
+            under applicable consumer protection law. To exercise your right of withdrawal, email{" "}
+            <a href="mailto:contact@mrr.fyi" className="text-[var(--amber)] hover:underline">
+              contact@mrr.fyi
+            </a>{" "}
+            with the subject line &quot;Right of Withdrawal&quot; within the 14-day period.
           </p>
         </section>
 
@@ -52,7 +94,8 @@ export default function RefundPage() {
           <p>
             Because MRR.fyi is a subscription service with immediately delivered digital benefits,
             we generally do not offer refunds after a billing cycle has started. If you believe
-            there has been a billing error, please contact us within 7 days of the charge at{" "}
+            there has been a billing error, please contact us within <strong>30 days</strong> of
+            the charge at{" "}
             <a href="mailto:contact@mrr.fyi" className="text-[var(--amber)] hover:underline">
               contact@mrr.fyi
             </a>{" "}
@@ -75,8 +118,9 @@ export default function RefundPage() {
               className="text-[var(--amber)] hover:underline"
             >
               Lemon Squeezy
-            </a>
-            . For payment-related issues, you may also contact Lemon Squeezy support directly.
+            </a>{" "}
+            (Merchant of Record). For payment-related issues, you may also contact Lemon Squeezy
+            support directly.
           </p>
         </section>
 
