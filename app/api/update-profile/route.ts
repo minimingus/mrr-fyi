@@ -157,7 +157,7 @@ export async function PATCH(req: NextRequest) {
 
     const founder = await prisma.founder.findUnique({
       where: { updateToken: token },
-      select: { id: true, isPro: true, emailVerified: true, stripeAccountId: true, updatedAt: true, productUrl: true, verified: true },
+      select: { id: true, slug: true, isPro: true, emailVerified: true, stripeAccountId: true, updatedAt: true, productUrl: true, verified: true },
     });
 
     if (!founder) {

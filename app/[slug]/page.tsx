@@ -1,5 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import { headers } from "next/headers";
+import crypto from "crypto";
 import { prisma } from "@/lib/prisma";
 import { MRRBadge } from "@/components/MRRBadge";
 import { GrowthBadge } from "@/components/GrowthBadge";
@@ -10,7 +12,37 @@ import { EmbedButton } from "@/components/EmbedButton";
 import { BadgeButton } from "@/components/BadgeButton";
 import { BadgeSection } from "@/components/BadgeSection";
 import { ReferralSection } from "@/components/ReferralSection";
+import { TrackedLink } from "@/components/TrackedLink";
 import { formatMRR, growthPercent } from "@/lib/utils";
+
+async function recordView(founderId: string, referrerHeader: string | null) {
+  try {
+    const hdrs = await headers();
+    const ip = hdrs.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+    const hour = new Date().toISOString().slice(0, 13); // "2026-03-28T23"
+    const dedupKey = `dedup:${crypto.createHash("sha256").update(`${founderId}:${ip}:${hour}`).digest("hex")}`;
+
+    // Check if view already recorded for this IP+hour (dedup sentinel)
+    const existing = await prisma.profileEvent.findFirst({
+      where: { founderId, type: "VIEW", referrer: dedupKey },
+    });
+    if (existing) return;
+
+    const referrerDomain = referrerHeader
+      ? (() => { try { return new URL(referrerHeader).hostname; } catch { return null; } })()
+      : null;
+
+    // Store dedup sentinel + actual referrer event
+    await prisma.profileEvent.createMany({
+      data: [
+        { founderId, type: "VIEW", referrer: dedupKey },
+        { founderId, type: "VIEW", referrer: referrerDomain },
+      ],
+    });
+  } catch {
+    // Analytics failure must never break page render
+  }
+}
 
 export const dynamic = "force-dynamic";
 
@@ -86,6 +118,12 @@ export default async function FounderProfile({ params, searchParams }: Props) {
   const referrer = result?.referrer ?? null;
 
   if (!founder || !founder.emailVerified) notFound();
+
+  // Record view for Pro founders (fire-and-forget, never blocks render)
+  if (founder.isPro) {
+    const hdrs = await headers();
+    void recordView(founder.id, hdrs.get("referer"));
+  }
 
   const { updated, submitted, payment } = await searchParams;
 
@@ -338,14 +376,13 @@ export default async function FounderProfile({ params, searchParams }: Props) {
         )}
 
         <div className="mt-4 flex items-center gap-4">
-          <a
+          <TrackedLink
             href={founder.productUrl}
-            target="_blank"
-            rel="noopener noreferrer"
+            slug={founder.slug}
             className="text-xs text-[var(--amber)] hover:underline flex items-center gap-1"
           >
             Visit {founder.productName} →
-          </a>
+          </TrackedLink>
           <span className="text-xs text-[var(--text-dim)]">
             Rank #{rank} on MRR.fyi
           </span>

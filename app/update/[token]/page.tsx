@@ -627,6 +627,34 @@ export default function UpdatePage() {
           )}
         </div>
       )}
+      {/* Analytics Section (Pro only) */}
+      {isPro && (
+        <div className="mt-16 pt-10 border-t border-[var(--border)]">
+          <div className="flex items-center gap-2 mb-2">
+            <h2
+              className="text-2xl"
+              style={{ fontFamily: "var(--font-dm-serif)" }}
+            >
+              Analytics.
+            </h2>
+            <span
+              className="text-[10px] font-semibold mono px-1.5 py-0.5 rounded-sm"
+              style={{ background: "rgba(251,191,36,0.15)", color: "var(--amber)" }}
+            >
+              ✦ PRO
+            </span>
+          </div>
+          <p className="text-sm text-[var(--text-muted)] mb-6">
+            Profile views, link clicks, and referrer sources for the last 30 days.
+          </p>
+          <a
+            href={`/dashboard/${params.token}`}
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-[var(--bg-card)] border border-[var(--border)] text-[var(--text)] text-sm font-semibold rounded-md hover:border-[var(--amber)] hover:text-[var(--amber)] transition-all hover:scale-[1.01]"
+          >
+            View analytics dashboard →
+          </a>
+        </div>
+      )}
       {/* Billing Section */}
       <div className="mt-16 pt-10 border-t border-[var(--border)]">
         <h2

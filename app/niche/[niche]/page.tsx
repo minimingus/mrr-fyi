@@ -81,6 +81,7 @@ async function getLeaderboard(category: FounderCategory) {
         currency: true,
         verified: true,
         featured: true,
+        isPro: true,
         stripeAccountId: true,
         stripeMrr: true,
         verificationStatus: true,
