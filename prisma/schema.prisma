@@ -30,6 +30,10 @@ model Founder {
   currency    String        @default("USD")
   verified    Boolean       @default(false)
   featured    Boolean       @default(false)
+  isPro       Boolean       @default(false)
+  logoUrl     String?
+  tags        String[]
+  linkedinUrl String?
   stripeAccountId  String?  @unique
   stripeMrr        Int?
   verificationStatus VerificationStatus @default(SELF_REPORTED)
@@ -39,9 +43,10 @@ model Founder {
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 
-  snapshots   MRRSnapshot[]
-  payments    Payment[]
-  milestones  MRRMilestone[]
+  snapshots      MRRSnapshot[]
+  payments       Payment[]
+  milestones     MRRMilestone[]
+  profileEvents  ProfileEvent[]
   referralsMade    Referral[] @relation("Referrer")
   referralsReceived Referral[] @relation("Referred")
 
@@ -104,11 +109,30 @@ model Referral {
 enum PaymentType {
   FEATURED
   VERIFIED
+  PRO
 }
 
 enum PaymentProvider {
   LEMON_SQUEEZY
   STRIPE
+}
+
+model ProfileEvent {
+  id        String    @id @default(cuid())
+  founderId String
+  type      EventType
+  referrer  String?
+  createdAt DateTime  @default(now())
+
+  founder Founder @relation(fields: [founderId], references: [id], onDelete: Cascade)
+
+  @@index([founderId, createdAt])
+  @@index([founderId, type, createdAt])
+}
+
+enum EventType {
+  VIEW
+  LINK_CLICK
 }
 
 model EmailSignup {
