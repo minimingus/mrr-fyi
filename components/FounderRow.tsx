@@ -6,6 +6,17 @@ import { MRRBadge } from "./MRRBadge";
 import { GrowthBadge } from "./GrowthBadge";
 import { formatMRR, growthPercent } from "@/lib/utils";
 
+function ProBadge() {
+  return (
+    <span
+      className="inline-flex items-center gap-1 text-[10px] font-semibold mono px-1.5 py-0.5 rounded-sm shrink-0"
+      style={{ background: "rgba(251,191,36,0.15)", color: "var(--amber)" }}
+    >
+      ✦ Pro
+    </span>
+  );
+}
+
 interface FounderRowProps {
   founder: PublicFounder & { snapshots: { mrr: number; recordedAt: Date }[] };
   rank: number;
@@ -13,16 +24,6 @@ interface FounderRowProps {
 }
 
 function TrustBadge({ status }: { status: PublicFounder["verificationStatus"] }) {
-  if (status === "VERIFIED") {
-    return (
-      <span
-        className="inline-flex items-center gap-1 text-[10px] font-semibold mono px-1.5 py-0.5 rounded-sm shrink-0"
-        style={{ background: "rgba(251,191,36,0.15)", color: "var(--amber)" }}
-      >
-        ✦ Pro
-      </span>
-    );
-  }
   if (status === "CONNECTED") {
     return (
       <span
@@ -128,6 +129,7 @@ export function FounderRow({ founder, rank, style }: FounderRowProps) {
                 FEATURED
               </span>
             )}
+            {founder.isPro && <ProBadge />}
             <TrustBadge status={founder.verificationStatus} />
           </div>
           <div className="flex items-center gap-2 mt-0.5">

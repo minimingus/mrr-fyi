@@ -19,6 +19,7 @@ export type PublicFounder = {
   currency: string;
   verified: boolean;
   featured: boolean;
+  isPro: boolean;
   stripeVerified: boolean;
   stripeMrr: number | null;
   verificationStatus: VerificationStatus;

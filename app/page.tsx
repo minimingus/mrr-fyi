@@ -31,6 +31,7 @@ async function getLeaderboard() {
         currency: true,
         verified: true,
         featured: true,
+        isPro: true,
         stripeAccountId: true,
         stripeMrr: true,
         verificationStatus: true,

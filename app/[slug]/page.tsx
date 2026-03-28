@@ -169,7 +169,7 @@ export default async function FounderProfile({ params, searchParams }: Props) {
           />
         </div>
       )}
-      {(updated || submitted) && !founder.verified && !founder.featured && (
+      {(updated || submitted) && !founder.isPro && !founder.featured && (
         <a
           href={`/pricing?slug=${founder.slug}`}
           className="block mb-6 px-4 py-3 rounded-lg border border-dashed border-[var(--border-accent)] text-sm text-[var(--text-muted)] hover:border-[var(--amber)] hover:text-[var(--text)] transition-colors text-center"
@@ -223,7 +223,7 @@ export default async function FounderProfile({ params, searchParams }: Props) {
                     FEATURED
                   </span>
                 )}
-                {founder.verified && (
+                {founder.isPro && (
                   <span
                     className="text-[10px] font-semibold mono px-1.5 py-0.5 rounded-sm"
                     style={{ background: "rgba(251,191,36,0.15)", color: "var(--amber)" }}
@@ -358,7 +358,7 @@ export default async function FounderProfile({ params, searchParams }: Props) {
       </div>
 
       {/* Upgrade banner for free profiles */}
-      {!founder.featured && !founder.verified && (
+      {!founder.featured && !founder.isPro && (
         <a
           href={`/pricing?slug=${founder.slug}`}
           className="block mb-6 px-4 py-3 rounded-lg border border-[var(--border)] bg-[var(--bg-card)] hover:border-[var(--border-accent)] transition-colors animate-fade-up stagger-2 group"
