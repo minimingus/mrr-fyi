@@ -4,9 +4,9 @@ import { z } from "zod";
 import { rateLimit } from "@/lib/rate-limit";
 import { sendUpdateConfirmation, sendMilestoneReached } from "@/lib/email";
 
-const MRR_MILESTONES = [1_000, 5_000, 10_000, 50_000, 100_000].map(
-  (d) => d * 100
-);
+const MRR_MILESTONES = [
+  1_000, 5_000, 10_000, 25_000, 50_000, 100_000, 250_000, 500_000, 1_000_000,
+].map((d) => d * 100);
 
 const schema = z.object({
   token: z.string().min(1),
