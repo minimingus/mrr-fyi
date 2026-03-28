@@ -4,12 +4,80 @@ import Link from "next/link";
 import type { PublicFounder } from "./LeaderboardList";
 import { MRRBadge } from "./MRRBadge";
 import { GrowthBadge } from "./GrowthBadge";
-import { growthPercent } from "@/lib/utils";
+import { formatMRR, growthPercent } from "@/lib/utils";
 
 interface FounderRowProps {
   founder: PublicFounder & { snapshots: { mrr: number; recordedAt: Date }[] };
   rank: number;
   style?: React.CSSProperties;
+}
+
+function TrustBadge({ status }: { status: PublicFounder["verificationStatus"] }) {
+  if (status === "VERIFIED") {
+    return (
+      <span
+        className="inline-flex items-center gap-1 text-[10px] font-semibold mono px-1.5 py-0.5 rounded-sm shrink-0"
+        style={{ background: "rgba(16,185,129,0.15)", color: "var(--emerald)" }}
+      >
+        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" style={{ background: "#34d399" }} />
+        Stripe Verified
+      </span>
+    );
+  }
+  if (status === "CONNECTED") {
+    return (
+      <span
+        className="inline-flex items-center gap-1 text-[10px] font-semibold mono px-1.5 py-0.5 rounded-sm shrink-0"
+        style={{ background: "rgba(234,179,8,0.15)", color: "#fbbf24" }}
+      >
+        <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: "#fbbf24" }} />
+        Connected
+      </span>
+    );
+  }
+  return (
+    <span
+      className="inline-flex items-center gap-1 text-[10px] font-semibold mono px-1.5 py-0.5 rounded-sm shrink-0"
+      style={{ background: "rgba(107,114,128,0.15)", color: "#9ca3af" }}
+    >
+      <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: "#9ca3af" }} />
+      Self-reported
+    </span>
+  );
+}
+
+function MRRDisplay({ founder }: { founder: PublicFounder }) {
+  if (founder.verificationStatus === "VERIFIED") {
+    const mrrValue = founder.stripeMrr ?? founder.mrr;
+    const syncedDate = new Date(founder.updatedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    return (
+      <div className="flex flex-col items-end gap-0.5">
+        <MRRBadge mrr={mrrValue} currency={founder.currency} />
+        <span className="text-[10px] text-[var(--text-dim)] mono">synced {syncedDate}</span>
+      </div>
+    );
+  }
+
+  if (founder.mrrRangeMin != null && founder.mrrRangeMax != null) {
+    const minStr = formatMRR(founder.mrrRangeMin, founder.currency);
+    const maxStr = formatMRR(founder.mrrRangeMax, founder.currency);
+    return (
+      <div className="flex flex-col items-end gap-0.5">
+        <span className="mono font-semibold text-[var(--amber)] tabular-nums text-base">
+          {minStr}–{maxStr}
+          <span className="text-[var(--text-dim)] text-xs ml-1 font-normal">/mo</span>
+        </span>
+        <span className="text-[10px] text-[var(--text-dim)] mono">self-reported</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col items-end gap-0.5">
+      <MRRBadge mrr={founder.mrr} currency={founder.currency} />
+      <span className="text-[10px] text-[var(--text-dim)] mono">self-reported</span>
+    </div>
+  );
 }
 
 export function FounderRow({ founder, rank, style }: FounderRowProps) {
@@ -61,27 +129,7 @@ export function FounderRow({ founder, rank, style }: FounderRowProps) {
                 FEATURED
               </span>
             )}
-            {founder.verified && (
-              <span
-                className="text-[10px] font-semibold mono px-1.5 py-0.5 rounded-sm shrink-0"
-                style={{ background: "rgba(16,185,129,0.15)", color: "var(--emerald)" }}
-              >
-                ✓ VERIFIED
-              </span>
-            )}
-            {founder.stripeVerified && (
-              <span
-                className="text-[10px] font-semibold mono px-2 py-0.5 rounded-sm shrink-0 border"
-                style={{
-                  background: "rgba(99,102,241,0.15)",
-                  color: "#818cf8",
-                  borderColor: "rgba(99,102,241,0.4)",
-                }}
-                title="MRR verified via Stripe Connect"
-              >
-                ⚡ STRIPE VERIFIED
-              </span>
-            )}
+            <TrustBadge status={founder.verificationStatus} />
           </div>
           <div className="flex items-center gap-2 mt-0.5">
             <span className="text-xs text-[var(--text-dim)] truncate">{founder.name}</span>
@@ -105,14 +153,7 @@ export function FounderRow({ founder, rank, style }: FounderRowProps) {
         {/* MRR + growth */}
         <div className="flex items-center gap-3 shrink-0">
           <GrowthBadge percent={growth} />
-          {founder.stripeMrr ? (
-            <div className="flex items-center gap-1">
-              <span className="text-xs" style={{ color: "#818cf8" }}>⚡</span>
-              <MRRBadge mrr={founder.stripeMrr} currency={founder.currency} />
-            </div>
-          ) : (
-            <MRRBadge mrr={founder.mrr} currency={founder.currency} />
-          )}
+          <MRRDisplay founder={founder} />
         </div>
 
         <span className="text-[var(--text-dim)] group-hover:text-[var(--text-muted)] text-sm transition-colors shrink-0">

@@ -83,6 +83,9 @@ async function getLeaderboard(category: FounderCategory) {
         featured: true,
         stripeAccountId: true,
         stripeMrr: true,
+        verificationStatus: true,
+        mrrRangeMin: true,
+        mrrRangeMax: true,
         createdAt: true,
         updatedAt: true,
         snapshots: {
