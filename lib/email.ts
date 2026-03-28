@@ -311,7 +311,7 @@ export async function sendUpdateConfirmation(
 export async function sendChurnRecoveryEmail(
   email: string,
   productName: string,
-  planType: "FEATURED" | "VERIFIED",
+  planType: "FEATURED" | "VERIFIED" | "PRO",
   slug: string
 ) {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
@@ -321,7 +321,7 @@ export async function sendChurnRecoveryEmail(
   const loseFeature =
     planType === "FEATURED"
       ? "top placement on the leaderboard and your Featured badge"
-      : "your Pro membership benefits";
+      : "your Pro membership benefits (badge, analytics, full MRR history)";
 
   const html = emailLayout(`
     <h1 style="margin:0 0 8px;font-size:20px;font-weight:700;color:${BRAND.text};">

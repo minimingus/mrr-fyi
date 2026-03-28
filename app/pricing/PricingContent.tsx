@@ -68,17 +68,17 @@ function PricingInner({ verifiedCount }: { verifiedCount: number }) {
     setError(null);
     setLoading(true);
     try {
-      const res = await fetch("/api/stripe/checkout", {
+      const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ slug: slug.trim(), plan: "VERIFIED" }),
+        body: JSON.stringify({ slug: slug.trim(), plan: "PRO" }),
       });
       const json = await res.json();
       if (!res.ok) {
         setError(json.error ?? "Something went wrong");
         return;
       }
-      trackEvent("Checkout Click", { plan: "VERIFIED" });
+      trackEvent("Checkout Click", { plan: "PRO" });
       window.location.href = json.url;
     } catch {
       setError("Network error. Please try again.");

@@ -1,9 +1,15 @@
 export const PLANS = {
   VERIFIED: {
     variantId: process.env.LS_VERIFIED_VARIANT_ID!,
-    name: "Verified Badge",
+    name: "Pro Membership",
     price: 9,
-    description: "Verified revenue badge on your profile",
+    description: "Pro badge, analytics, full MRR history, enhanced profile",
+  },
+  PRO: {
+    variantId: process.env.LS_PRO_VARIANT_ID!,
+    name: "Pro Membership",
+    price: 9,
+    description: "Pro badge, analytics, full MRR history, enhanced profile",
   },
 } as const;
 

@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
           prisma.payment.create({
             data: {
               founderId,
-              type: plan as "FEATURED" | "VERIFIED",
+              type: plan as "FEATURED" | "VERIFIED" | "PRO",
               externalId: subscriptionId,
               active: true,
               trialEndsAt,
@@ -72,7 +72,8 @@ export async function POST(req: NextRequest) {
             where: { id: founderId },
             data: {
               featured: plan === "FEATURED" ? true : undefined,
-              verified: plan === "VERIFIED" ? true : undefined,
+              verified: plan === "VERIFIED" || plan === "PRO" ? true : undefined,
+              isPro: plan === "PRO" ? true : undefined,
             },
           }),
         ]);
@@ -116,7 +117,8 @@ export async function POST(req: NextRequest) {
             where: { id: resumedPayment.founderId },
             data: {
               featured: resumedPayment.type === "FEATURED" ? true : undefined,
-              verified: resumedPayment.type === "VERIFIED" ? true : undefined,
+              verified: resumedPayment.type === "VERIFIED" || resumedPayment.type === "PRO" ? true : undefined,
+              isPro: resumedPayment.type === "PRO" ? true : undefined,
             },
           }),
         ]);
@@ -140,7 +142,8 @@ export async function POST(req: NextRequest) {
             where: { id: payment.founderId },
             data: {
               featured: payment.type === "FEATURED" ? false : undefined,
-              verified: payment.type === "VERIFIED" ? false : undefined,
+              verified: payment.type === "VERIFIED" || payment.type === "PRO" ? false : undefined,
+              isPro: payment.type === "PRO" ? false : undefined,
             },
           }),
         ]);
