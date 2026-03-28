@@ -4,6 +4,7 @@
   "framework": "nextjs",
   "crons": [
     { "path": "/api/cron/stripe-mrr-sync", "schedule": "0 4 * * *" },
-    { "path": "/api/cron/prune-events", "schedule": "0 3 * * *" }
+    { "path": "/api/cron/prune-events", "schedule": "0 3 * * *" },
+    { "path": "/api/cron/pro-weekly-progress", "schedule": "0 9 * * 1" }
   ]
 }

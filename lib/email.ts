@@ -975,3 +975,131 @@ export async function sendPaymentsLaunchEmail(
     html,
   });
 }
+
+export async function sendProWeeklyProgress(
+  email: string,
+  updateToken: string,
+  data: {
+    productName: string;
+    currentMrr: number;
+    previousMrr: number | null;
+    currency: string;
+    currentRank: number;
+    previousRank: number | null;
+    totalFounders: number;
+    avgGrowthPct: number | null;
+  }
+) {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const updateUrl = `${appUrl}/update/${updateToken}`;
+  const dashboardUrl = `${appUrl}/dashboard/${updateToken}`;
+  const unsubscribeUrl = `${appUrl}/api/unsubscribe/weekly-digest?token=${updateToken}`;
+
+  const s = data.currency === "EUR" ? "€" : data.currency === "GBP" ? "£" : "$";
+  const fmtMrr = (v: number) => `${s}${(v / 100).toLocaleString("en-US")}`;
+
+  const mrrChange = data.previousMrr !== null ? data.currentMrr - data.previousMrr : null;
+  const mrrChangePct =
+    mrrChange !== null && data.previousMrr && data.previousMrr > 0
+      ? (mrrChange / data.previousMrr) * 100
+      : null;
+
+  const rankChange =
+    data.previousRank !== null ? data.previousRank - data.currentRank : null;
+
+  const rankChangeHtml =
+    rankChange === null
+      ? `<span style="color:${BRAND.textMuted};">—</span>`
+      : rankChange > 0
+      ? `<span style="color:${BRAND.emerald};">▲ ${rankChange}</span>`
+      : rankChange < 0
+      ? `<span style="color:${BRAND.red};">▼ ${Math.abs(rankChange)}</span>`
+      : `<span style="color:${BRAND.textMuted};">—</span>`;
+
+  const mrrChangeHtml =
+    mrrChange === null
+      ? `<span style="color:${BRAND.textMuted};">—</span>`
+      : mrrChange > 0
+      ? `<span style="color:${BRAND.emerald};">+${fmtMrr(mrrChange)}</span>`
+      : mrrChange < 0
+      ? `<span style="color:${BRAND.red};">-${fmtMrr(Math.abs(mrrChange))}</span>`
+      : `<span style="color:${BRAND.textMuted};">No change</span>`;
+
+  const avgGrowthHtml =
+    data.avgGrowthPct !== null
+      ? `<tr>
+      <td style="padding:12px;font-size:13px;color:${BRAND.textMuted};border-bottom:1px solid ${BRAND.border};">Community avg. growth</td>
+      <td style="padding:12px;font-size:14px;color:${BRAND.text};text-align:right;border-bottom:1px solid ${BRAND.border};">+${data.avgGrowthPct.toFixed(1)}%</td>
+    </tr>`
+      : "";
+
+  const html = emailLayout(`
+    <div style="margin-bottom:6px;">
+      <span style="font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:${BRAND.amber};">✦ PRO · WEEKLY REPORT</span>
+    </div>
+    <h1 style="margin:0 0 8px;font-size:20px;font-weight:700;color:${BRAND.text};">
+      ${data.productName}: weekly snapshot
+    </h1>
+    <p style="margin:0 0 24px;font-size:14px;color:${BRAND.textMuted};line-height:1.6;">
+      Here's how ${data.productName} is performing on MRR.fyi this week.
+    </p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:${BRAND.bg};border:1px solid ${BRAND.border};border-radius:6px;margin-bottom:24px;">
+      <tr>
+        <td style="padding:12px;font-size:13px;color:${BRAND.textMuted};border-bottom:1px solid ${BRAND.border};">Current MRR</td>
+        <td style="padding:12px;font-size:14px;font-weight:600;color:${BRAND.amber};text-align:right;border-bottom:1px solid ${BRAND.border};">${fmtMrr(data.currentMrr)}/mo</td>
+      </tr>
+      <tr>
+        <td style="padding:12px;font-size:13px;color:${BRAND.textMuted};border-bottom:1px solid ${BRAND.border};">MRR change (WoW)</td>
+        <td style="padding:12px;font-size:14px;text-align:right;border-bottom:1px solid ${BRAND.border};">${mrrChangeHtml}${mrrChangePct !== null ? ` <span style="font-size:12px;color:${BRAND.textMuted};">(${mrrChangePct > 0 ? "+" : ""}${mrrChangePct.toFixed(1)}%)</span>` : ""}</td>
+      </tr>
+      <tr>
+        <td style="padding:12px;font-size:13px;color:${BRAND.textMuted};border-bottom:1px solid ${BRAND.border};">Leaderboard rank</td>
+        <td style="padding:12px;font-size:14px;color:${BRAND.text};text-align:right;border-bottom:1px solid ${BRAND.border};">#${data.currentRank} of ${data.totalFounders} ${rankChangeHtml}</td>
+      </tr>
+      ${avgGrowthHtml}
+    </table>
+    ${button("View analytics →", dashboardUrl)}
+    <p style="margin:16px 0 0;font-size:12px;color:${BRAND.textMuted};line-height:1.5;">
+      Update your MRR at <a href="${updateUrl}" style="color:${BRAND.amber};text-decoration:none;">${updateUrl.replace(/^https?:\/\//, "")}</a><br/>
+      <a href="${unsubscribeUrl}" style="color:${BRAND.textMuted};text-decoration:underline;">Unsubscribe from weekly digest</a>
+    </p>
+  `);
+
+  const mrrChangePlain =
+    mrrChange !== null
+      ? `MRR change: ${mrrChange >= 0 ? "+" : ""}${fmtMrr(mrrChange)}`
+      : "MRR change: —";
+  const rankChangePlain =
+    rankChange !== null
+      ? rankChange > 0
+        ? `▲ ${rankChange} spots`
+        : rankChange < 0
+        ? `▼ ${Math.abs(rankChange)} spots`
+        : "no change"
+      : "—";
+
+  const text = [
+    `✦ PRO WEEKLY REPORT — ${data.productName}`,
+    "",
+    `Current MRR: ${fmtMrr(data.currentMrr)}/mo`,
+    mrrChangePlain,
+    `Rank: #${data.currentRank} of ${data.totalFounders} (${rankChangePlain})`,
+    data.avgGrowthPct !== null ? `Community avg. growth: +${data.avgGrowthPct.toFixed(1)}%` : "",
+    "",
+    `Analytics: ${dashboardUrl}`,
+    `Update MRR: ${updateUrl}`,
+    "",
+    `Unsubscribe: ${unsubscribeUrl}`,
+  ]
+    .filter((l) => l !== undefined)
+    .join("\n");
+
+  const resend = await getResend();
+  await resend.emails.send({
+    from: "MRR.fyi <onboarding@resend.dev>",
+    to: email,
+    subject: `${data.productName}: rank #${data.currentRank}, ${mrrChangePct !== null && mrrChangePct !== 0 ? `${mrrChangePct > 0 ? "+" : ""}${mrrChangePct.toFixed(0)}% MRR` : `${fmtMrr(data.currentMrr)}/mo`} — MRR.fyi weekly`,
+    text,
+    html,
+  });
+}
