@@ -50,7 +50,7 @@ export default function TermsPage() {
         <section>
           <h2 className="text-base font-semibold text-[var(--text)] mb-2">3. Subscriptions and Free Trial</h2>
           <p>
-            Paid features (Verified and Featured badges) are offered as monthly subscriptions
+            Paid features (Pro and Featured) are offered as monthly subscriptions
             processed by Lemon Squeezy, which acts as our Merchant of Record. All paid plans
             include a <strong>7-day free trial</strong>. You will not be charged during the trial
             period and may cancel at any time before the trial ends without incurring any charge.

@@ -35,12 +35,12 @@ export default async function Image() {
           <span style={{ color: "#f59e0b", fontSize: "24px", fontWeight: 700, marginRight: "12px" }}>
             MRR.fyi
           </span>
-          <span style={{ color: "#52525b", fontSize: "18px" }}>verified MRR profiles</span>
+          <span style={{ color: "#52525b", fontSize: "18px" }}>MRR profiles</span>
         </div>
 
         <div style={{ display: "flex", flexDirection: "column" }}>
           <div style={{ display: "flex", color: "#fafafa", fontSize: "56px", fontWeight: 700, marginBottom: "24px" }}>
-            Verified MRR Profiles for Indie Founders
+Real MRR Profiles for Indie Founders
           </div>
           <div style={{ display: "flex", color: "#71717a", fontSize: "24px", marginBottom: "32px" }}>
             {founderCount} founders building in public
