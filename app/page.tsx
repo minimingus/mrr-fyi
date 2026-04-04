@@ -120,7 +120,7 @@ async function getRecentActivity() {
       name: f.name,
       slug: f.slug,
       productName: f.productName,
-      detail: "got a verified profile",
+      detail: "created a profile",
       at: f.createdAt,
     })),
   ];
@@ -153,7 +153,7 @@ const TESTIMONIALS = [
   },
   {
     quote:
-      "Investors actually found me through my verified profile. If you're building in public, there's no reason not to be here.",
+      "Investors actually found me through my MRR profile. If you're building in public, there's no reason not to be here.",
     name: "Priya R.",
     product: "FormStack AI",
   },

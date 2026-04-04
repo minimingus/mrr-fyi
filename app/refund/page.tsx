@@ -22,7 +22,7 @@ export default function RefundPage() {
         <section>
           <h2 className="text-base font-semibold text-[var(--text)] mb-2">Overview</h2>
           <p>
-            MRR.fyi offers monthly subscriptions for Verified and Featured badges. Payments are
+            MRR.fyi offers monthly subscriptions for Pro and Featured. Payments are
             processed by{" "}
             <a
               href="https://www.lemonsqueezy.com"

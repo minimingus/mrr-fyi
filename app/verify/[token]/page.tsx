@@ -46,7 +46,7 @@ export default function VerifyPage() {
   const profileUrl = slug ? `https://mrr.fyi/${slug}` : "";
   const tweetUrl = slug
     ? buildTwitterIntentUrl(
-        "Just got my verified MRR profile on @mrrfyi — tracking my revenue in public. #buildinpublic",
+        "Just created my MRR profile on @mrrfyi — tracking my revenue in public. #buildinpublic",
         profileUrl
       )
     : "";
@@ -75,7 +75,7 @@ export default function VerifyPage() {
             className="text-3xl mb-3"
             style={{ fontFamily: "var(--font-dm-serif)" }}
           >
-            Your verified profile is live
+            Your profile is live
           </h1>
           <p className="text-sm text-[var(--text-muted)] mb-6">
             Your profile is live. Let the world know you&apos;re building in public.

@@ -278,7 +278,7 @@ export default function UpdatePage() {
 
             <a
               href={buildTwitterIntentUrl(
-                `Just updated my verified MRR profile on @mrrfyi — building in public. Check it out: #buildinpublic`,
+                `Just updated my MRR profile on @mrrfyi — building in public. Check it out: #buildinpublic`,
                 `https://mrr.fyi/${mrrSuccess.slug}`
               )}
               target="_blank"

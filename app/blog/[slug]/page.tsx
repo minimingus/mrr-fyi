@@ -117,7 +117,7 @@ export default async function BlogPostPage({ params }: Props) {
             href="/submit"
             className="inline-flex items-center gap-2 px-6 py-2.5 bg-[var(--amber)] text-black font-semibold rounded-md hover:bg-amber-400 transition-all hover:scale-[1.02] text-sm"
           >
-            Get Your Verified Profile →
+            Get Your Pro Profile →
           </a>
           <p className="text-xs text-[var(--text-dim)] mt-3">
             Already listed?{" "}

@@ -8,6 +8,8 @@ describe("POST /api/submit", () => {
   beforeEach(async () => {
     await cleanDatabase();
     vi.clearAllMocks();
+    // Mock fetch so the URL reachability check doesn't make real network calls
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ status: 200 } as Response));
   });
 
   const validBody = {

@@ -20,37 +20,37 @@ const NICHES: Record<string, NicheConfig> = {
   saas: {
     label: "SaaS",
     category: "SAAS",
-    h1: "SaaS Verified MRR Profiles",
+    h1: "SaaS MRR Profiles",
     description:
-      "Verified MRR profiles from SaaS founders building in public on mrr.fyi. See who's building profitable software businesses with provably real revenue.",
+      "MRR profiles from SaaS founders building in public on mrr.fyi. See who's building profitable software businesses with provably real revenue.",
   },
   newsletter: {
     label: "Newsletter",
     category: "CREATOR",
-    h1: "Newsletter Verified MRR Profiles",
+    h1: "Newsletter MRR Profiles",
     description:
-      "Verified MRR profiles from newsletter founders building in public on mrr.fyi. Discover which indie newsletters are actually making money.",
+      "MRR profiles from newsletter founders building in public on mrr.fyi. Discover which indie newsletters are actually making money.",
   },
   "ai-tools": {
     label: "AI Tools",
     category: "DEV_TOOLS",
-    h1: "AI Tools Verified MRR Profiles",
+    h1: "AI Tools MRR Profiles",
     description:
-      "Verified MRR profiles from AI tools founders building in public on mrr.fyi. See who's monetizing AI in the indie hacker space with real revenue.",
+      "MRR profiles from AI tools founders building in public on mrr.fyi. See who's monetizing AI in the indie hacker space with real revenue.",
   },
   "mobile-app": {
     label: "Mobile App",
     category: "SAAS",
-    h1: "Mobile App Verified MRR Profiles",
+    h1: "Mobile App MRR Profiles",
     description:
-      "Verified MRR profiles from mobile app founders building in public on mrr.fyi. Discover profitable indie mobile apps built by solo founders.",
+      "MRR profiles from mobile app founders building in public on mrr.fyi. Discover profitable indie mobile apps built by solo founders.",
   },
   "chrome-extension": {
     label: "Chrome Extension",
     category: "DEV_TOOLS",
-    h1: "Chrome Extension Verified MRR Profiles",
+    h1: "Chrome Extension MRR Profiles",
     description:
-      "Verified MRR profiles from Chrome extension founders building in public on mrr.fyi. See who's building profitable browser extensions with real revenue.",
+      "MRR profiles from Chrome extension founders building in public on mrr.fyi. See who's building profitable browser extensions with real revenue.",
   },
 };
 
@@ -174,7 +174,7 @@ export default async function NichePage({ params }: Props) {
           style={{ fontFamily: "var(--font-dm-serif)", color: "var(--text)" }}
         >
           {config.label}{" "}
-          <span style={{ color: "var(--amber)" }}>Verified MRR Profiles</span>
+          <span style={{ color: "var(--amber)" }}>MRR Profiles</span>
         </h1>
 
         <p className="text-[var(--text-muted)] text-base max-w-lg mb-6">
@@ -185,7 +185,7 @@ export default async function NichePage({ params }: Props) {
           href="/submit"
           className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--amber)] text-black font-semibold rounded-md hover:bg-amber-400 transition-all hover:scale-[1.02]"
         >
-          Get Your Verified Profile →
+          Get Your Profile →
         </a>
       </div>
 
@@ -223,7 +223,7 @@ export default async function NichePage({ params }: Props) {
             href="/submit"
             className="inline-flex items-center gap-2 px-5 py-2.5 bg-[var(--amber)] text-black text-sm font-semibold rounded-md hover:bg-amber-400 transition-colors"
           >
-            Get Your Verified Profile →
+            Get Your Profile →
           </a>
         </div>
       ) : (
@@ -248,13 +248,13 @@ export default async function NichePage({ params }: Props) {
           Building a {config.label} product?
         </h2>
         <p className="text-[var(--text-muted)] text-sm mb-5">
-          Get your verified {config.label} MRR profile. Takes 60 seconds.
+          Share your {config.label} MRR in public. Takes 60 seconds.
         </p>
         <a
           href="/submit"
           className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--amber)] text-black font-semibold rounded-md hover:bg-amber-400 transition-all hover:scale-[1.02]"
         >
-          Get Your Verified Profile →
+          Get Your Profile →
         </a>
       </div>
     </div>

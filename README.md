@@ -10,7 +10,7 @@ Public indie revenue leaderboard. Real MRR from real founders, building in publi
 - Founders submit their MRR + product link
 - Public leaderboard ranked by revenue
 - Individual profile pages with MRR growth charts (SEO goldmine)
-- Monetized via Featured listings ($29/mo) and Verified badges ($9/mo)
+- Monetized via Featured listings ($29/mo) and Pro Membership ($9/mo)
 - Payments via LemonSqueezy
 
 ## Stack

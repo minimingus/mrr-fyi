@@ -334,7 +334,7 @@ export default function SubmitPage() {
           disabled={isSubmitting}
           className="w-full py-3 bg-[var(--amber)] text-black font-semibold rounded-md hover:bg-amber-400 transition-all hover:scale-[1.01] disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100"
         >
-          {isSubmitting ? "Submitting..." : "Create My Verified Profile →"}
+          {isSubmitting ? "Submitting..." : "Create My Profile →"}
         </button>
 
         <p className="text-xs text-center text-[var(--text-dim)]">
