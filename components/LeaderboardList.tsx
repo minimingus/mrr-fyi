@@ -172,7 +172,7 @@ export function LeaderboardList({ founders: initialFounders, totalCount, pageSiz
       {/* Tabs */}
       <div className="mb-4 flex gap-1">
         {[
-          { label: "Verified", value: "verified" },
+          { label: "Stripe Verified", value: "verified" },
           { label: "All", value: "all" },
         ].map((t) => {
           const active = tab === t.value;

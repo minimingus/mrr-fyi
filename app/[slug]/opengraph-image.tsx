@@ -164,7 +164,7 @@ export default async function Image({ params }: Props) {
                   }}
                 >
                   <span style={{ color: "#818cf8", fontSize: "14px", fontWeight: 600 }}>
-                    ✓ Verified
+                    ✓ Stripe Verified
                   </span>
                 </div>
               )}
