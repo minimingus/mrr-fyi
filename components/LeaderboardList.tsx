@@ -75,7 +75,6 @@ export function LeaderboardList({ founders: initialFounders, totalCount, pageSiz
   const query = searchParams.get("q") ?? "";
   const range = searchParams.get("range") ?? "";
   const category = searchParams.get("category") ?? "";
-  const tab = searchParams.get("tab") ?? "verified";
 
   const [allFounders, setAllFounders] = useState(initialFounders);
   const [isLoadingMore, startLoadMore] = useTransition();
@@ -101,10 +100,6 @@ export function LeaderboardList({ founders: initialFounders, totalCount, pageSiz
   const filtered = useMemo(() => {
     let result = allFounders;
 
-    if (tab === "verified") {
-      result = result.filter((f) => f.verificationStatus === "VERIFIED");
-    }
-
     if (query) {
       const q = query.toLowerCase();
       result = result.filter(
@@ -126,7 +121,7 @@ export function LeaderboardList({ founders: initialFounders, totalCount, pageSiz
     }
 
     return result;
-  }, [allFounders, query, range, category, tab, lockedCategory]);
+  }, [allFounders, query, range, category, lockedCategory]);
 
   const loadMore = useCallback(() => {
     const nextPage = Math.floor(allFounders.length / pageSize) + 1;
@@ -169,29 +164,6 @@ export function LeaderboardList({ founders: initialFounders, totalCount, pageSiz
 
   return (
     <>
-      {/* Tabs */}
-      <div className="mb-4 flex gap-1">
-        {[
-          { label: "Stripe Verified", value: "verified" },
-          { label: "All", value: "all" },
-        ].map((t) => {
-          const active = tab === t.value;
-          return (
-            <button
-              key={t.value}
-              onClick={() => updateParams({ tab: t.value === "verified" ? "" : t.value })}
-              className={`px-4 py-2 rounded-lg text-sm mono border transition-colors ${
-                active
-                  ? "border-[var(--amber)] bg-[var(--amber-glow)] text-[var(--amber)]"
-                  : "border-[var(--border)] bg-[var(--bg-card)] text-[var(--text-dim)] hover:border-[var(--border-accent)] hover:text-[var(--text-muted)]"
-              }`}
-            >
-              {t.label}
-            </button>
-          );
-        })}
-      </div>
-
       {/* Search & Filters */}
       <div className="mb-4 flex flex-col sm:flex-row gap-2">
         <input
@@ -255,24 +227,10 @@ export function LeaderboardList({ founders: initialFounders, totalCount, pageSiz
       {filtered.length === 0 ? (
         <div className="text-center py-16">
           <p className="text-[var(--text-muted)] text-sm">
-            {tab === "verified" && !query && !range
-              ? "No Stripe-verified founders yet — be the first"
-              : <>
-                  No founders found
-                  {query && <> matching &ldquo;{query}&rdquo;</>}
-                  {range && <> in this MRR range</>}
-                </>
-            }
+            No founders found
+            {query && <> matching &ldquo;{query}&rdquo;</>}
+            {range && <> in this MRR range</>}
           </p>
-          {tab === "verified" && !query && !range && (
-            <a
-              href="/submit"
-              className="inline-flex items-center gap-1.5 mt-4 px-4 py-2 rounded-lg text-xs border transition-colors"
-              style={{ borderColor: "#6366f1", color: "#818cf8", background: "rgba(99,102,241,0.1)" }}
-            >
-              ⚡ Connect Stripe and get verified →
-            </a>
-          )}
         </div>
       ) : (
         <div className="flex flex-col gap-2">
